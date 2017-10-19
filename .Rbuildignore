@@ -1,0 +1,12 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^figures/*$
+^README.Rmd$
+^.travis.yml$
+^autocompile.sh$
+^compile.R$
+^compile.sh$
+^README.HTML$
+^README.pdf$
+^profile.R$
+^README_files/*$
