@@ -3,4 +3,5 @@
 S3method(print,bayz)
 export(bayz)
 export(mm)
+export(mmg)
 import(stats)
