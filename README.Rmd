@@ -1,12 +1,11 @@
 ---
-title: "BayZ"
-  author: "Luc"
+title: "Bayesian linear regression"
+author: "Maria Izabel Cavassim Alves"
 date: "`r Sys.Date()`"
 output:
   md_document:
     variant: markdown_github
 ---
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -14,7 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Bayesian Linear Mixed Models
 
-Here write down the applicability of the software. For now access the website: http://www.bayz.biz/
+Here write down the applicability of the software. For more information access the website: ???http://www.bayz.biz/???.
 
 
 # How to install
@@ -23,5 +22,3 @@ Bayz can be used in two ways: on a unix/linux/windows prompt, or from R (availab
 # Functions and models associated with BayZ
 
 # Examples
-
-
