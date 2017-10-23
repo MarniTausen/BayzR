@@ -3,11 +3,12 @@
 #' Prints the bayz class
 #'
 #' @param x    bayz object
+#' @param ...  additional parameters
 #'
 #' @return Nothing, only prints
 #' @import stats
 #' @export
-print.bayz <- function(x){
+print.bayz <- function(x, ...){
     cat(x$modelname, "\n\n")
     cat("    model:", deparse(x$terms), "\n\n")
     cat("Model function:", x$modelfunction,"\n")

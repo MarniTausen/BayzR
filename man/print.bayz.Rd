@@ -4,10 +4,12 @@
 \alias{print.bayz}
 \title{Print function for bayz class}
 \usage{
-\method{print}{bayz}(x)
+\method{print}{bayz}(x, ...)
 }
 \arguments{
 \item{x}{bayz object}
+
+\item{...}{additional parameters}
 }
 \value{
 Nothing, only prints
