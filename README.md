@@ -1,7 +1,7 @@
 Bayesian Linear Mixed Models
 ============================
 
-Here write down the applicability of the software. For more information access the website: ???<http://www.bayz.biz/>???.
+Here write down the applicability of the software. For more information access the website: <http://www.bayz.biz/>.
 
 How to install
 ==============
