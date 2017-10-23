@@ -35,3 +35,6 @@ vignettes/*.pdf
 
 # Emacs generated files
 *~
+
+# Mac Generated files
+.DS_Store

@@ -1,4 +1,4 @@
 library(testthat)
-library(blm)
+library(BayzR)
 
-test_check("blm")
+test_check("BayzR")
