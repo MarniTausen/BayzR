@@ -14,7 +14,7 @@ ranf <- function(x, cor=NULL, prior=NULL) {
     if(!is.null(cor)) {
         EVdecomp <- eigen(cor)
         attr(x, "evalues") <- EVdecomp$values
-        attr(x, "evectors") <- EVdecome$vectors
+        attr(x, "evectors") <- EVdecomp$vectors
     }
     if (!is.null(prior)) attr(x,"prior") <- prior
     return(x)

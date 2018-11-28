@@ -2,7 +2,7 @@
 % Please edit documentation in R/rbayz.R
 \name{rbayz}
 \alias{rbayz}
-\title{Bayz function}
+\title{Bayz test function}
 \usage{
 rbayz(model, data = NULL, chain = NULL)
 }
@@ -11,9 +11,7 @@ rbayz(model, data = NULL, chain = NULL)
 
 \item{data}{Data frame to collect data from}
 
-\item{fct}{Model function}
-
-\item{...}{Additional parameters passed onto the Model function (for example )}
+\item{chain}{Number of iteration/sample to generate.}
 }
 \value{
 A fitted bayz model

@@ -1,14 +1,14 @@
 Package: BayzR
 Title: R package for bayz
-Version: 0.0.1
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Version: 0.0.3
+Authors@R: person("Marni", "Tausen", email = "marni@birc.au.dk", role = c("aut", "cre"))
 Description: What the package does (one paragraph).
-Depends: R (>= 3.3.3)
+Depends: R (>= 3.5)
 License: GPL
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat
 RoxygenNote: 6.1.1
-Imports: 
+Imports:
     Rcpp
 LinkingTo: Rcpp

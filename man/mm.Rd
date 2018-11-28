@@ -9,6 +9,8 @@ mm(data = NULL, chain = NULL, ...)
 \arguments{
 \item{data}{Data frame to collect data from}
 
+\item{chain}{Vector describing the number of iterations to be run.}
+
 \item{...}{Additional parameters passed onto the Model function (for example )}
 }
 \value{

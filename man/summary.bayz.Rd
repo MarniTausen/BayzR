@@ -4,10 +4,10 @@
 \alias{summary.bayz}
 \title{Print function for bayz class}
 \usage{
-\method{summary}{bayz}(x, ...)
+\method{summary}{bayz}(object, ...)
 }
 \arguments{
-\item{x}{bayz object}
+\item{object}{bayz object}
 
 \item{...}{additional parameters}
 }

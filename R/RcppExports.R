@@ -4,10 +4,8 @@
 #'
 #' Fits a model based on the given modelframe, using Markovian Coalescens
 #'
-#' @param modelframe Generated
+#' @param modelFrame Generated
 #' @param chain      Three value vector containing the number of iterations c(1000,100,10)
-#' @param fct     Model function
-#' @param ...     Additional parameters passed on
 #'
 #' @return A fitted bayz model
 #' @import Rcpp

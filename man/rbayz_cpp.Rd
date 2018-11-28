@@ -7,13 +7,9 @@
 rbayz_cpp(modelFrame, chain)
 }
 \arguments{
+\item{modelFrame}{Generated}
+
 \item{chain}{Three value vector containing the number of iterations c(1000,100,10)}
-
-\item{modelframe}{Generated}
-
-\item{fct}{Model function}
-
-\item{...}{Additional parameters passed on}
 }
 \value{
 A fitted bayz model

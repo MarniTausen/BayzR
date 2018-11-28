@@ -3,6 +3,7 @@
 #' Fits a model, given as a formula, optionally with data provided through the "..." parameter.
 #'
 #' @param data    Data frame to collect data from
+#' @param chain   Vector describing the number of iterations to be run.
 #' @param ...     Additional parameters passed onto the Model function (for example )
 #'
 #' @return Fitted mixed model

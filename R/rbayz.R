@@ -1,11 +1,10 @@
-#' Bayz function
+#' Bayz test function
 #'
 #' Fits a model, given as a formula, optionally with data provided through the "..." parameter.
 #'
 #' @param model   A formula describing the model.
 #' @param data    Data frame to collect data from
-#' @param fct     Model function
-#' @param ...     Additional parameters passed onto the Model function (for example )
+#' @param chain   Number of iteration/sample to generate.
 #'
 #' @return A fitted bayz model
 #' @import stats
