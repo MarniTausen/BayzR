@@ -8,7 +8,7 @@
 #' @return Fitted mixed model
 #' @import stats
 #' @export
-mm <- function(data=NULL, ...){
+mm <- function(data=NULL, chain=NULL, ...){
     if(is.null(data)) return("Bayesian mixed model")
-    data
+    return(rbayz_cpp(data, chain))
 }

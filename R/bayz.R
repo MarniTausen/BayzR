@@ -5,17 +5,26 @@
 #' @param model   A formula describing the model.
 #' @param data    Data frame to collect data from
 #' @param fct     Model function
-#' @param ...     Additional parameters passed onto the Model function (for example )
+#' @param chain   Vector describing the number of iterations to be run.
+#' @param ...     Additional parameters passed onto the Model function.
 #'
 #' @return A fitted bayz model
 #' @import stats
 #' @export
-bayz <- function(model, data=NULL, fct=NULL, ...){
+#'
+#' @useDynLib BayzR, .registration = TRUE
+#' @importFrom Rcpp sourceCpp
+bayz <- function(model, data=NULL, fct=NULL, chain=NULL, ...){
     model_data <- model.frame(model, data=data)
+    if (is.null(chain)){
+        chain=c(1100,100,10)
+        cat("Warning: running the default chain of 1100 cycles, this may be too short for many analyses\n")
+    }
+    charin <- as.integer(chain)
     if(is.function(fct)){
-        result <- fct(data=model_data, model=model, ...)
+        result <- fct(data=model_data, model=model, chain=chain, ...)
     } else {
-        stop("No model function provided")
+        stop("No model function provided. Use mm for a basic model.")
     }
     class(result) <- "bayz"
     result[['modelname']] <- fct()
@@ -23,6 +32,3 @@ bayz <- function(model, data=NULL, fct=NULL, ...){
     result[['terms']] <- terms(model)
     return(result)
 }
-
-fixed <- function(x) x
-random <- function(x) x

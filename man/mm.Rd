@@ -4,7 +4,7 @@
 \alias{mm}
 \title{Bayesian mixed model}
 \usage{
-mm(data = NULL, ...)
+mm(data = NULL, chain = NULL, ...)
 }
 \arguments{
 \item{data}{Data frame to collect data from}
