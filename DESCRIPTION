@@ -1,10 +1,13 @@
 Package: BayzR
 Title: R package for bayz
-Version: 0.0.3
-Authors@R: person("Marni", "Tausen", email = "marni@birc.au.dk", role = c("aut", "cre"))
+Version: 0.0.6
+Authors@R: c(person("Marni", "Tausen", email = "marni@birc.au.dk", role = c("aut", "cre")),
+person("Luc", "Janss", email = "luc.janss@mbg.au.dk", role = c("aut", "cre")),
+person("Maria", "Izabel", "Cavassim", "Alves", email = "mica@birc.au.dk", role = c("edt")))
 Description: What the package does (one paragraph).
 Depends: R (>= 3.5)
 License: GPL
+URL: http://www.bayz.biz
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat

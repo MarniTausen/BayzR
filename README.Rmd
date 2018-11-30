@@ -39,4 +39,16 @@ devtools::install_github("MarniTausen/BayzR")
 
 # Functions and models associated with BayZ
 
+
+
 # Examples
+
+```{r}
+
+example_data = data.frame(y = 1:20, x = 20:1)
+
+fit <- bayz(y ~ ranf(x), data=example_data)
+
+summary(fit)
+
+```

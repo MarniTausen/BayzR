@@ -27,3 +27,34 @@ Functions and models associated with BayZ
 
 Examples
 ========
+
+``` r
+example_data = data.frame(y = 1:20, x = 20:1)
+
+fit <- bayz(y ~ ranf(x), data=example_data)
+```
+
+    ## Warning in bayz(y ~ ranf(x), data = example_data): running the default chain of 1100 cycles, this may be too short for many analyses
+
+    ## 220 1.13587 146.52 11.7294 
+    ## 440 0.905233 160.56 8.15912 
+    ## 660 2.2259 214.22 5.71739 
+    ## 880 2.06531 225.052 3.43328 
+    ## 1100 0.582729 180.863 5.30218
+
+``` r
+summary(fit)
+```
+
+    ## Summary statistics of Bayz object
+    ## 
+    ##     model formula: y ~ ranf(x) 
+    ## 
+    ## Random variable estimates:
+    ##              postMean      postSD
+    ## var.resid    1.166754   0.5427654
+    ## var.ranf.x 182.671712 114.4047595
+    ## 
+    ## Broad sense heritability:
+    ## resid:        0.6346629 %
+    ## x:        99.36534 %
