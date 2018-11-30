@@ -18,4 +18,3 @@ print.bayz <- function(x, ...){
         }
     }
 }
-Sys.setenv("PKG_CXXFLAGS"="-std=c++11")
