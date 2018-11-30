@@ -1,7 +1,7 @@
 Bayesian Linear Mixed Models
 ============================
 
-[![Coverage Status](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
+[![Build Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage Status](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
 
 Here write down the applicability of the software. For more information access the website: <http://www.bayz.biz/>.
 
