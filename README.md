@@ -36,11 +36,11 @@ fit <- bayz(y ~ ranf(x), data=example_data)
 
     ## Warning in bayz(y ~ ranf(x), data = example_data): running the default chain of 1100 cycles, this may be too short for many analyses
 
-    ## 220 1.13587 146.52 11.7294 
-    ## 440 0.905233 160.56 8.15912 
-    ## 660 2.2259 214.22 5.71739 
-    ## 880 2.06531 225.052 3.43328 
-    ## 1100 0.582729 180.863 5.30218
+    ## 220 0.995131 396.876 9.12154 
+    ## 440 1.35793 641.307 -6.45424 
+    ## 660 0.795633 915.299 3.60962 
+    ## 880 0.698552 682.898 7.90645 
+    ## 1100 2.25099 255.516 7.85459
 
 ``` r
 summary(fit)
@@ -52,9 +52,9 @@ summary(fit)
     ## 
     ## Random variable estimates:
     ##              postMean      postSD
-    ## var.resid    1.166754   0.5427654
-    ## var.ranf.x 182.671712 114.4047595
+    ## var.resid    1.269095   0.6153912
+    ## var.ranf.x 853.870200 623.5912124
     ## 
     ## Broad sense heritability:
-    ## resid:        0.6346629 %
-    ## x:        99.36534 %
+    ## resid:        0.148408 %
+    ## x:        99.85159 %
