@@ -1,7 +1,7 @@
 Bayesian Linear Mixed Models
 ============================
 
-[![Build Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage Status coveralls](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
+[![Build Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage Status coveralls](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master&kill_cache=1)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
 
 Here write down the applicability of the software. For more information access the website: <http://www.bayz.biz/>.
 
@@ -36,12 +36,11 @@ fit <- bayz(y ~ ranf(x), data=example_data)
 
     ## Warning in bayz(y ~ ranf(x), data = example_data): running the default chain of 1100 cycles, this may be too short for many analyses
 
-    ## cycle var.resid var.ranf.x mean.y 
-    ## 220 1.02433 108.936 13.7026 
-    ## 440 1.48455 872.084 13.8791 
-    ## 660 0.609921 681.277 10.4569 
-    ## 880 0.935697 4077.21 10.6522 
-    ## 1100 0.753366 2481.22 12.9702
+    ## 220 1.00931 71.6876 0.84113 
+    ## 440 0.444949 1.29795 2.35149 
+    ## 660 2.62573 24.901 -0.0419425 
+    ## 880 1.03553 61.0391 -3.84536 
+    ## 1100 0.648931 164.79 0.39281
 
 ``` r
 summary(fit)
@@ -52,11 +51,11 @@ summary(fit)
     ##    model formula: y ~ ranf(x) 
     ## 
     ## Random variable estimates:
-    ##               postMean       postSD
-    ## var.resid     1.226162    0.8235952
-    ## var.ranf.x 1328.083949 1258.4308083
+    ##             postMean     postSD
+    ## var.resid   1.277064  0.5715017
+    ## var.ranf.x 71.093073 80.7595373
     ## 
     ## Variance explained (Heritability):
     ##   Variable Heritability
-    ## 1    resid 0.0009224052
-    ## 2        x 0.9990775948
+    ## 1    resid   0.01764628
+    ## 2        x   0.98235372
