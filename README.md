@@ -1,7 +1,7 @@
 Bayesian Linear Mixed Models
 ============================
 
-[![Build Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage Status](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
+[![Build Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage Status coveralls](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
 
 Here write down the applicability of the software. For more information access the website: <http://www.bayz.biz/>.
 
@@ -36,11 +36,12 @@ fit <- bayz(y ~ ranf(x), data=example_data)
 
     ## Warning in bayz(y ~ ranf(x), data = example_data): running the default chain of 1100 cycles, this may be too short for many analyses
 
-    ## 220 0.995131 396.876 9.12154 
-    ## 440 1.35793 641.307 -6.45424 
-    ## 660 0.795633 915.299 3.60962 
-    ## 880 0.698552 682.898 7.90645 
-    ## 1100 2.25099 255.516 7.85459
+    ## cycle var.resid var.ranf.x mean.y 
+    ## 220 1.02433 108.936 13.7026 
+    ## 440 1.48455 872.084 13.8791 
+    ## 660 0.609921 681.277 10.4569 
+    ## 880 0.935697 4077.21 10.6522 
+    ## 1100 0.753366 2481.22 12.9702
 
 ``` r
 summary(fit)
@@ -48,13 +49,14 @@ summary(fit)
 
     ## Summary statistics of Bayz object
     ## 
-    ##     model formula: y ~ ranf(x) 
+    ##    model formula: y ~ ranf(x) 
     ## 
     ## Random variable estimates:
-    ##              postMean      postSD
-    ## var.resid    1.269095   0.6153912
-    ## var.ranf.x 853.870200 623.5912124
+    ##               postMean       postSD
+    ## var.resid     1.226162    0.8235952
+    ## var.ranf.x 1328.083949 1258.4308083
     ## 
-    ## Broad sense heritability:
-    ## resid:        0.148408 %
-    ## x:        99.85159 %
+    ## Variance explained (Heritability):
+    ##   Variable Heritability
+    ## 1    resid 0.0009224052
+    ## 2        x 0.9990775948
