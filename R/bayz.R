@@ -28,7 +28,7 @@ bayz <- function(model, data=NULL, fct=NULL, chain=NULL, ...){
     }
     class(result) <- "bayz"
     #result[['modelname']] <- fct()
-    result[['modelfunction']] <- deparse(substitute(fct))
+    #result[['modelfunction']] <- deparse(substitute(fct))
     result[['terms']] <- terms(model)
     return(result)
 }

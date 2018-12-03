@@ -21,12 +21,15 @@ test_that("Warning messages", {
 test_that("Wrong input", {
 
     my_data <- data.frame(x=1:20, y=20:1)
+    fit <- bayz(y ~ x, data=my_data, chain=c(1100,100,10))
 
-    expect_match(bayz(y ~ x, data=my_data, chain=c(1100,100,10))$Errors[1],
+    expect_match(fit$Errors[1],
                  "Unknown wrapper function on data column")
-    expect_match(bayz(y ~ x, data=my_data, chain=c(1100,100,10))$Errors[2],
+    expect_match(fit$Errors[2],
                  "Bayz terminates after model building")
-    expect_equal(bayz(y ~ x, data=my_data, chain=c(1100,100,10))$nError, 2)
+    expect_equal(fit$nError, 2)
+
+    capture.output(print(fit))
 })
 
 
@@ -36,5 +39,16 @@ test_that("Working run", {
 
     expect_equal(bayz(y ~ fixf(x), data=my_data, chain=c(1100,100,10))$nError, 0)
     expect_equal(bayz(y ~ ranf(x), data=my_data, chain=c(1100,100,10))$nError, 0)
+
+    capture.output(print(bayz(y ~ fixf(x), data=my_data, chain=c(1100,100,10))))
+
+})
+
+test_that("Plotting", {
+
+     my_data <- data.frame(x=1:20, y=20:1)
+     fit <- bayz(y ~ fixf(x), data=my_data, chain=c(1100,100,10))
+
+     capture.output(plot(fit))
 
 })
