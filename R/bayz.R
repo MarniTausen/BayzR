@@ -20,7 +20,7 @@ bayz <- function(model, data=NULL, fct=NULL, chain=NULL, ...){
         chain=c(1100,100,10)
         warning("running the default chain of 1100 cycles, this may be too short for many analyses\n")
     }
-    charin <- as.integer(chain)
+    chain <- as.integer(chain)
     if(is.function(fct)){
         result <- fct(data=model_data, model=model, chain=chain, ...)
     } else {
