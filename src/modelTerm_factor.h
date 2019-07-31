@@ -46,7 +46,7 @@ protected:
    
    void resid_decorrect() {
       for (size_t obs=0; obs<coldata.size(); obs++)
-         resid[obs] -= par[coldata[obs]];
+         resid[obs] += par[coldata[obs]];
    }
 
    void collect_lhs_rhs() {
