@@ -28,7 +28,7 @@ public:
    
    modelTerm_realmat(Rcpp::DataFrame &d, size_t col, Rcpp::NumericMatrix &m) : modelTerm(d, col) {
       coldata = m;
-      parLevelNames = colnames(m);
+      parLevelNames = colnames(coldata);
       par.resize(parLevelNames.size(),0);
 //      lhs.resize(parLevelNames.size(),0);
 //      rhs.resize(parLevelNames.size(),0);
@@ -40,32 +40,28 @@ public:
    
 protected:
 
-   void resid_correct() {
-      for (size_t obs=0; obs<coldata.size(); obs++)
-         resid[obs] -= par[coldata[obs]];
+   void resid_correct(size_t col) {
+      for (size_t obs=0; obs < nrow(coldata); obs++)
+         resid[obs] -= par[col] * coldata[obs,col];
    }
    
-   void resid_decorrect() {
-      for (size_t obs=0; obs<coldata.size(); obs++)
-         resid[obs] -= par[coldata[obs]];
+   void resid_decorrect(size_t col) {
+      for (size_t obs=0; obs < nrow(coldata); obs++)
+         resid[obs] += par[col] * coldata[obs,col];
    }
 
-   void collect_lhs_rhs() {
+   void collect_lhs_rhs(size_t col) {
       size_t k;
-      for(k=0; k<par.size(); k++) {
-         rhs[k] = 0.0;
-         lhs[k] = 0.0;
-      }
-      for (size_t obs=0; obs<coldata.size(); obs++) {
-         k=coldata[obs];
-         rhs[k] += residPrec[obs] * resid[obs];
-         lhs[k] += residPrec[obs];
+      lhs = 0.0; rhs=0.0;
+      for (size_t obs=0; obs < nrow(coldata); obs++) {
+         rhs += residPrec[obs] * resid[obs] * coldata[obs,col];
+         lhs += residPrec[obs] * residPrec[obs];
       }
    }
 
    Rcpp::NumericMatrix coldata;
-   std::vector<double> lhs, rhs;          // working vectors to collect LHS an RHS of equations
-// this one can probably also have a fit vector
+   double lhs, rhs;          // lhs, rhs will be scalar here (per iteration)
+   std::vector<double> fit;
    
 };
 
