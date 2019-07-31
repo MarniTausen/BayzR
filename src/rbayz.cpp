@@ -177,7 +177,8 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelT
    else if(s=="ranf") {
       Rcpp::RObject thiscol = modelFrame[col];
       if(thiscol.hasAttribute("evalues")) {
-         model.push_back(new modelTerm_ran_cor(modelFrame, col));
+         Rcpp::NumericMatrix m = thiscol.attr("evectors");  // the evectors matrix must be passed already in the constructor
+         model.push_back(new modelTerm_ran_cor(modelFrame, col, m));
       }
       else {
          model.push_back(new modelTerm_random(modelFrame, col));

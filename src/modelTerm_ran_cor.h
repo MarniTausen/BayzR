@@ -10,17 +10,21 @@
 #define modelTerm_ran_cor_h
 
 #include <Rcpp.h>
-#include "modelTerm_factor.h"
+#include "modelTerm_realmat.h"
 #include "priorClasses.h"
 
 // random-correlated model term, built from ranf() model term with cor=K setting.
-//
+// This is a child-class of modelTerm_realmat because it works on a real matrix with regressions.
+// - in this model hpar is one variance
+// - par is size number of columns of d (minus the ones with small eigenvalue?) to hold regression
+//   coefficients
 
-class modelTerm_ran_cor : public modelTerm_factor {
+class modelTerm_ran_cor : public modelTerm_realmat {
 
 public:
 
-   modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col)  : modelTerm_factor(d, col) {
+   modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col, Rcpp::NumericMatrix &m)
+                         : modelTerm_realmat(d, col, m) {
       hpar.resize(1,1);
       hparName = "var." + parName;
       

@@ -1,40 +1,45 @@
 //
-//  modelTerm_factor.h
+//  modelTerm_realmat.h
 //  rbayz
 //
-//  Created by Luc Janss on 03/08/2018.
-//  Copyright © 2018 Luc Janss. All rights reserved.
+//  Created by Luc Janss on 30/08/2019.
+//  Copyright © 2019 Luc Janss. All rights reserved.
 //
 
-#ifndef modelTerm_factor_h
-#define modelTerm_factor_h
+#ifndef modelTerm_realmat_h
+#define modelTerm_realmat_h
 
 #include <Rcpp.h>
 #include <cmath>
 
-// Model-term that is parent class of model-terms using factors (currently fixf and ranf),
-// this class organizes storage and some methods that are common for factors:
-// - par vector is size number of levels of the factor
-// - hpar is not set here, it depends on the actual class if this is used or not
+// Model-term where 'coldata' is a matrix of real numbers (Rcpp NumericMatrix, C++ double), it is
+// a parent class of model-terms for random regression and also the ran_cor (that works like
+// a random regression model on eigenvectors). Here:
+// - par vector is size number of columns of the input matrix (will hold regression coefficients)
+// - hpar is not set here, it depends on the actual class if this is used or not ... <- check
 // - common working vectors are lhs and rhs vector
-// - here can also define coldata, it is IntegerVector for factors
+// - the matrix that should be attached to coldata should be passed as argument (reference) in the
+//   constructor
 // - common methods are correction, decorrection, and collection of rhs and lhs vectors
 
-class modelTerm_factor : public modelTerm {
+class modelTerm_realmat : public modelTerm {
    
 public:
    
-   modelTerm_factor(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
-      coldata = d[col];
+   modelTerm_realmat(Rcpp::DataFrame &d, size_t col, Rcpp::NumericMatrix &m) : modelTerm(d, col) {
+      coldata = m;
+      
+/*      coldata = d[col];  needs to be changed, this is code cpoied from factor
       for (size_t i=0; i<coldata.size(); i++)
          coldata[i] -= 1;
       parLevelNames = coldata.attr("levels");
       par.resize(parLevelNames.size(),0);
       lhs.resize(parLevelNames.size(),0);
       rhs.resize(parLevelNames.size(),0);
+ */
    }
    
-   ~modelTerm_factor() {
+   ~modelTerm_realmat() {
    }
    
 protected:
@@ -62,9 +67,10 @@ protected:
       }
    }
 
-   Rcpp::IntegerVector coldata;
+   Rcpp::NumericMatrix coldata;
    std::vector<double> lhs, rhs;          // working vectors to collect LHS an RHS of equations
-
+// this one can probably also have a fit vector
+   
 };
 
-#endif /* modelTerm_factor_h */
+#endif /* modelTerm_realmat_h */

@@ -13,6 +13,7 @@ ranf <- function(x, cor=NULL, prior=NULL) {
     x <- as.factor(x)
     if(!is.null(cor)) {
         EVdecomp <- eigen(cor)
+        colnames(EVdecomp$vectors) <- paste("evec",1:ncol(EVdecomp$vectors),sep="")
         attr(x, "evalues") <- EVdecomp$values
         attr(x, "evectors") <- EVdecomp$vectors
     }
