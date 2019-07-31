@@ -28,14 +28,10 @@ public:
    
    modelTerm_realmat(Rcpp::DataFrame &d, size_t col, Rcpp::NumericMatrix &m) : modelTerm(d, col) {
       coldata = m;
-      
-/*      coldata = d[col];  needs to be changed, this is code cpoied from factor
-      for (size_t i=0; i<coldata.size(); i++)
-         coldata[i] -= 1;
-      parLevelNames = coldata.attr("levels");
+      parLevelNames = colnames(m);
       par.resize(parLevelNames.size(),0);
-      lhs.resize(parLevelNames.size(),0);
-      rhs.resize(parLevelNames.size(),0);
+//      lhs.resize(parLevelNames.size(),0);
+//      rhs.resize(parLevelNames.size(),0);
  */
    }
    
