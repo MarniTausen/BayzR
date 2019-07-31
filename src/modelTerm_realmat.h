@@ -30,9 +30,6 @@ public:
       coldata = m;
       parLevelNames = colnames(coldata);
       par.resize(parLevelNames.size(),0);
-//      lhs.resize(parLevelNames.size(),0);
-//      rhs.resize(parLevelNames.size(),0);
- */
    }
    
    ~modelTerm_realmat() {
@@ -41,20 +38,19 @@ public:
 protected:
 
    void resid_correct(size_t col) {
-      for (size_t obs=0; obs < nrow(coldata); obs++)
-         resid[obs] -= par[col] * coldata[obs,col];
+      for (size_t obs=0; obs < coldata.nrow(); obs++)
+         resid[obs] -= par[col] * coldata(obs,col);
    }
    
    void resid_decorrect(size_t col) {
-      for (size_t obs=0; obs < nrow(coldata); obs++)
-         resid[obs] += par[col] * coldata[obs,col];
+      for (size_t obs=0; obs < coldata.nrow(); obs++)
+         resid[obs] += par[col] * coldata(obs,col);
    }
 
    void collect_lhs_rhs(size_t col) {
-      size_t k;
       lhs = 0.0; rhs=0.0;
-      for (size_t obs=0; obs < nrow(coldata); obs++) {
-         rhs += residPrec[obs] * resid[obs] * coldata[obs,col];
+      for (size_t obs=0; obs < coldata.nrow(); obs++) {
+         rhs += residPrec[obs] * resid[obs] * coldata(obs,col);
          lhs += residPrec[obs] * residPrec[obs];
       }
    }
