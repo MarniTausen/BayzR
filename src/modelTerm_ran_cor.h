@@ -15,21 +15,23 @@
 
 // random-correlated model term, built from ranf() model term with cor=K setting.
 // This is a child-class of modelTerm_realmat because it works on a real matrix with regressions.
-// - in this model hpar is one variance
-// - par is size number of columns of d (minus the ones with small eigenvalue?) to hold regression
-//   coefficients
+// - eigenvector data is already stored as coldata through constructor of modelTerm_realmat
+// - eigenvalue data still needs to be set
+// - hpar is one variance
+// - par is set in modelTerm_realmat constructor and is size of coldata columns
 
 class modelTerm_ran_cor : public modelTerm_realmat {
 
 public:
 
-   modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col, Rcpp::NumericMatrix &m)
-                         : modelTerm_realmat(d, col, m) {
+   modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col, Rcpp::NumericMatrix &m) : modelTerm_realmat(d, col, m) {
       hpar.resize(1,1);
       hparName = "var." + parName;
-      
-      // add setting of NumericVector and NumericMatrix that match eigen-values and vectors
-      
+      Rcpp::RObject thiscol = d[col];
+      eval = thiscol.attr("evalues");
+      nPosEval=0;
+      for (size_t i=0;  i<eval.size() && eval[i] >= 0.001; i++)
+         nPosEval++;
       
    }
 
@@ -37,22 +39,25 @@ public:
    }
 
    void sample() {
-      resid_decorrect();
-      collect_lhs_rhs();
-      for(size_t k=0; k<par.size(); k++) {
-         // random effect: add 1/hpar[0] in lhs
-         par[k] = R::rnorm( (rhs[k]/(lhs[k]+(1/hpar[0]))), sqrt(1.0/(lhs[k]+(1/hpar[0]))));
+      double temp;
+      for(size_t k=0; k<nPosEval; k++) {
+         resid_decorrect(k);
+         collect_lhs_rhs(k);
+         temp = lhs + (1.0/(eval[k]*hpar[0]));  // lhs with variance added
+         par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
+         resid_correct(k);
       }
-      resid_correct();
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
-      for(size_t k=0; k<par.size(); k++)
+      for(size_t k=0; k<nPosEval; k++)
          ssq += par[k]*par[k];
-      hpar[0] = gprior.samplevar(ssq,par.size());
+      hpar[0] = gprior.samplevar(ssq,nPosEval);
    }
 
 private:
-
+   Rcpp::NumericVector eval;
+   Rcpp::IntegerVector update;
+   size_t nPosEval;
 };
 
 #endif /* modelTerm_ran_cor_h */
