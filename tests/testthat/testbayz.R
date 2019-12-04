@@ -49,6 +49,8 @@ test_that("Plotting", {
      my_data <- data.frame(x=1:20, y=20:1)
      fit <- bayz(y ~ fixf(x), data=my_data, chain=c(1100,100,10))
 
-     capture.output(plot(fit))
+     plot(fit)
+
+     expect_equal(TRUE, TRUE)
 
 })
