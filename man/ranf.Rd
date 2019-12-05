@@ -4,12 +4,12 @@
 \alias{ranf}
 \title{Set Random variable}
 \usage{
-ranf(x, cor = NULL, prior = NULL)
+ranf(x, V = NULL, prior = NULL)
 }
 \arguments{
 \item{x}{Variable vector which should be set to random in a model.}
 
-\item{cor}{Correlation matrix to be included. Default uses eigen decomposition}
+\item{V}{Correlation matrix to be included. Default uses eigen decomposition}
 
 \item{prior}{Prior information to be added.}
 }

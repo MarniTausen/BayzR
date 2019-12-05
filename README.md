@@ -1,3 +1,13 @@
+Bayesian linear regression
+================
+Maria Izabel Cavassim Alves
+2019-12-05
+
+-   [Bayesian Linear Mixed Models](#bayesian-linear-mixed-models)
+-   [How to install](#how-to-install)
+-   [Functions and models associated with BayZ](#functions-and-models-associated-with-bayz)
+-   [Examples](#examples)
+
 Bayesian Linear Mixed Models
 ============================
 
@@ -29,18 +39,23 @@ Examples
 ========
 
 ``` r
-example_data = data.frame(y = 1:20, x = 20:1)
+library(BayzR)
 
-fit <- bayz(y ~ ranf(x), data=example_data)
+x <- rnorm(500, 10, 5)
+
+y <- 5 * x + 4 + rnorm(500, 0, 4)
+
+example_data = data.frame(y = y, x = x)
+
+fit <- bayz(y ~ ranf(x), data=example_data, chain=c(10000, 100, 10))
 ```
 
-    ## Warning in bayz(y ~ ranf(x), data = example_data): running the default chain of 1100 cycles, this may be too short for many analyses
-
-    ## 220 1.00931 71.6876 0.84113 
-    ## 440 0.444949 1.29795 2.35149 
-    ## 660 2.62573 24.901 -0.0419425 
-    ## 880 1.03553 61.0391 -3.84536 
-    ## 1100 0.648931 164.79 0.39281
+    ## cycle var.resid var.ranf.x mean.y 
+    ## 2000 1.22833 805.1 50.6616 
+    ## 4000 0.940035 772.305 48.9582 
+    ## 6000 1.20571 783.969 48.2655 
+    ## 8000 0.902765 996.047 47.3541 
+    ## 10000 0.95025 753.195 47.1943
 
 ``` r
 summary(fit)
@@ -51,11 +66,11 @@ summary(fit)
     ##    model formula: y ~ ranf(x) 
     ## 
     ## Random variable estimates:
-    ##             postMean     postSD
-    ## var.resid   1.277064  0.5715017
-    ## var.ranf.x 71.093073 80.7595373
+    ##              postMean      postSD
+    ## var.resid    1.010605   0.0934522
+    ## var.ranf.x 763.445986 167.6535818
     ## 
     ## Variance explained (Heritability):
     ##   Variable Heritability
-    ## 1    resid   0.01764628
-    ## 2        x   0.98235372
+    ## 1    resid  0.001321991
+    ## 2        x  0.998678009
