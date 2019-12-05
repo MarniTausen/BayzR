@@ -1,6 +1,6 @@
 Bayesian linear regression
 ================
-Maria Izabel Cavassim Alves
+Luc Janss, Maria Izabel Cavassim Alves and Marni Tausen
 2019-12-05
 
 -   [Bayesian Linear Mixed Models](#bayesian-linear-mixed-models)
@@ -51,11 +51,11 @@ fit <- bayz(y ~ ranf(x), data=example_data, chain=c(10000, 100, 10))
 ```
 
     ## cycle var.resid var.ranf.x mean.y 
-    ## 2000 1.22833 805.1 50.6616 
-    ## 4000 0.940035 772.305 48.9582 
-    ## 6000 1.20571 783.969 48.2655 
-    ## 8000 0.902765 996.047 47.3541 
-    ## 10000 0.95025 753.195 47.1943
+    ## 2000 0.935585 464.711 53.9635 
+    ## 4000 1.04123 243.027 62.3797 
+    ## 6000 1.11008 406.843 64.8925 
+    ## 8000 1.00234 309.321 65.0168 
+    ## 10000 0.956062 335.057 65.9105
 
 ``` r
 summary(fit)
@@ -67,10 +67,10 @@ summary(fit)
     ## 
     ## Random variable estimates:
     ##              postMean      postSD
-    ## var.resid    1.010605   0.0934522
-    ## var.ranf.x 763.445986 167.6535818
+    ## var.resid    1.003139  0.08760237
+    ## var.ranf.x 350.822759 73.65586649
     ## 
     ## Variance explained (Heritability):
     ##   Variable Heritability
-    ## 1    resid  0.001321991
-    ## 2        x  0.998678009
+    ## 1    resid  0.002851238
+    ## 2        x  0.997148762
