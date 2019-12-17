@@ -1,6 +1,6 @@
 ---
 title: "Bayesian linear regression"
-author: "Maria Izabel Cavassim Alves"
+author: "Luc Janss, Maria Izabel Cavassim Alves and Marni Tausen"
 date: "`r Sys.Date()`"
 output:
   md_document:
@@ -36,18 +36,22 @@ To install the R package on your system you can then use:
 devtools::install_github("MarniTausen/BayzR")
 ```
 
-
 # Functions and models associated with BayZ
-
 
 
 # Examples
 
 ```{r, eval=TRUE}
 
-example_data = data.frame(y = 1:20, x = 20:1)
+library(BayzR)
 
-fit <- bayz(y ~ ranf(x), data=example_data)
+x <- rnorm(500, 10, 5)
+
+y <- 5 * x + 4 + rnorm(500, 0, 4)
+
+example_data = data.frame(y = y, x = x)
+
+fit <- bayz(y ~ ranf(x), data=example_data, chain=c(10000, 100, 10))
 
 summary(fit)
 
