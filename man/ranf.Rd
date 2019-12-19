@@ -9,7 +9,7 @@ ranf(x, V = NULL, prior = NULL)
 \arguments{
 \item{x}{Variable vector which should be set to random in a model.}
 
-\item{V}{Correlation matrix to be included. Default uses eigen decomposition}
+\item{V}{Similarity/var-covar matrix to be included so that x~N(0,Vsigma^2). Uses eigen decomposition}
 
 \item{prior}{Prior information to be added.}
 }

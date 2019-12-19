@@ -41,7 +41,7 @@ public:
       double sum=0.0;
       for (obs=0; obs<nobs; obs++)
          sum += resid[obs]*resid[obs]*residPrec[obs];
-      hpar[0] = gprior.samplevar(sum, nobs);
+      hpar[0] = gprior.samplevar(sum*hpar[0], nobs);
       // the residPrec vector should be re-filled
       double temp = 1.0/hpar[0];
       for (obs=0; obs<nobs; obs++)
