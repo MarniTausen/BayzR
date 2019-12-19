@@ -41,8 +41,9 @@ public:
       double sum=0.0;
       for (obs=0; obs<nobs; obs++)
          sum += resid[obs]*resid[obs]*residPrec[obs];
+      sum *= hpar[0];
       Rcpp::Rcout << "updating residual variance, hpar[0]=" << hpar[0] << " sum=" << sum;
-      hpar[0] = gprior.samplevar(sum*hpar[0], nobs);
+      hpar[0] = gprior.samplevar(sum, nobs);
       Rcpp::Rcout << "updated variance hpa[0]=" << hpar[0] << "\n";
       // the residPrec vector should be re-filled
       double temp = 1.0/hpar[0];
