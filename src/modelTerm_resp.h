@@ -24,9 +24,8 @@ public:
    
    modelTerm_resp(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
       coldata = d[col];
-      hpar.resize(1,0);
+      hpar.resize(1,1.0);
       hparName = "var.resid";
-      hpar[0] = 1.0;
       for (size_t obs=0; obs<resid.size(); obs++)
          resid[obs] = coldata[obs];  // initialize resid vector by copying data-vector in it
    }
@@ -42,7 +41,9 @@ public:
       double sum=0.0;
       for (obs=0; obs<nobs; obs++)
          sum += resid[obs]*resid[obs]*residPrec[obs];
+      Rcpp::Rcout << "updating residual variance, hpar[0]=" << hpar[0] << " sum=" << sum;
       hpar[0] = gprior.samplevar(sum*hpar[0], nobs);
+      Rcpp::Rcout << "updated variance hpa[0]=" << hpar[0] << "\n";
       // the residPrec vector should be re-filled
       double temp = 1.0/hpar[0];
       for (obs=0; obs<nobs; obs++)
