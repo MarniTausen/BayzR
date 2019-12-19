@@ -26,6 +26,7 @@ public:
       coldata = d[col];
       hpar.resize(1,0);
       hparName = "var.resid";
+      hpar[0] = 1.0;
       for (size_t obs=0; obs<resid.size(); obs++)
          resid[obs] = coldata[obs];  // initialize resid vector by copying data-vector in it
    }
