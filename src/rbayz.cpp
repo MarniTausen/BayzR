@@ -165,7 +165,7 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain) {
 void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelTerm *> & model, Rcpp::RObject &terms) {
    std::string s = getWrapName(modelFrame, col);
    if (s=="" && col==0) {
-      Rccp::Rcout << "Creating response model term\n";
+      Rcpp::Rcout << "Creating response model term\n";
       model.push_back(new modelTerm_resp(modelFrame, col));
       int k=0;
       if (terms.hasAttribute("intercept"))
