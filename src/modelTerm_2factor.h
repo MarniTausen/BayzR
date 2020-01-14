@@ -1,29 +1,29 @@
 //
-//  modelTerm_factor.h
+//  modelTerm_2factor.h
 //  rbayz
 //
-//  Created by Luc Janss on 03/08/2018.
+//  Created by Luc Janss on 14/01/2020.
 //
 
-#ifndef modelTerm_factor_h
-#define modelTerm_factor_h
+#ifndef modelTerm_2factor_h
+#define modelTerm_2factor_h
 
 #include <Rcpp.h>
 #include <cmath>
 
-// Model-term that handles storage of factor data.
-// - par vector has size levels of the factor
-// - hpar is determined in child classes (not used if fixed, used if random)
-// - common working vectors are lhs and rhs vectors
-// - define coldata vector, it is IntegerVector for factors
+// Model-term that handles storage of data on 2 factors (used to build classes for interaction fit).
+// - par vector size ....
+// - hpar is not yet set here, it depends on the actual class if this is used or not
+// - common working vectors are lhs and rhs vector
+// - define two IntegerVectors for coldata
 // - common methods are correction, decorrection, and collection of rhs and lhs vectors
 
-class modelTerm_factor : public modelTerm {
+class modelTerm_2factor : public modelTerm {
    
 public:
    
-   modelTerm_factor(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
-      coldata = d[col];
+   modelTerm_2factor(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
+      col1data = d[col];
       for (size_t i=0; i<coldata.size(); i++)
          coldata[i] -= 1;
       parLevelNames = coldata.attr("levels");
@@ -32,7 +32,7 @@ public:
       rhs.resize(parLevelNames.size(),0);
    }
    
-   ~modelTerm_factor() {
+   ~modelTerm_2factor() {
    }
    
 protected:
@@ -60,7 +60,7 @@ protected:
       }
    }
 
-   Rcpp::IntegerVector coldata;
+   Rcpp::IntegerVector col1data, col2data;
    std::vector<double> lhs, rhs;          // working vectors to collect LHS an RHS of equations
 
 };
