@@ -18,11 +18,11 @@
 // - par vector is size 1, we only update par[0] here
 // - hpar is not used here
 
-class modelTerm_fixreg : public modelTerm_factor {
+class modelTerm_fixreg : public modelTerm_realvec {
    
 public:
    
-   modelTerm_fixreg(Rcpp::DataFrame &d, size_t col) : modelTerm_factor(d, col) {
+   modelTerm_fixreg(Rcpp::DataFrame &d, size_t col) : modelTerm_realvec(d, col) {
    }
    
    ~modelTerm_fixreg() {
