@@ -10,8 +10,10 @@
 #include "modelTerm_mean.h"
 #include "modelTerm_resp.h"
 #include "modelTerm_fixed.h"
+#include "modelTerm_fixreg.h"
 #include "modelTerm_random.h"
 #include "modelTerm_ran_cor.h"
+#include "modelTerm_ran2f.h"
 #include "rbayzExceptions.h"
 
 // These functions are defined below the main function
