@@ -177,13 +177,15 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelT
    else if(s=="ranf") {
       Rcpp::RObject thiscol = modelFrame[col];
       if(thiscol.hasAttribute("evalues")) {
-         Rcpp::NumericMatrix m = thiscol.attr("evectors");  // the evectors matrix must be passed already in the constructor
+         Rcpp::NumericMatrix m = thiscol.attr("evectors");  // the evectors matrix must be passed in the constructor
          model.push_back(new modelTerm_ran_cor(modelFrame, col, m));
       }
       else {
          model.push_back(new modelTerm_random(modelFrame, col));
       }
    }
+   else if (s=="freg")
+      model.push_back(new modelTerm_fixreg(modelFrame, col));
    else if (col==0 && s!="") {
       throw(generalRbayzError("Cannot handle wrapper function on response column"));
    }
