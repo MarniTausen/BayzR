@@ -184,6 +184,18 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelT
          model.push_back(new modelTerm_random(modelFrame, col));
       }
    }
+   else if(s=="ran2f") {
+      Rcpp::RObject thiscol = modelFrame[col];
+      Rcpp::RObject secondcol = thiscol.attr("factor2");
+      if(thiscol.hasAttribute("evalues") && secondcol.hasAttribute("evalues")) {
+         Rcpp::NumericMatrix m1 = thiscol.attr("evectors");
+         Rcpp::NumericMatrix m2 = secondcol.attr("evectors");
+         model.push_back(new modelTerm_ran2f_2cor(modelFrame, col, secondcol, m1, m2));
+      }
+      else {  // here need to implement 1) only 'thiscol' with evalues; 2) both with no evalues.
+         throw(generalRbayzError("Version of ran2f not yet implemented"));
+      }
+   }
    else if (s=="freg")
       model.push_back(new modelTerm_fixreg(modelFrame, col));
    else if (col==0 && s!="") {
