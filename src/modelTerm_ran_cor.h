@@ -13,7 +13,7 @@
 #include "modelTerm_realmat.h"
 #include "priorClasses.h"
 
-// random-correlated model term, built from ranf() model term with cor=K setting.
+// random-correlated model term, built from ranf() model term with V=K setting.
 // This is a child-class of modelTerm_realmat because it works on a real matrix with regressions.
 // - eigenvector data is already stored as coldata through constructor of modelTerm_realmat
 // - eigenvalue data still needs to be set
