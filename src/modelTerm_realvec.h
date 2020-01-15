@@ -10,6 +10,7 @@
 
 #include <Rcpp.h>
 #include <cmath>
+#include "modelTerm.h"
 
 // Model-term where 'coldata' is a vector of real numbers (Rcpp NumericVector, C++ double), it is
 // a parent class of the model-term for fixed regression. Here:

@@ -10,6 +10,7 @@
 
 #include <Rcpp.h>
 #include <cmath>
+#include "modelTerm_realvec.h"
 
 // Model-term for fixed regression (built from freg() in the model).
 // This class derives from modelTerm_realvec, which
@@ -30,6 +31,7 @@ public:
    
    void sample() {
       resid_decorrect();
+      collect_lhs_rhs();
       par[0] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
       resid_correct();
    }
