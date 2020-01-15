@@ -22,8 +22,9 @@ class modelTerm_2factor : public modelTerm {
    
 public:
    
-   modelTerm_2factor(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
+   modelTerm_2factor(Rcpp::DataFrame &d, size_t col, Rcpp::RObject &col2) : modelTerm(d, col) {
       col1data = d[col];
+      // have to link col2 to col2data vector, but col2 is now RObject
       for (size_t i=0; i<coldata.size(); i++)
          coldata[i] -= 1;
       parLevelNames = coldata.attr("levels");
