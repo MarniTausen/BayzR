@@ -15,6 +15,7 @@
 #' @useDynLib BayzR, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 bayz <- function(model, data=NULL, fct=NULL, chain=NULL, ...){
+    bayz_check_modelterms(model)
     model_data <- model.frame(model, data=data)
     if (is.null(chain)){
         chain=c(1100,100,10)

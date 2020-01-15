@@ -1,7 +1,7 @@
 Bayesian linear regression
 ================
 Luc Janss, Maria Izabel Cavassim Alves and Marni Tausen
-2019-12-05
+2020-01-15
 
 -   [Bayesian Linear Mixed Models](#bayesian-linear-mixed-models)
 -   [How to install](#how-to-install)
@@ -35,6 +35,10 @@ devtools::install_github("MarniTausen/BayzR")
 Functions and models associated with BayZ
 =========================================
 
+-   fixf (Fixed effect as factor)
+-   ranf (Random effect factor)
+-   ran2f (Random effect interaction term)
+
 Examples
 ========
 
@@ -51,11 +55,11 @@ fit <- bayz(y ~ ranf(x), data=example_data, chain=c(10000, 100, 10))
 ```
 
     ## cycle var.resid var.ranf.x mean.y 
-    ## 2000 0.935585 464.711 53.9635 
-    ## 4000 1.04123 243.027 62.3797 
-    ## 6000 1.11008 406.843 64.8925 
-    ## 8000 1.00234 309.321 65.0168 
-    ## 10000 0.956062 335.057 65.9105
+    ## 2000 9.35702 590.307 52.9588 
+    ## 4000 163.759 422.812 54.2868 
+    ## 6000 125.981 475.352 52.3711 
+    ## 8000 13.5625 561.388 55.1601 
+    ## 10000 37.3442 510.696 51.3846
 
 ``` r
 summary(fit)
@@ -66,11 +70,11 @@ summary(fit)
     ##    model formula: y ~ ranf(x) 
     ## 
     ## Random variable estimates:
-    ##              postMean      postSD
-    ## var.resid    1.003139  0.08760237
-    ## var.ranf.x 350.822759 73.65586649
+    ##            postMean   postSD
+    ## var.resid  191.3183 192.1095
+    ## var.ranf.x 369.9300 194.8178
     ## 
     ## Variance explained (Heritability):
     ##   Variable Heritability
-    ## 1    resid  0.002851238
-    ## 2        x  0.997148762
+    ## 1    resid      0.34088
+    ## 2        x      0.65912
