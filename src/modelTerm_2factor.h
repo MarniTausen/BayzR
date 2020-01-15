@@ -10,6 +10,7 @@
 
 #include <Rcpp.h>
 #include <cmath>
+#include "modelTerm.h"
 
 // Model-term that handles storage of data on 2 factors (used to build classes for interaction fit).
 // - par vector size ....

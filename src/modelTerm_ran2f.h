@@ -9,7 +9,7 @@
 #define modelTerm_ran2f_h
 
 #include <Rcpp.h>
-#include "modelTerm_factor.h"
+#include "modelTerm_2factor.h"
 #include "priorClasses.h"
 
 // Model-term for interaction between two random factors; there are also versions allowing
