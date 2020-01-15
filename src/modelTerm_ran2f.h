@@ -15,7 +15,7 @@
 // Model-term for interaction between two random factors; there are also versions allowing
 // for one or two covariance-structures.
 
-class modelTerm_ran2f : public modelTerm_factor {
+class modelTerm_ran2f : public modelTerm_2factor {
 
 public:
 

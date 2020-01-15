@@ -35,18 +35,18 @@ public:
 protected:
 
    void resid_correct() {
-      for (size_t obs=0; obs < coldata.nrow(); obs++)
+      for (size_t obs=0; obs < coldata.size(); obs++)
          resid[obs] -= par[0] * coldata(obs);
    }
    
    void resid_decorrect() {
-      for (size_t obs=0; obs < coldata.nrow(); obs++)
+      for (size_t obs=0; obs < coldata.size(); obs++)
          resid[obs] += par[0] * coldata(obs);
    }
 
    void collect_lhs_rhs() {
       lhs = 0.0; rhs=0.0;
-      for (size_t obs=0; obs < coldata.nrow(); obs++) {
+      for (size_t obs=0; obs < coldata.size(); obs++) {
          rhs += residPrec[obs] * resid[obs] * coldata(obs);
          lhs += residPrec[obs] * residPrec[obs];
       }

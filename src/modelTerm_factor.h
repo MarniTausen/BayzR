@@ -10,6 +10,7 @@
 
 #include <Rcpp.h>
 #include <cmath>
+#include "modelTerm.h"
 
 // Model-term that handles storage of factor data.
 // - par vector has size levels of the factor

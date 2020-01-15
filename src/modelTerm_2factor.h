@@ -26,9 +26,9 @@ public:
    modelTerm_2factor(Rcpp::DataFrame &d, size_t col, Rcpp::RObject &col2) : modelTerm(d, col) {
       col1data = d[col];
       // have to link col2 to col2data vector, but col2 is now RObject
-      for (size_t i=0; i<coldata.size(); i++)
-         coldata[i] -= 1;
-      parLevelNames = coldata.attr("levels");
+      for (size_t i=0; i<col1data.size(); i++)
+         col1data[i] -= 1;
+      parLevelNames = col1data.attr("levels");
       par.resize(parLevelNames.size(),0);
       lhs.resize(parLevelNames.size(),0);
       rhs.resize(parLevelNames.size(),0);
@@ -39,14 +39,15 @@ public:
    
 protected:
 
+   // still needs updating to work on interaction, this is code copied from factor
    void resid_correct() {
-      for (size_t obs=0; obs<coldata.size(); obs++)
-         resid[obs] -= par[coldata[obs]];
+      for (size_t obs=0; obs<col1data.size(); obs++)
+         resid[obs] -= par[col1data[obs]];
    }
    
    void resid_decorrect() {
-      for (size_t obs=0; obs<coldata.size(); obs++)
-         resid[obs] += par[coldata[obs]];
+      for (size_t obs=0; obs<col1data.size(); obs++)
+         resid[obs] += par[col1data[obs]];
    }
 
    void collect_lhs_rhs() {
@@ -55,8 +56,8 @@ protected:
          rhs[k] = 0.0;
          lhs[k] = 0.0;
       }
-      for (size_t obs=0; obs<coldata.size(); obs++) {
-         k=coldata[obs];
+      for (size_t obs=0; obs<col1data.size(); obs++) {
+         k=col1data[obs];
          rhs[k] += residPrec[obs] * resid[obs];
          lhs[k] += residPrec[obs];
       }
