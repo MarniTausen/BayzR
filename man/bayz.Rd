@@ -4,14 +4,12 @@
 \alias{bayz}
 \title{Bayz function}
 \usage{
-bayz(model, data = NULL, fct = NULL, chain = NULL, ...)
+bayz(model, data = NULL, chain = NULL, ...)
 }
 \arguments{
 \item{model}{A formula describing the model.}
 
 \item{data}{Data frame to collect data from}
-
-\item{fct}{Model function}
 
 \item{chain}{Vector describing the number of iterations to be run.}
 
