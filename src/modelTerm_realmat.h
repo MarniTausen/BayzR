@@ -3,7 +3,6 @@
 //  rbayz
 //
 //  Created by Luc Janss on 30/08/2019.
-//  Copyright © 2019 Luc Janss. All rights reserved.
 //
 
 #ifndef modelTerm_realmat_h
@@ -26,8 +25,25 @@ class modelTerm_realmat : public modelTerm {
    
 public:
    
-   modelTerm_realmat(Rcpp::DataFrame &d, size_t col, Rcpp::NumericMatrix &m) : modelTerm(d, col) {
-      coldata = m;
+   modelTerm_realmat(Rcpp::DataFrame &d, size_t col, int flag) : modelTerm(d, col) {
+      Rcpp::RObject thiscol = d[col];
+      if (flag==2) {  // this indicates the matrix data is stored as evectors and evalues
+         coldata = Rcpp::as<Rcpp::NumericMatrix>(thiscol.attr("evectors"));
+         /* This is code if would like to change to the 'U-tilde' model
+         Rcpp::NumericVector d = Rcpp::as<Rcpp::NumericVector>(thiscol.attr("evalues"));
+         double evalsqrt;
+         for(size_t col=0; col<coldata.ncol(); col++) {
+            if (d[col] >= 0.001) {
+               evalsqrt = sqrt(d[col]);
+            }
+            else {
+               evalsqrt=0.0;
+            }
+            for(size_t row=0; row<coldata.nrow(); row++)
+               coldata(row,col) = coldata(row,col)*evalsqrt;
+         }
+         */
+      }
       parLevelNames = colnames(coldata);
       par.resize(parLevelNames.size(),0);
    }

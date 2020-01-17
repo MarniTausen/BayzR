@@ -24,11 +24,11 @@ class modelTerm_ran_cor : public modelTerm_realmat {
 
 public:
 
-   modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col, Rcpp::NumericMatrix &m) : modelTerm_realmat(d, col, m) {
+   modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col) : modelTerm_realmat(d, col, 2) {
       hpar.resize(1,1);
       hparName = "var." + parName;
       Rcpp::RObject thiscol = d[col];
-      eval = thiscol.attr("evalues");
+      eval = Rcpp::as<Rcpp::NumericVector>(thiscol.attr("evalues"));
       nPosEval=0;
       for (size_t i=0;  i<eval.size() && eval[i] >= 0.001; i++)
          nPosEval++;
@@ -50,14 +50,16 @@ public:
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
       for(size_t k=0; k<nPosEval; k++)
-         ssq += par[k]*par[k];
+         ssq += par[k]*par[k]/eval[k];
       hpar[0] = gprior.samplevar(ssq,nPosEval);
    }
 
 private:
+
    Rcpp::NumericVector eval;
    Rcpp::IntegerVector update;
    size_t nPosEval;
+   
 };
 
 #endif /* modelTerm_ran_cor_h */
