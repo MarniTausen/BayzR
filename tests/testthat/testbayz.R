@@ -1,5 +1,15 @@
 context("bayz")
 
+
+test_that("Chain warning", {
+
+    my_data <- data.frame(x=1:20, y=20:1)
+
+    expect_warning(bayz(y ~ fixf(x), data=my_data))
+    #expect_error(bayz(x ~ y, chain=c(10000, 100, 10)))
+
+})
+
 test_that("Missing inputs", {
 
     my_data <- data.frame(x=1:20, y=20:1)
@@ -9,11 +19,11 @@ test_that("Missing inputs", {
 
 })
 
-test_that("Warning messages", {
+test_that("Error message", {
 
     my_data <- data.frame(x=1:20, y=20:1)
 
-    expect_warning(bayz(y ~ x, data=my_data))
+    expect_error(bayz(y ~ x, data=my_data))
     #expect_silent(bayz(y ~ x, data=my_data, chain=c(10000, 100, 10)))
 
 })
@@ -21,17 +31,12 @@ test_that("Warning messages", {
 test_that("Wrong input", {
 
     my_data <- data.frame(x=1:20, y=20:1)
-    fit <- bayz(y ~ x, data=my_data, chain=c(10000,100,10))
+    expect_error(bayz(y ~ x, data=my_data, chain=c(10000,100,10)))
 
-    expect_match(fit$Errors[1],
-                 "Unknown wrapper function on data column")
-    expect_match(fit$Errors[2],
-                 "Bayz terminates after model building")
-    expect_equal(fit$nError, 2)
-
+    fit <- bayz(y ~ fixf(x), data=my_data, chain=c(10000,100,10))
+    ## Run print
     capture.output(print(fit))
 })
-
 
 test_that("Working run", {
 
