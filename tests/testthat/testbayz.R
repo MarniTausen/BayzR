@@ -1,5 +1,15 @@
 context("bayz")
 
+
+test_that("Chain warning", {
+
+    my_data <- data.frame(x=1:20, y=20:1)
+
+    expect_warning(bayz(y ~ fixf(x), data=my_data))
+    #expect_error(bayz(x ~ y, chain=c(10000, 100, 10)))
+
+})
+
 test_that("Missing inputs", {
 
     my_data <- data.frame(x=1:20, y=20:1)
@@ -27,7 +37,6 @@ test_that("Wrong input", {
     ## Run print
     capture.output(print(fit))
 })
-
 
 test_that("Working run", {
 
