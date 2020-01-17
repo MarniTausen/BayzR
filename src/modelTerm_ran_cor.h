@@ -39,11 +39,10 @@ public:
    }
 
    void sample() {
-      double temp;
       for(size_t k=0; k<nPosEval; k++) {
          resid_decorrect(k);
          collect_lhs_rhs(k);
-         temp = lhs + (1.0/(eval[k]*hpar[0]));  // lhs with variance added
+         lhs = lhs + (1.0/(eval[k]*hpar[0]));  // lhs with variance added
          par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
          resid_correct(k);
       }

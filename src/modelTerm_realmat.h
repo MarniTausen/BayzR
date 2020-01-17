@@ -25,11 +25,29 @@ class modelTerm_realmat : public modelTerm {
    
 public:
    
+   // The constructor can work in different 'modes' for receiving and storing matrix-data.
+   // flag=1: (to be added) for covariate data
+   // flag=2: for data from ran_cor where column data is a factor and there is a correlation
+   //         matrix that comes in as eigen-vectors
+   // .... ?
+   
    modelTerm_realmat(Rcpp::DataFrame &d, size_t col, int flag) : modelTerm(d, col) {
-      Rcpp::RObject thiscol = d[col];
-      if (flag==2) {  // this indicates the matrix data is stored as evectors and evalues
-         coldata = Rcpp::as<Rcpp::NumericMatrix>(thiscol.attr("evectors"));
-         /* This is code if would like to change to the 'U-tilde' model
+      if (flag==2) {
+         coldata = d[col];
+         for (size_t i=0; i<coldata.size(); i++)
+            coldata[i] -= 1;
+         parLevelNames = coldata.attr("levels");
+         par.resize(parLevelNames.size(),0);
+         Rcpp::RObject thiscol = d[col];
+         matrixdata = Rcpp::as<Rcpp::NumericMatrix>(thiscol.attr("evectors"));
+         if(matrixdata.nrow() != matrixdata.ncol()) {
+            throw(generalRbayzError(std::string("In ranf(...,V=v) matrix v is not square")));
+         }
+         if (parLevelNames.size() != matrixdata.nrow()) {
+            throw(generalRbayzError(std::string("In ranf(f,V=v) number of levels in f do not match size of v")));
+         }
+         
+         /* This is code for change to the 'U-tilde' model
          Rcpp::NumericVector d = Rcpp::as<Rcpp::NumericVector>(thiscol.attr("evalues"));
          double evalsqrt;
          for(size_t col=0; col<coldata.ncol(); col++) {
@@ -44,8 +62,6 @@ public:
          }
          */
       }
-      parLevelNames = colnames(coldata);
-      par.resize(parLevelNames.size(),0);
    }
    
    ~modelTerm_realmat() {
@@ -54,24 +70,27 @@ public:
 protected:
 
    void resid_correct(size_t col) {
-      for (size_t obs=0; obs < coldata.nrow(); obs++)
-         resid[obs] -= par[col] * coldata(obs,col);
+      for (size_t obs=0; obs < coldata.size(); obs++)
+         resid[obs] -= par[col] * matrixdata(coldata(obs),col);
    }
    
    void resid_decorrect(size_t col) {
-      for (size_t obs=0; obs < coldata.nrow(); obs++)
-         resid[obs] += par[col] * coldata(obs,col);
+      for (size_t obs=0; obs < coldata.size(); obs++)
+         resid[obs] += par[col] * matrixdata(coldata(obs),col);
    }
 
    void collect_lhs_rhs(size_t col) {
       lhs = 0.0; rhs=0.0;
-      for (size_t obs=0; obs < coldata.nrow(); obs++) {
-         rhs += residPrec[obs] * resid[obs] * coldata(obs,col);
-         lhs += residPrec[obs] * residPrec[obs];
+      size_t rowlevel;
+      for (size_t obs=0; obs < coldata.size(); obs++) {
+         rowlevel = coldata(obs);
+         rhs += matrixdata(rowlevel,col) * residPrec[obs] * resid[obs];
+         lhs += matrixdata(rowlevel,col) * matrixdata(rowlevel,col) * residPrec[obs];
       }
    }
 
-   Rcpp::NumericMatrix coldata;
+   Rcpp::NumericMatrix matrixdata;
+   Rcpp::IntegerVector coldata;
    double lhs, rhs;          // lhs, rhs will be scalar here (per iteration)
    std::vector<double> fit;
    

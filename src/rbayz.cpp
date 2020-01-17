@@ -46,6 +46,7 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain) {
    // so it remains available in case of errors.
    Rcpp::CharacterVector errorMessages;
    Rcpp::CharacterVector warningMessages;
+   std::string lastDone;
 
    try {     // a large try-block wraps nearly all of code, in case of normal exectution
              // the code builds a return list and returns before the catch().
@@ -112,6 +113,7 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain) {
       Rcpp::NumericVector postSD(nEstimates,0);
       Rcpp::colnames(loggedSamples) = parLoggedNames;
       int nShow = chain[0]/5;
+      lastDone="Preparing to run MCMC";
 
       // Run the model by calling the sample() method for each modelTerm
       for (size_t cycle=1, save=0; cycle <= chain[0]; cycle++) {
@@ -126,6 +128,7 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain) {
             save++;  // save is counter for output (saved) cycles
          }
       }
+      lastDone="Finished running MCMC";
 
       // Build result list for normal termination
       Rcpp::List result = Rcpp::List::create();
@@ -134,24 +137,28 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain) {
                 Rcpp::Named("Size")=parSizes, Rcpp::Named("EstStart")=parEstFirst,
                 Rcpp::Named("EstEnd")=parEstLast, Rcpp::Named("Logged")=parLogged);
       parInfo.attr("row.names") = parNames;
+      lastDone="Setting up return list";
       for(size_t i=0; i<nEstimates; i++)
-      postMean[i] /= double(nSamples);       // finish computing post mean and SD, so far it is sum and sum squares
+          postMean[i] /= double(nSamples);   // finish computing post mean and SD, so far it is sum and sum squares
       for(size_t i=0; i<nEstimates; i++)
-      postSD[i] = sqrt(postSD[i]/double(nSamples) - postMean[i]*postMean[i]);
+          postSD[i] = sqrt(postSD[i]/double(nSamples) - postMean[i]*postMean[i]);
+      lastDone="Computing postMeans and PostSDs";
       Rcpp::DataFrame estimates = Rcpp::DataFrame::create
                (Rcpp::Named("postMean")=postMean, Rcpp::Named("postSD")=postSD);
       estimates.attr("row.names") = estimNames;
+      lastDone="Setting up estimates dataframe";
       result.push_back(0,"nError");
       result.push_back(parInfo,"Parameters");
       result.push_back(loggedSamples,"Samples");
       result.push_back(estimates,"Estimates");
+      lastDone="Filling return list";
       return(result);   // normal termination
 
    } catch (std::exception &err) {  // this includes generalRbayzErrors
       errorMessages.push_back(err.what());
    }
    catch (...) {
-      errorMessages.push_back("An unknown error occured in bayz");
+      errorMessages.push_back("An unknown error occured in bayz after "+lastDone);
    }
 
    // Note: program flow only comes here in case of errors (normal return is above);

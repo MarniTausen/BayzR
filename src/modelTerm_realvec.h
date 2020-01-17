@@ -24,8 +24,8 @@ class modelTerm_realvec : public modelTerm {
 public:
    
    modelTerm_realvec(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
-      coldata = d[col];
-      parLevelNames = colnames(coldata);
+      coldata = Rcpp::as<Rcpp::NumericVector>(d[col]);
+//      parLevelNames = colnames(coldata);
       par.resize(1,0);
    }
    
@@ -36,19 +36,19 @@ protected:
 
    void resid_correct() {
       for (size_t obs=0; obs < coldata.size(); obs++)
-         resid[obs] -= par[0] * coldata(obs);
+         resid[obs] -= par[0] * coldata[obs];
    }
    
    void resid_decorrect() {
       for (size_t obs=0; obs < coldata.size(); obs++)
-         resid[obs] += par[0] * coldata(obs);
+         resid[obs] += par[0] * coldata[obs];
    }
 
    void collect_lhs_rhs() {
       lhs = 0.0; rhs=0.0;
       for (size_t obs=0; obs < coldata.size(); obs++) {
-         rhs += residPrec[obs] * resid[obs] * coldata(obs);
-         lhs += residPrec[obs] * residPrec[obs];
+         rhs += residPrec[obs] * resid[obs] * coldata[obs];
+         lhs += coldata[obs] * residPrec[obs] * coldata[obs];
       }
    }
 
