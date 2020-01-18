@@ -26,10 +26,9 @@ public:
    modelTerm_2factor(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
       Rcpp::RObject thiscol = d[col];
       Rcpp::RObject secondcol = thiscol.attr("factor2");
+//      parName += "." + getVarName(d, secondcol);
       col1data = d[col];
       col2data = Rcpp::as<Rcpp::NumericVector>(secondcol);
-      Rcpp::Rcout << "Head of column 1: " << col1data[0] << " " << col1data[1] << " " << col1data[2] << std::endl;
-      Rcpp::Rcout << "Head of column 2: " << col2data[0] << " " << col2data[1] << " " << col2data[2] << std::endl;
       for (size_t i=0; i<col1data.size(); i++) col1data[i] -= 1;
       for (size_t i=0; i<col2data.size(); i++) col2data[i] -= 1;
       Rcpp::CharacterVector factor1Names = col1data.attr("levels");
@@ -46,11 +45,11 @@ public:
             parLevelNames.push_back(s);
          }
       }
-      for(size_t i=0; i<intdata.size(); i++) {
-         intdata.push_back(col1data[i]*nLevel1 + col2data[i]);
+      for(size_t i=0; i<col1data.size(); i++) {
+         intdata.push_back(col1data[i]*nLevel2 + col2data[i]);
       }
-//      lhs.resize(parLevelNames.size(),0);
-//      rhs.resize(parLevelNames.size(),0);
+      lhs.resize(parLevelNames.size(),0);
+      rhs.resize(parLevelNames.size(),0);
    }
    
    ~modelTerm_2factor() {
