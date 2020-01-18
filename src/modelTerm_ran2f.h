@@ -19,7 +19,7 @@ class modelTerm_ran2f : public modelTerm_2factor {
 
 public:
 
-   modelTerm_ran2f(Rcpp::DataFrame &d, size_t col)  : modelTerm_2factor(d, col, col2) {
+   modelTerm_ran2f(Rcpp::DataFrame &d, size_t col)  : modelTerm_2factor(d, col) {
       hpar.resize(1,1);
       hparName = "var." + parName;
    }

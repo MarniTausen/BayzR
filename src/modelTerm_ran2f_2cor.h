@@ -18,12 +18,12 @@ class modelTerm_ran2f_2cor : public modelTerm_2factor {
 
 public:
 
-   modelTerm_ran2f_2cor(Rcpp::DataFrame &d, size_t col)  : modelTerm_2factor(d, col, col2) {
+   modelTerm_ran2f_2cor(Rcpp::DataFrame &d, size_t col)  : modelTerm_2factor(d, col) {
       hpar.resize(1,1);
       hparName = "var." + parName;
    }
 
-   ~modelTerm_ran2f() {
+   ~modelTerm_ran2f_2cor() {
    }
 
    void sample() {

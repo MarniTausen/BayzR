@@ -24,7 +24,7 @@ class modelTerm_2factor : public modelTerm {
 public:
    
    modelTerm_2factor(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
-      Rcpp::RObject thiscol = modelFrame[col];
+      Rcpp::RObject thiscol = d[col];
       Rcpp::RObject secondcol = thiscol.attr("factor2");
       col1data = d[col];
       col2data = Rcpp::as<Rcpp::NumericVector>(secondcol);
@@ -38,14 +38,16 @@ public:
       // initially set-up interaction coding and solutions for all combinations,
       // factor2 levels nested within factor1 levels. 
       par.resize(nLevel1*nLevel2,0);
-      parLevelNames.resize(nLevel1*nLevel2);
       for(size_t i=0; i<nLevel1; i++) {
-         for(size_t j=0; j<nLevel2; j++)
-            parLevelNames[i*nLevel1+j] = factor1Names[i]+"%"+factor2Names[j];
+         for(size_t j=0; j<nLevel2; j++) {
+            Rcpp::String s = factor1Names[i];
+            s += "%";
+            s += factor2Names[j];
+            parLevelNames.push_back(s);
+         }
       }
-      intdata.resize(col1data.size(),0);
       for(size_t i=0; i<intdata.size(); i++) {
-         intdata[i] = col1data[i]*nLevel1 + col2data[i];
+         intdata.push_back(col1data[i]*nLevel1 + col2data[i]);
       }
 //      lhs.resize(parLevelNames.size(),0);
 //      rhs.resize(parLevelNames.size(),0);

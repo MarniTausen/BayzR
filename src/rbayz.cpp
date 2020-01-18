@@ -14,6 +14,7 @@
 #include "modelTerm_random.h"
 #include "modelTerm_ran_cor.h"
 #include "modelTerm_ran2f.h"
+#include "modelTerm_ran2f_2cor.h"
 #include "rbayzExceptions.h"
 
 // These functions are defined below the main function
@@ -207,8 +208,7 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelT
          throw(generalRbayzError("Version of ran2f not yet implemented"));
       }
       else {
-         throw(generalRbayzError("In ran2f(...,V1=,V2=) setting V2 but not V1 is not supported;" +
-                                 "swap the variables and set V1"));
+         throw(generalRbayzError("In ran2f(...,V1=,V2=) cannot set V2 only, swap the variables and set V1"));
       }
    }
    else if (s=="freg")
