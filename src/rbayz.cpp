@@ -158,7 +158,7 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain) {
       errorMessages.push_back(err.what());
    }
    catch (...) {
-      errorMessages.push_back("An unknown error occured in bayz after "+lastDone);
+      errorMessages.push_back("An unknown error occured in bayz after: "+lastDone);
    }
 
    // Note: program flow only comes here in case of errors (normal return is above);
@@ -195,18 +195,21 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelT
    else if(s=="ran2f") {
       Rcpp::RObject thiscol = modelFrame[col];
       Rcpp::RObject secondcol = thiscol.attr("factor2");
-      
-      model.push_back(new modelTerm_ran2f(modelFrame, col, secondcol));
-/*
       if(thiscol.hasAttribute("evalues") && secondcol.hasAttribute("evalues")) {
-         Rcpp::NumericMatrix m1 = thiscol.attr("evectors");
-         Rcpp::NumericMatrix m2 = secondcol.attr("evectors");
-         model.push_back(new modelTerm_ran2f_2cor(modelFrame, col, secondcol, m1, m2));
+//         Rcpp::NumericMatrix m1 = thiscol.attr("evectors");
+//         Rcpp::NumericMatrix m2 = secondcol.attr("evectors");
+         model.push_back(new modelTerm_ran2f_2cor(modelFrame, col));
       }
-      else {  // here need to implement 1) only 'thiscol' with evalues; 2) both with no evalues.
+      else if (!thiscol.hasAttribute("evalues") && !secondcol.hasAttribute("evalues")) {
+         model.push_back(new modelTerm_ran2f(modelFrame, col));
+      }
+      else if (thiscol.hasAttribute("evalues") && !secondcol.hasAttribute("evalues")) {
          throw(generalRbayzError("Version of ran2f not yet implemented"));
       }
- */
+      else {
+         throw(generalRbayzError("In ran2f(...,V1=,V2=) setting V2 but not V1 is not supported;" +
+                                 "swap the variables and set V1"));
+      }
    }
    else if (s=="freg")
       model.push_back(new modelTerm_fixreg(modelFrame, col));

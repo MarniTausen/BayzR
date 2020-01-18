@@ -23,15 +23,32 @@ class modelTerm_2factor : public modelTerm {
    
 public:
    
-   modelTerm_2factor(Rcpp::DataFrame &d, size_t col, Rcpp::RObject &col2) : modelTerm(d, col) {
+   modelTerm_2factor(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
+      Rcpp::RObject thiscol = modelFrame[col];
+      Rcpp::RObject secondcol = thiscol.attr("factor2");
       col1data = d[col];
-      // have to link col2 to col2data vector, but col2 is now RObject
-      for (size_t i=0; i<col1data.size(); i++)
-         col1data[i] -= 1;
-      parLevelNames = col1data.attr("levels");
-      par.resize(parLevelNames.size(),0);
-      lhs.resize(parLevelNames.size(),0);
-      rhs.resize(parLevelNames.size(),0);
+      col2data = Rcpp::as<Rcpp::NumericVector>(secondcol);
+      Rcpp::Rcout << "Head of column 1: " << col1data[0] << " " << col1data[1] << " " << col1data[2] << std::endl;
+      Rcpp::Rcout << "Head of column 2: " << col2data[0] << " " << col2data[1] << " " << col2data[2] << std::endl;
+      for (size_t i=0; i<col1data.size(); i++) col1data[i] -= 1;
+      for (size_t i=0; i<col2data.size(); i++) col2data[i] -= 1;
+      Rcpp::CharacterVector factor1Names = col1data.attr("levels");
+      Rcpp::CharacterVector factor2Names = col2data.attr("levels");
+      size_t nLevel1=factor1Names.size(), nLevel2=factor2Names.size();
+      // initially set-up interaction coding and solutions for all combinations,
+      // factor2 levels nested within factor1 levels. 
+      par.resize(nLevel1*nLevel2,0);
+      parLevelNames.resize(nLevel1*nLevel2);
+      for(size_t i=0; i<nLevel1; i++) {
+         for(size_t j=0; j<nLevel2; j++)
+            parLevelNames[i*nLevel1+j] = factor1Names[i]+"%"+factor2Names[j];
+      }
+      intdata.resize(col1data.size(),0);
+      for(size_t i=0; i<intdata.size(); i++) {
+         intdata[i] = col1data[i]*nLevel1 + col2data[i];
+      }
+//      lhs.resize(parLevelNames.size(),0);
+//      rhs.resize(parLevelNames.size(),0);
    }
    
    ~modelTerm_2factor() {
@@ -39,33 +56,21 @@ public:
    
 protected:
 
-   // still needs updating to work on interaction, this is code copied from factor
+   // The correction and de-correction methods are general for all child classes.
+   // The collect_lhs_rhs() methods are different between the child classes.
    void resid_correct() {
-      for (size_t obs=0; obs<col1data.size(); obs++)
-         resid[obs] -= par[col1data[obs]];
+      for (size_t obs=0; obs<intdata.size(); obs++)
+         resid[obs] -= par[intdata[obs]];
    }
    
    void resid_decorrect() {
-      for (size_t obs=0; obs<col1data.size(); obs++)
-         resid[obs] += par[col1data[obs]];
+      for (size_t obs=0; obs<intdata.size(); obs++)
+         resid[obs] += par[intdata[obs]];
    }
-
-   void collect_lhs_rhs() {
-      size_t k;
-      for(k=0; k<par.size(); k++) {
-         rhs[k] = 0.0;
-         lhs[k] = 0.0;
-      }
-      for (size_t obs=0; obs<col1data.size(); obs++) {
-         k=col1data[obs];
-         rhs[k] += residPrec[obs] * resid[obs];
-         lhs[k] += residPrec[obs];
-      }
-   }
-
-   Rcpp::IntegerVector col1data, col2data;
-   std::vector<double> lhs, rhs;          // working vectors to collect LHS an RHS of equations
+   
+   Rcpp::IntegerVector col1data, col2data, intdata;
+   std::vector<double> lhs, rhs;
 
 };
 
-#endif /* modelTerm_factor_h */
+#endif /* modelTerm_2factor_h */

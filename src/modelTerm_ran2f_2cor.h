@@ -1,25 +1,24 @@
 //
-//  modelTerm_rand2f.hpp
+//  modelTerm_ran2f_2cor.hpp
 //  rbayz
 //
-//  Created by Luc Janss on 14/01/2020.
+//  Created by Luc Janss on 18/01/2020.
 //
 
-#ifndef modelTerm_ran2f_h
-#define modelTerm_ran2f_h
+#ifndef modelTerm_ran2f_2cor_h
+#define modelTerm_ran2f_2cor_h
 
 #include <Rcpp.h>
 #include "modelTerm_2factor.h"
 #include "priorClasses.h"
 
-// Model-term for interaction between two random factors; there are also versions allowing
-// for one or two covariance-structures.
+// Model-term for interaction between two random factors both with covariance-structures.
 
-class modelTerm_ran2f : public modelTerm_2factor {
+class modelTerm_ran2f_2cor : public modelTerm_2factor {
 
 public:
 
-   modelTerm_ran2f(Rcpp::DataFrame &d, size_t col)  : modelTerm_2factor(d, col, col2) {
+   modelTerm_ran2f_2cor(Rcpp::DataFrame &d, size_t col)  : modelTerm_2factor(d, col, col2) {
       hpar.resize(1,1);
       hparName = "var." + parName;
    }
@@ -44,6 +43,8 @@ public:
 
 private:
 
+   // this is code from ran2f that collects all lhs and rhs at once, probably
+   // needs to be changed to collect one level at-a-time like ran_cor.
    void collect_lhs_rhs() {
       size_t k;
       for(k=0; k<par.size(); k++) {
@@ -59,4 +60,4 @@ private:
 
 };
 
-#endif /* modelTerm_ran2f_h */
+#endif /* modelTerm_ran2f_2cor_h */
