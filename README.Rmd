@@ -1,7 +1,7 @@
 ---
-title: "Bayesian linear regression"
-author: "Luc Janss, Maria Izabel Cavassim Alves and Marni Tausen"
-date: "`r Sys.Date()`"
+#title: "Bayesian linear regression"
+#author: "Luc Janss, Maria Izabel Cavassim Alves and Marni Tausen"
+#date: "`r Sys.Date()`"
 output:
   md_document:
     variant: markdown_github
@@ -12,7 +12,11 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 # Bayesian Linear Mixed Models
-[![Build Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage Status coveralls](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master&kill_cache=1)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
+[![Build Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage Status coveralls](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
+
+-   [How to install](#how-to-install)
+-   [Functions and models associated with BayZ](#functions-and-models-associated-with-bayz)
+-   [Examples](#examples)
 
 Here write down the applicability of the software. For more information access the website: <http://www.bayz.biz/>.
 
@@ -41,6 +45,7 @@ devtools::install_github("MarniTausen/BayzR")
 - fixf (Fixed effect as factor)
 - ranf (Random effect factor)
 - ran2f (Random effect interaction term)
+- freg (Fixed continuous variables)
 
 # Examples
 
