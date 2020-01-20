@@ -1,17 +1,12 @@
-Bayesian linear regression
-================
-Luc Janss, Maria Izabel Cavassim Alves and Marni Tausen
-2020-01-15
-
--   [Bayesian Linear Mixed Models](#bayesian-linear-mixed-models)
--   [How to install](#how-to-install)
--   [Functions and models associated with BayZ](#functions-and-models-associated-with-bayz)
--   [Examples](#examples)
 
 Bayesian Linear Mixed Models
 ============================
 
-[![Build Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage Status coveralls](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master&kill_cache=1)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
+[![Build Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage Status coveralls](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=master)](https://coveralls.io/github/MarniTausen/BayzR?branch=master)
+
+-   [How to install](#how-to-install)
+-   [Functions and models associated with BayZ](#functions-and-models-associated-with-bayz)
+-   [Examples](#examples)
 
 Here write down the applicability of the software. For more information access the website: <http://www.bayz.biz/>.
 
@@ -38,6 +33,7 @@ Functions and models associated with BayZ
 -   fixf (Fixed effect as factor)
 -   ranf (Random effect factor)
 -   ran2f (Random effect interaction term)
+-   freg (Fixed continuous variables)
 
 Examples
 ========
@@ -54,12 +50,11 @@ example_data = data.frame(y = y, x = x)
 fit <- bayz(y ~ ranf(x), data=example_data, chain=c(10000, 100, 10))
 ```
 
-    ## cycle var.resid var.ranf.x mean.y 
-    ## 2000 9.35702 590.307 52.9588 
-    ## 4000 163.759 422.812 54.2868 
-    ## 6000 125.981 475.352 52.3711 
-    ## 8000 13.5625 561.388 55.1601 
-    ## 10000 37.3442 510.696 51.3846
+    ## 2000 411.74 211.907 55.5413 
+    ## 4000 526.394 82.3809 55.3901 
+    ## 6000 341.156 275.283 52.6522 
+    ## 8000 226.035 347.902 55.747 
+    ## 10000 518.322 115.43 54.8652
 
 ``` r
 summary(fit)
@@ -71,10 +66,10 @@ summary(fit)
     ## 
     ## Random variable estimates:
     ##            postMean   postSD
-    ## var.resid  191.3183 192.1095
-    ## var.ranf.x 369.9300 194.8178
+    ## var.resid  420.8849 176.6630
+    ## var.ranf.x 190.5818 174.6422
     ## 
     ## Variance explained (Heritability):
     ##   Variable Heritability
-    ## 1    resid      0.34088
-    ## 2        x      0.65912
+    ## 1    resid    0.6883202
+    ## 2        x    0.3116798
