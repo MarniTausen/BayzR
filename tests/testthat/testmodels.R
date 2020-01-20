@@ -238,7 +238,7 @@ test_that("GRM tests", {
 
     print(summary(fit))
 
-    expect_gte(summary(fit)$Heritability$Heritability[2], 0.9)
+    expect_gte(summary(fit)$Heritability$Heritability[2]+summary(fit)$Heritability$Heritability[3], 0.9)
     #expect_equal(is.na(summary(fit)$Heritability$Heritability[2]), TRUE)
 
 })
