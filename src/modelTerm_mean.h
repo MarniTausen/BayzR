@@ -22,7 +22,7 @@ public:
    
    modelTerm_mean(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
       par.resize(1,0);
-      parName = "mean." + getVarName(d, col);
+      parName = "mean";
    }
 
    ~modelTerm_mean() {

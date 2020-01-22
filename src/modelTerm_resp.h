@@ -25,6 +25,7 @@ public:
    modelTerm_resp(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
       coldata = d[col];
       hpar.resize(1,1.0);
+      parName = "resid";
       hparName = "var.resid";
       for (size_t obs=0; obs<resid.size(); obs++)
          resid[obs] = coldata[obs];  // initialize resid vector by copying data-vector in it

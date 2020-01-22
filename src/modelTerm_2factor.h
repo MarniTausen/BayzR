@@ -26,9 +26,12 @@ public:
    modelTerm_2factor(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
       Rcpp::RObject thiscol = d[col];
       Rcpp::RObject secondcol = thiscol.attr("factor2");
-//      parName += "." + getVarName(d, secondcol);
+      std::vector<std::string> names = parseColNames(d,col);
+      parName = parName + "." + names[2];
       col1data = d[col];
       col2data = Rcpp::as<Rcpp::NumericVector>(secondcol);
+      coldata.push_back(col1data);
+      coldata.push_back(col2data);
       for (size_t i=0; i<col1data.size(); i++) col1data[i] -= 1;
       for (size_t i=0; i<col2data.size(); i++) col2data[i] -= 1;
       Rcpp::CharacterVector factor1Names = col1data.attr("levels");
@@ -70,6 +73,7 @@ protected:
    }
    
    Rcpp::IntegerVector col1data, col2data, intdata;
+   Rcpp::DataFrame coldata;
    std::vector<double> lhs, rhs;
 
 };

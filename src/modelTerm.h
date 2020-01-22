@@ -49,7 +49,10 @@ public:
    modelTerm(Rcpp::DataFrame &d, size_t col) : gprior(d, col) {
       resid = d[d.size()-2];
       residPrec = d[d.size()-1];
-      parName = getWrapName(d, col) + "." + getVarName(d, col);
+      if(getWrapName(d,col)=="")
+         parName = getVarName(d, col);
+      else
+         parName = getWrapName(d, col) + "." + getVarName(d, col);
    }
 
    virtual ~modelTerm() {

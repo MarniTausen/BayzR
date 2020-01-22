@@ -12,6 +12,7 @@
 #include <Rcpp.h>
 #include "modelTerm_realmat.h"
 #include "priorClasses.h"
+#include "parseColNames.h"
 
 // random-correlated model term, built from ranf() model term with V=K setting.
 // This is a child-class of modelTerm_realmat because it works on a real matrix with regressions.
@@ -26,6 +27,8 @@ public:
 
    modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col) : modelTerm_realmat(d, col, 2) {
       hpar.resize(1,1);
+      std::vector<std::string> names = parseColNames(d,col);
+      parName = parName + "." + names[3];
       hparName = "var." + parName;
       Rcpp::RObject thiscol = d[col];
       eval = Rcpp::as<Rcpp::NumericVector>(thiscol.attr("evalues"));

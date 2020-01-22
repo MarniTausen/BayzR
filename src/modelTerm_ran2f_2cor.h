@@ -20,7 +20,8 @@ public:
 
    modelTerm_ran2f_2cor(Rcpp::DataFrame &d, size_t col)  : modelTerm_2factor(d, col) {
       hpar.resize(1,1);
-      hparName = "var." + parName;
+      std::vector<std::string> names = parseColNames(d,col);
+      hparName = "var." + parName + "." + names[3] + "." + names[4];
    }
 
    ~modelTerm_ran2f_2cor() {
