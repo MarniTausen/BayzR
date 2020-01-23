@@ -74,7 +74,7 @@ test_that("Genotype and Environment effects model", {
     expect_gte(summary(fit)$Heritability$Heritability[2], 0.15)
     expect_lte(summary(fit)$Heritability$Heritability[2], 0.35)
 
-    fit <- bayz(Response ~ ranf(Genotypes) + fixf(Env_1) + fixf(Env_2), chain=c(3e4,100,10))
+    fit <- bayz(Response ~ ranf(Genotypes) + fixf(Env_1) + fixf(Env_2), chain=c(2e4,100,10))
 
     print(summary(fit))
 
@@ -122,14 +122,14 @@ test_that("Genotype and Environment interactions effects model", {
     0.03*(sapply(Env_1, function(x) Env_1_effects[x])*sapply(Env_2, function(x) Env_2_effects[x]))
     names(Response) <- NULL
 
-    fit <- bayz(Response ~ ranf(Genotypes), chain=c(3e4,100,10))
+    fit <- bayz(Response ~ ranf(Genotypes), chain=c(2e4,100,10))
 
     print(summary(fit))
 
     expect_gte(summary(fit)$Heritability$Heritability[2], 0.05)
     expect_lte(summary(fit)$Heritability$Heritability[2], 0.25)
 
-    fit <- bayz(Response ~ ranf(Genotypes) + fixf(Env_1) + fixf(Env_2), chain=c(3e4,100,10))
+    fit <- bayz(Response ~ ranf(Genotypes) + fixf(Env_1) + fixf(Env_2), chain=c(2e4,100,10))
 
     print(summary(fit))
 
@@ -174,14 +174,14 @@ test_that("Genotype and Environment continous", {
     names(Response) <- NULL
 
     print("Continous variables!")
-    fit <- bayz(Response ~ ranf(Genotypes), chain=c(3e4,100,10))
+    fit <- bayz(Response ~ ranf(Genotypes), chain=c(2e4,100,10))
 
     print(summary(fit))
 
     expect_gte(summary(fit)$Heritability$Heritability[2], 0.15)
     expect_lte(summary(fit)$Heritability$Heritability[2], 0.4)
 
-    fit <- bayz(Response ~ ranf(Genotypes) + freg(Env_1) + freg(Env_2), chain=c(3e4,100,10))
+    fit <- bayz(Response ~ ranf(Genotypes) + freg(Env_1) + freg(Env_2), chain=c(2e4,100,10))
 
     print(summary(fit))
 
@@ -227,14 +227,14 @@ test_that("GRM tests", {
     1.5*sapply(Env_1, function(x) Env_1_effects[x]) +
     1.5*sapply(Env_2, function(x) Env_2_effects[x])
 
-    fit <- bayz(Response ~ ranf(Genotypes, V=GRM) + fixf(Env_1) + fixf(Env_2), chain=c(3e4,100,10))
+    fit <- bayz(Response ~ ranf(Genotypes) + ranf(Genotypes, V=GRM) + fixf(Env_1) + fixf(Env_2), chain=c(2e4,100,10))
 
     print(summary(fit))
 
-    expect_gte(summary(fit)$Heritability$Heritability[2], 0.9)
+    expect_gte(summary(fit)$Heritability$Broad.sense.Heritability[2], 0.9)
     #expect_equal(is.na(summary(fit)$Heritability$Heritability[2]), TRUE)
 
-    fit <- bayz(Response ~ ranf(Genotypes, V=GRM) + ran2f(Genotypes, Genotypes, V1=GRM, V2=GRM) + fixf(Env_1) + fixf(Env_2), chain=c(3e4,100,10))
+    fit <- bayz(Response ~ ranf(Genotypes, V=GRM) + ran2f(Genotypes, Genotypes, V1=GRM, V2=GRM) + fixf(Env_1) + fixf(Env_2), chain=c(2e4,100,10))
 
     print(summary(fit))
 
