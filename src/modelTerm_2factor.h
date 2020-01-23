@@ -34,8 +34,8 @@ public:
       coldata.push_back(col2data);
       for (size_t i=0; i<col1data.size(); i++) col1data[i] -= 1;
       for (size_t i=0; i<col2data.size(); i++) col2data[i] -= 1;
-      Rcpp::CharacterVector factor1Names = col1data.attr("levels");
-      Rcpp::CharacterVector factor2Names = col2data.attr("levels");
+      factor1Names = col1data.attr("levels");
+      factor2Names = col2data.attr("levels");
       size_t nLevel1=factor1Names.size(), nLevel2=factor2Names.size();
       // initially set-up interaction coding and solutions for all combinations,
       // factor2 levels nested within factor1 levels. 
@@ -73,6 +73,7 @@ protected:
    }
    
    Rcpp::IntegerVector col1data, col2data, intdata;
+   Rcpp::CharacterVector factor1Names, factor2Names;
    Rcpp::DataFrame coldata;
    std::vector<double> lhs, rhs;
 
