@@ -69,7 +69,7 @@ public:
             }
          }
       }
-      Rcpp::Rcout << "ran2f with two V-matrices models interaction VxV with rank " << evalint.size() << std::endl;
+      Rcpp::Rcout << "ran2f with two V-matrices uses rank for VxV of " << evalint.size() << std::endl;
       if(evalint.size()==0)
          throw generalRbayzError("Zero rank in ran2f for VxV; all eigenvalues are below tolerance?");
       workcol.resize(nLevel1*nLevel2,0);
@@ -80,55 +80,44 @@ public:
 
    void sample() {
       size_t nLevel1=factor1Names.size(), nLevel2=factor2Names.size();
-      size_t matrix1col, matrix2col;
+      size_t matrix1col, matrix2col, rowlevel;
+      double lhsl, rhsl; // local scalar version, there is also vector lhs and rhs in the object
       for(size_t k=0; k<evalint.size(); k++) {
          matrix1col = intcol1[k];  // column k of interaction matrix is combination of these
          matrix2col = intcol2[k];  // two columns of the two input relationship matrices
          for(size_t i=0; i<nLevel1; i++) {
             for(size_t j=0; j<nLevel2; j++) {
-               workcol[i*nLevel2+j] = matrix1data(i,matrix1col) * matrix2data[j,matrix2col];
+               workcol[i*nLevel2+j] = matrix1data(i,matrix1col) * matrix2data(j,matrix2col);
             }
          }
          // the workcol still needs to be multiplied over the factor, from this
          // point all should work the same as in realmat....
-         
-         resid_decorrect();
-         collect_lhs_rhs();
-         for(size_t k=0; k<par.size(); k++) {
-            // random effect: add 1/hpar[0] in lhs
-            par[k] = R::rnorm( (rhs[k]/(lhs[k]+(1/hpar[0]))), sqrt(1.0/(lhs[k]+(1/hpar[0]))));
+         for (size_t obs=0; obs < intdata.size(); obs++)
+            resid[obs] -= par[k] * workcol[intdata(obs)];
+         lhsl = 0.0; rhsl=0.0;
+         for (size_t obs=0; obs < coldata.size(); obs++) {
+            rowlevel = intdata(obs);
+            rhsl += workcol[rowlevel] * residPrec[obs] * resid[obs];
+            lhsl += workcol[rowlevel] * workcol[rowlevel] * residPrec[obs];
          }
-         resid_correct();
+         lhsl = lhsl + (1.0/(evalint[k]*hpar[0]));  // lhs with variance added
+         par[k] = R::rnorm( (rhsl/lhsl), sqrt(1.0/lhsl));
+         for (size_t obs=0; obs < intdata.size(); obs++)
+            resid[obs] += par[k] * workcol[intdata(obs)];
       }
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
-      for(size_t k=0; k<par.size(); k++)
-         ssq += par[k]*par[k];
-      hpar[0] = gprior.samplevar(ssq,par.size());
+      for(size_t k=0; k<evalint.size(); k++)
+         ssq += par[k]*par[k]/evalint[k];
+      hpar[0] = gprior.samplevar(ssq,evalint.size());
    }
 
 private:
-
-   // this is code from ran2f that collects all lhs and rhs at once, probably
-   // needs to be changed to collect one level at-a-time like ran_cor.
-   void collect_lhs_rhs() {
-      size_t k;
-      for(k=0; k<par.size(); k++) {
-         rhs[k] = 0.0;
-         lhs[k] = 0.0;
-      }
-      for (size_t obs=0; obs<intdata.size(); obs++) {
-         k=intdata[obs];
-         rhs[k] += residPrec[obs] * resid[obs];
-         lhs[k] += residPrec[obs];
-      }
-   }
    
    Rcpp::NumericMatrix matrix1data, matrix2data;
    Rcpp::NumericVector eval1, eval2;
    std::vector<double> evalint, workcol;
    std::vector<size_t> intcol1,intcol2;
-   size_t nPosEval1, nPosEval2, nPosEvali;
 
 
 };

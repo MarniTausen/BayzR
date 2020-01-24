@@ -31,7 +31,6 @@ public:
       resid_decorrect();
       collect_lhs_rhs();
       for(size_t k=0; k<par.size(); k++) {
-         // random effect: add 1/hpar[0] in lhs
          par[k] = R::rnorm( (rhs[k]/(lhs[k]+(1/hpar[0]))), sqrt(1.0/(lhs[k]+(1/hpar[0]))));
       }
       resid_correct();
