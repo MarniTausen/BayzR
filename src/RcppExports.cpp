@@ -6,20 +6,21 @@
 using namespace Rcpp;
 
 // rbayz_cpp
-Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain);
-RcppExport SEXP _BayzR_rbayz_cpp(SEXP modelFrameSEXP, SEXP chainSEXP) {
+Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool silent);
+RcppExport SEXP _BayzR_rbayz_cpp(SEXP modelFrameSEXP, SEXP chainSEXP, SEXP silentSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::DataFrame >::type modelFrame(modelFrameSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type chain(chainSEXP);
-    rcpp_result_gen = Rcpp::wrap(rbayz_cpp(modelFrame, chain));
+    Rcpp::traits::input_parameter< bool >::type silent(silentSEXP);
+    rcpp_result_gen = Rcpp::wrap(rbayz_cpp(modelFrame, chain, silent));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_BayzR_rbayz_cpp", (DL_FUNC) &_BayzR_rbayz_cpp, 2},
+    {"_BayzR_rbayz_cpp", (DL_FUNC) &_BayzR_rbayz_cpp, 3},
     {NULL, NULL, 0}
 };
 

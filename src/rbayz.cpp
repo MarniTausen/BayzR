@@ -25,7 +25,7 @@ void collectParInfo(std::vector<modelTerm *> & model, Rcpp::CharacterVector & pa
                     Rcpp::IntegerVector & parModelNr, Rcpp::IntegerVector & parLogged,
                     Rcpp::CharacterVector & parLoggedNames, Rcpp::CharacterVector & estimNames);
 void writeLoggedSamples(size_t & cycle, std::vector<modelTerm *> & model, Rcpp::IntegerVector & parLogged,
-                        Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr);
+                        Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr, bool silent);
 void collectPostStats(std::vector<modelTerm *> & model, Rcpp::NumericVector & postMean,
                       Rcpp::NumericVector & postSD);
 void collectLoggedSamples(std::vector<modelTerm *> &model, Rcpp::IntegerVector & parModelNr,
@@ -37,7 +37,7 @@ void collectLoggedSamples(std::vector<modelTerm *> &model, Rcpp::IntegerVector &
 // The return value is a List, to check if program terminated normally or with errors check $nError.
 
 // [[Rcpp::export]]
-Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, ) {
+Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool silent) {
 
    // Some check of chain settings is needed. Also the rbayz wrapper function now
    // handles chain being NULL, but it can be done here, so that warning message
@@ -122,7 +122,7 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, ) {
             model[mt]->sample();
          }
          if (cycle % nShow == 0 )
-            writeLoggedSamples(cycle, model, parLogged, parLoggedNames, parModelNr);
+            writeLoggedSamples(cycle, model, parLogged, parLoggedNames, parModelNr, silent);
          if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {
             collectPostStats(model, postMean, postSD);
             collectLoggedSamples(model, parModelNr, parLogged, loggedSamples, save);
@@ -312,8 +312,10 @@ void collectParInfo(std::vector<modelTerm *> & model, Rcpp::CharacterVector & pa
 
 }
 
+// This is the only part that writes to the screen under normal operation (if there are no errors)
 void writeLoggedSamples(size_t & cycle, std::vector<modelTerm *> & model, Rcpp::IntegerVector & parLogged,
-                        Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr) {
+                        Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr, bool silent) {
+   if (silent) return;
    static int writtenHead=0;
    double x=0.0;
    if (!writtenHead) {
