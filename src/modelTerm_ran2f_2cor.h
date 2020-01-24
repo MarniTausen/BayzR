@@ -68,10 +68,7 @@ public:
             }
          }
       }
-      Rcpp::Rcout << "Interaction matrix building:" << std::endl;
-      for(size_t i=0; i<evalint.size();i++) {
-         Rcpp::Rcout << evalint[i] << " " << intcol1[i] << " " << intcol2[i] << std::endl;
-      }
+      // Instead of screen this could go to some kind of 'notes' buffer
       Rcpp::Rcout << "ran2f with two V-matrices uses rank for VxV of " << evalint.size() << std::endl;
       if(evalint.size()==0)
          throw generalRbayzError("Zero rank in ran2f for VxV; all eigenvalues are below tolerance?");

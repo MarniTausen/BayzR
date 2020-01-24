@@ -37,7 +37,7 @@ void collectLoggedSamples(std::vector<modelTerm *> &model, Rcpp::IntegerVector &
 // The return value is a List, to check if program terminated normally or with errors check $nError.
 
 // [[Rcpp::export]]
-Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain) {
+Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, ) {
 
    // Some check of chain settings is needed. Also the rbayz wrapper function now
    // handles chain being NULL, but it can be done here, so that warning message
