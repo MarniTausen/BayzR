@@ -55,11 +55,10 @@ public:
          throw(generalRbayzError(std::string("In ran2f(F1,F2,...,V2=v2) number of levels in F2 do not match size of v2")));
       }
       eval1 = Rcpp::as<Rcpp::NumericVector>(col1data.attr("evalues"));
-      for (size_t i=0, nPosEval1=0;  i<eval1.size() && eval1[i] >= 0.001; i++) nPosEval1++;
       eval2 = Rcpp::as<Rcpp::NumericVector>(col2data.attr("evalues"));
-      // info on the evector columns of the interaction matrix. Every enty in the
+      // Build info on the evector columns of the interaction matrix. Every entry in the
       // combination intcol1, intcol2 and evalint tells what column of matrix1data (intcol1)
-      // and column of matrix2data (intcol2) it is based on and the eigenvalue (evalint).
+      // and column of matrix2data (intcol2) it is based on, and the eigenvalue (evalint).
       for(size_t i=0; i<nLevel1; i++) {
          for(size_t j=0; j<nLevel2; j++) {
             if (eval1[i]*eval2[j] > 0.001) {
@@ -68,6 +67,10 @@ public:
                intcol2.push_back(j);
             }
          }
+      }
+      Rcpp::Rcout << "Interaction matrix building:" << std::endl;
+      for(size_t i=0; i<evalint.size();i++) {
+         Rcpp::Rcout << evalint[i] << " " << intcol1[i] << " " << intcol2[i] << std::endl;
       }
       Rcpp::Rcout << "ran2f with two V-matrices uses rank for VxV of " << evalint.size() << std::endl;
       if(evalint.size()==0)
@@ -90,20 +93,25 @@ public:
                workcol[i*nLevel2+j] = matrix1data(i,matrix1col) * matrix2data(j,matrix2col);
             }
          }
+//         Rcpp::Rcout << "Workcol " << k << ": ";
+//         for(size_t i=0; i<workcol.size(); i++)
+//            Rcpp::Rcout << workcol[i] << " ";
+//         Rcpp::Rcout << std::endl;
          // the workcol still needs to be multiplied over the factor, from this
          // point all should work the same as in realmat....
-         for (size_t obs=0; obs < intdata.size(); obs++)
-            resid[obs] -= par[k] * workcol[intdata(obs)];
+         for (size_t obs=0; obs < intdata.size(); obs++) {
+            resid[obs] += par[k] * workcol[intdata[obs]];
+         }
          lhsl = 0.0; rhsl=0.0;
-         for (size_t obs=0; obs < coldata.size(); obs++) {
-            rowlevel = intdata(obs);
+         for (size_t obs=0; obs < intdata.size(); obs++) {
+            rowlevel = intdata[obs];
             rhsl += workcol[rowlevel] * residPrec[obs] * resid[obs];
             lhsl += workcol[rowlevel] * workcol[rowlevel] * residPrec[obs];
          }
          lhsl = lhsl + (1.0/(evalint[k]*hpar[0]));  // lhs with variance added
          par[k] = R::rnorm( (rhsl/lhsl), sqrt(1.0/lhsl));
          for (size_t obs=0; obs < intdata.size(); obs++)
-            resid[obs] += par[k] * workcol[intdata(obs)];
+            resid[obs] -= par[k] * workcol[intdata[obs]];
       }
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
