@@ -2,7 +2,7 @@ context("summary.bayz")
 
 test_that("Validation", {
     example_data = data.frame(y = 1:20, x = 20:1)
-    fit <- bayz(y ~ ranf(x), data=example_data, chain=c(10000, 100, 10))
+    fit <- bayz(y ~ ranf(x), data=example_data, chain=c(10000, 100, 10), silent=TRUE)
 
     summary_object <- summary(fit)
 
