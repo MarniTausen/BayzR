@@ -236,7 +236,7 @@ test_that("GRM tests", {
 
     fit <- bayz(Response ~ ranf(Genotypes, V=GRM) + ran2f(Genotypes, Genotypes, V1=GRM, V2=GRM) + fixf(Env_1) + fixf(Env_2), chain=c(1e4,100,10), silent=TRUE)
 
-    #print(summary(fit))
+    print(summary(fit))
 
     expect_gte(summary(fit)$Heritability$Heritability[2]+summary(fit)$Heritability$Heritability[3], 0.9)
     #expect_equal(is.na(summary(fit)$Heritability$Heritability[2]), TRUE)
