@@ -32,17 +32,22 @@ public:
       hparName = "var." + parName;
       Rcpp::RObject thiscol = d[col];
       eval = Rcpp::as<Rcpp::NumericVector>(thiscol.attr("evalues"));
-      nPosEval=0;
-      for (size_t i=0;  i<eval.size() && eval[i] >= 0.001; i++)
-         nPosEval++;
-      
+	  rrankpct = thiscol.attr("rrankpct");
+ 	  double sumeval = 0.0l;
+	  for (size_t i = 0; i<eval.size() && eval[i] > 0; i++) sumeval += eval[i];
+	  double eval_cutoff = rrankpct * sumeval / 100.0l;
+	  nEvalUsed = 0;
+	  sumeval = 0.0l;
+	  while (sumeval < eval_cutoff) sumeval += eval[nEvalUsed++];
+      Rcpp::Rcout << "In ranf with V rrankpct=" << rrankpct << " uses " << nEvalUsed << "eigenvectors\n";
    }
 
    ~modelTerm_ran_cor() {
    }
+   
 
    void sample() {
-      for(size_t k=0; k<nPosEval; k++) {
+      for(size_t k=0; k<nEvalUsed; k++) {
          resid_decorrect(k);
          collect_lhs_rhs(k);
          lhs = lhs + (1.0/(eval[k]*hpar[0]));  // lhs with variance added
@@ -51,16 +56,17 @@ public:
       }
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
-      for(size_t k=0; k<nPosEval; k++)
+      for(size_t k=0; k<nEvalUsed; k++)
          ssq += par[k]*par[k]/eval[k];
-      hpar[0] = gprior.samplevar(ssq,nPosEval);
+      hpar[0] = gprior.samplevar(ssq,nEvalUsed);
    }
 
 private:
 
    Rcpp::NumericVector eval;
    Rcpp::IntegerVector update;
-   size_t nPosEval;
+   size_t nEvalUsed;
+   double rrankpct;
    
 };
 
