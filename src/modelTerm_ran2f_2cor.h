@@ -60,6 +60,8 @@ public:
 	  // Note: when computing evals for Kronecker product from eval1*eval2 entries, these are not sorted!
 	  // First compute all product eigenvalues, then sort and determine cut-off, then re-fill in unsorted order with only the needed ones.
 	  evalint.resize(nLevel1*nLevel2);
+      intcol1.resize(nLevel1*nLevel2);
+      intcol2.resize(nLevel1*nLevel2);
 	  double sumeval = 0.0l;
 	  for (size_t i = 0; i<nLevel1; i++) {
 		  for (size_t j = 0; j<nLevel2; j++) {
@@ -70,7 +72,7 @@ public:
 			  sumeval += evalint[i*nLevel2 + j];
 		  }
 	  }
-	  std::sort(evalint.begin(), evalint.end());
+	  std::sort(evalint.begin(), evalint.end(), std::greater<double>());
 	  rrankpct = col1data.attr("rrankpct");
 	  double eval_sum_cutoff = rrankpct * sumeval / 100.0l;  // this is cut-off on cumulative/sum of eval
 	  sumeval = 0.0l;
@@ -80,19 +82,17 @@ public:
 	  nEvalUsed = 0;
       for(size_t i=0; i<nLevel1; i++) {
          for(size_t j=0; j<nLevel2; j++) {
-			 if (eval1[i] <= 0.0l || eval2[j] <= 0.0l)
-				 continue;
-			 else if (eval1[i]*eval2[j] > eval_min_cutoff) {
+            if ( !(eval1[i] <= 0.0l || eval2[j] <= 0.0l) && (eval1[i]*eval2[j] >= eval_min_cutoff) ) {
                evalint[nEvalUsed]=eval1[i]*eval2[j];
                intcol1[nEvalUsed]=i;
                intcol2[nEvalUsed]=j;
-			   nEvalUsed++;
+               nEvalUsed++;
             }
          }
       }
       // Instead of screen this could go to some kind of 'notes' buffer
-      Rcpp::Rcout << "ran2f with two V-matrices rrankpct=" << rrankpct << " uses " << nEvalUsed << "eigenvectors\n";
-      if(evalint.size()==0)
+      Rcpp::Rcout << "ran2f with two V-matrices rrankpct=" << rrankpct << " uses " << nEvalUsed << " eigenvectors\n";
+      if(nEvalUsed==0)
          throw generalRbayzError("Zero rank in ran2f for VxV; all eigenvalues are below tolerance?");
       workcol.resize(nLevel1*nLevel2,0);
    }
