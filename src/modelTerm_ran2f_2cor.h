@@ -11,6 +11,7 @@
 #include <Rcpp.h>
 #include "modelTerm_2factor.h"
 #include "priorClasses.h"
+#include <vector>
 
 // Model-term for interaction between two random factors both with covariance-structures.
 // The parent class has already set up the interaction coding, here need to add storage
@@ -56,20 +57,41 @@ public:
       }
       eval1 = Rcpp::as<Rcpp::NumericVector>(col1data.attr("evalues"));
       eval2 = Rcpp::as<Rcpp::NumericVector>(col2data.attr("evalues"));
-      // Build info on the evector columns of the interaction matrix. Every entry in the
-      // combination intcol1, intcol2 and evalint tells what column of matrix1data (intcol1)
-      // and column of matrix2data (intcol2) it is based on, and the eigenvalue (evalint).
+	  // Note: when computing evals for Kronecker product from eval1*eval2 entries, these are not sorted!
+	  // First compute all product eigenvalues, then sort and determine cut-off, then re-fill in unsorted order with only the needed ones.
+	  evalint.resize(nLevel1*nLevel2);
+	  double sumeval = 0.0l;
+	  for (size_t i = 0; i<nLevel1; i++) {
+		  for (size_t j = 0; j<nLevel2; j++) {
+			  if (eval1[i] <= 0.0l || eval2[j] <= 0.0l)
+				  evalint[i*nLevel2 + j] = 0.0l;
+			  else
+			      evalint[i*nLevel2 + j] = eval1[i] * eval2[j];
+			  sumeval += evalint[i*nLevel2 + j];
+		  }
+	  }
+	  std::sort(evalint.begin(), evalint.end());
+	  rrankpct = col1data.attr("rrankpct");
+	  double eval_sum_cutoff = rrankpct * sumeval / 100.0l;  // this is cut-off on cumulative/sum of eval
+	  sumeval = 0.0l;
+	  unsigned long nEvalUsed=0;
+	  while ((sumeval += evalint[nEvalUsed]) < eval_sum_cutoff) nEvalUsed++;
+	  double eval_min_cutoff = evalint[nEvalUsed];  // this is cut-off evalue below which not to use
+	  nEvalUsed = 0;
       for(size_t i=0; i<nLevel1; i++) {
          for(size_t j=0; j<nLevel2; j++) {
-            if (eval1[i]*eval2[j] > 0.001) {
-               evalint.push_back(eval1[i]*eval2[j]);
-               intcol1.push_back(i);
-               intcol2.push_back(j);
+			 if (eval1[i] <= 0.0l || eval2[j] <= 0.0l)
+				 continue;
+			 else if (eval1[i]*eval2[j] > eval_min_cutoff) {
+               evalint[nEvalUsed]=eval1[i]*eval2[j];
+               intcol1[nEvalUsed]=i;
+               intcol2[nEvalUsed]=j;
+			   nEvalUsed++;
             }
          }
       }
       // Instead of screen this could go to some kind of 'notes' buffer
-      Rcpp::Rcout << "ran2f with two V-matrices uses rank for VxV of " << evalint.size() << std::endl;
+      Rcpp::Rcout << "ran2f with two V-matrices rrankpct=" << rrankpct << " uses " << nEvalUsed << "eigenvectors\n";
       if(evalint.size()==0)
          throw generalRbayzError("Zero rank in ran2f for VxV; all eigenvalues are below tolerance?");
       workcol.resize(nLevel1*nLevel2,0);
@@ -123,6 +145,7 @@ private:
    Rcpp::NumericVector eval1, eval2;
    std::vector<double> evalint, workcol;
    std::vector<size_t> intcol1,intcol2;
+   double rrankpct;
 
 
 };
