@@ -2,12 +2,12 @@
 #'
 #' With two covariance structures specified it will build the interaction-relationship matrix.
 #'
-#' @param x1    First variable vector (a factor) to build two-factor interaction
-#' @param x2    Second variable vector (a factor) to build two-factor interaction
-#' @param V1    Similarity/var-covar matrix to be included on first variable. Uses/stores the eigen decomposition of V1.
-#' @param V2    Similarity/var-covar matrix to be included on second variable. Uses/stores the eigen decomposition of V2.
-#' @param rrankpct Reduced Rank threshold for including eigenvectors in percent (default 99%)
-#' @param prior Prior information for the variance component.
+#' @param x1        First variable vector (a factor) to build two-factor interaction
+#' @param x2        Second variable vector (a factor) to build two-factor interaction
+#' @param V1        Similarity/var-covar matrix to be included on first variable. Uses/stores the eigen decomposition of V1.
+#' @param V2        Similarity/var-covar matrix to be included on second variable. Uses/stores the eigen decomposition of V2.
+#' @param rrankpct  Reduced Rank threshold for including eigenvectors in percent (default 99\%)
+#' @param prior     Prior information for the variance component.
 #'
 #' @return The first factor data is returned, the second factor and V1 and V2 eigenvectors (when available) are stored as attributes.
 #' @export

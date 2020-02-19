@@ -4,12 +4,14 @@
 \alias{ranf}
 \title{Set Random variable}
 \usage{
-ranf(x, V = NULL, prior = NULL)
+ranf(x, V = NULL, rrankpct = 99, prior = NULL)
 }
 \arguments{
 \item{x}{Variable vector which should be set to random in a model.}
 
 \item{V}{Similarity/var-covar matrix to be included so that x~N(0,Vsigma^2). Uses eigen decomposition}
+
+\item{rrankpct}{Reduced Rank threshold for including eigenvectors in percent (default 99\%)}
 
 \item{prior}{Prior information to be added.}
 }

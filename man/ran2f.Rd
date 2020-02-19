@@ -4,7 +4,7 @@
 \alias{ran2f}
 \title{Fit two random factors with interactions, and optional attach covariance structures to first or both variables.}
 \usage{
-ran2f(x1, x2, V1 = NULL, V2 = NULL, prior = NULL)
+ran2f(x1, x2, V1 = NULL, V2 = NULL, rrankpct = 99, prior = NULL)
 }
 \arguments{
 \item{x1}{First variable vector (a factor) to build two-factor interaction}
@@ -14,6 +14,8 @@ ran2f(x1, x2, V1 = NULL, V2 = NULL, prior = NULL)
 \item{V1}{Similarity/var-covar matrix to be included on first variable. Uses/stores the eigen decomposition of V1.}
 
 \item{V2}{Similarity/var-covar matrix to be included on second variable. Uses/stores the eigen decomposition of V2.}
+
+\item{rrankpct}{Reduced Rank threshold for including eigenvectors in percent (default 99\%)}
 
 \item{prior}{Prior information for the variance component.}
 }
