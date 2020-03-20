@@ -3,7 +3,6 @@
 //  rbayz
 //
 //  Created by Luc Janss on 03/08/2018.
-//  Copyright © 2018 Luc Janss. All rights reserved.
 //
 
 #ifndef modelTerm_ran_cor_h
@@ -13,6 +12,7 @@
 #include "modelTerm_realmat.h"
 #include "priorClasses.h"
 #include "parseColNames.h"
+#include "data_kernel.h"
 
 // random-correlated model term, built from ranf() model term with V=K setting.
 // This is a child-class of modelTerm_realmat because it works on a real matrix with regressions.
@@ -21,25 +21,15 @@
 // - hpar is one variance
 // - par is set in modelTerm_realmat constructor and is size of coldata columns
 
-class modelTerm_ran_cor : public modelTerm_realmat {
+class modelTerm_ran_cor : public modelTerm_factor {
 
 public:
 
-   modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col) : modelTerm_realmat(d, col, 2) {
+   modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col) : v((Rcpp::Robject)(d[col])) {
       hpar.resize(1,1);
       std::vector<std::string> names = parseColNames(d,col);
       parName = parName + "." + names[3];
       hparName = "var." + parName;
-      Rcpp::RObject thiscol = d[col];
-      eval = Rcpp::as<Rcpp::NumericVector>(thiscol.attr("evalues"));
-	  rrankpct = thiscol.attr("rrankpct");
- 	  double sumeval = 0.0l;
-	  for (size_t i = 0; i<eval.size() && eval[i] > 0; i++) sumeval += eval[i];
-	  double eval_cutoff = rrankpct * sumeval / 100.0l;
-	  nEvalUsed = 0;
-	  sumeval = 0.0l;
-	  while (sumeval < eval_cutoff) sumeval += eval[nEvalUsed++];
-      Rcpp::Rcout << "In ranf with V rrankpct=" << rrankpct << " uses " << nEvalUsed << "eigenvectors\n";
    }
 
    ~modelTerm_ran_cor() {
@@ -60,13 +50,35 @@ public:
          ssq += par[k]*par[k]/eval[k];
       hpar[0] = gprior.samplevar(ssq,nEvalUsed);
    }
+   
+protected:
+   // These methods may be general for working on matrices, it could be organised
+   // by making a class that handles factor+matrix computation, or with multiple inheritance.
+   void resid_correct(size_t col) {
+      for (size_t obs=0; obs < coldata.size(); obs++)
+         resid[obs] -= par[col] * matrixdata(coldata(obs),col);
+   }
+   
+   void resid_decorrect(size_t col) {
+      for (size_t obs=0; obs < coldata.size(); obs++)
+         resid[obs] += par[col] * matrixdata(coldata(obs),col);
+   }
+
+   void collect_lhs_rhs(size_t col) {
+      lhs = 0.0; rhs=0.0;
+      size_t rowlevel;
+      for (size_t obs=0; obs < coldata.size(); obs++) {
+         rowlevel = coldata(obs);
+         rhs += matrixdata(rowlevel,col) * residPrec[obs] * resid[obs];
+         lhs += matrixdata(rowlevel,col) * matrixdata(rowlevel,col) * residPrec[obs];
+      }
+   }
 
 private:
 
+   dataKernel v;
    Rcpp::NumericVector eval;
    Rcpp::IntegerVector update;
-   size_t nEvalUsed;
-   double rrankpct;
    
 };
 

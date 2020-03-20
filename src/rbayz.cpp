@@ -196,15 +196,15 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelT
    else if(s=="ran2f") {
       Rcpp::RObject thiscol = modelFrame[col];
       Rcpp::RObject secondcol = thiscol.attr("factor2");
-      if(thiscol.hasAttribute("evalues") && secondcol.hasAttribute("evalues")) {
+      if(thiscol.hasAttribute("evectors") && secondcol.hasAttribute("evectors")) {
 //         Rcpp::NumericMatrix m1 = thiscol.attr("evectors");
 //         Rcpp::NumericMatrix m2 = secondcol.attr("evectors");
          model.push_back(new modelTerm_ran2f_2cor(modelFrame, col));
       }
-      else if (!thiscol.hasAttribute("evalues") && !secondcol.hasAttribute("evalues")) {
+      else if (!thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
          model.push_back(new modelTerm_ran2f(modelFrame, col));
       }
-      else if (thiscol.hasAttribute("evalues") && !secondcol.hasAttribute("evalues")) {
+      else if (thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
          throw(generalRbayzError("Version of ran2f not yet implemented"));
       }
       else {
