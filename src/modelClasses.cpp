@@ -9,6 +9,7 @@
 #include "modelFactor.h"
 #include "modelFixf.h"
 #include "modelRanf.h"
+#include "modelFreg.h"
 
 void modelFactor::resid_correct() {
    for (size_t obs=0; obs < F->data.size(); obs++)
@@ -58,4 +59,29 @@ void modelRanf::sample() {
    for(size_t k=0; k<par.size(); k++)
       ssq += par[k]*par[k];
    hpar[0] = gprior.samplevar(ssq,par.size());
+}
+
+void modelFreg::resid_correct() {
+   for (size_t obs=0; obs < C->data.size(); obs++)
+      resid[obs] -= par[0] * C->data[obs];
+}
+
+void modelFreg::resid_decorrect() {
+   for (size_t obs=0; obs < C->data.size(); obs++)
+      resid[obs] += par[0] * C->data[obs];
+}
+
+void modelFreg::collect_lhs_rhs() {
+   lhs = 0.0; rhs=0.0;
+   for (size_t obs=0; obs < C->data.size(); obs++) {
+      rhs += residPrec[obs] * resid[obs] * C->data[obs];
+      lhs += C->data[obs] * residPrec[obs] * C->data[obs];
+   }
+}
+
+void modelFreg::sample() {
+   resid_decorrect();
+   collect_lhs_rhs();
+   par[0] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
+   resid_correct();
 }
