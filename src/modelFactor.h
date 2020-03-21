@@ -1,51 +1,44 @@
 //
-//  modelTerm_factor.h
-//  rbayz
+//  rbayz -- modelFactor.h
+//  Computational methods to work on one factor.
 //
 //  Created by Luc Janss on 03/08/2018.
 //
 
-#ifndef modelTerm_factor_h
-#define modelTerm_factor_h
+#ifndef modelFactor_h
+#define modelFactor_h
 
 #include <Rcpp.h>
 #include <cmath>
-#include "modelTerm.h"
+#include "modelBase.h"
+#include "dataFactor.h"
 
-// Model-term that handles storage of factor data.
-// - par vector has size levels of the factor
-// - hpar is determined in child classes (not used if fixed, used if random)
-// - common working vectors are lhs and rhs vectors
-// - define coldata vector, it is IntegerVector for factors
-// - common methods are correction, decorrection, and collection of rhs and lhs vectors
-
-class modelTerm_factor : public modelTerm {
+class modelFactor : public modelBase {
    
 public:
    
-   modelTerm_factor(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
-      coldata = d[col];
-      for (size_t i=0; i<coldata.size(); i++)
-         coldata[i] -= 1;
-      parLevelNames = coldata.attr("levels");
+   modelFactor(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
+      F = new dataFactor(d, col);
+      parLevelNames = F->labels;
       par.resize(parLevelNames.size(),0);
       lhs.resize(parLevelNames.size(),0);
       rhs.resize(parLevelNames.size(),0);
    }
    
-   ~modelTerm_factor() {
+   ~modelFactor() {
+      delete F;
    }
    
 protected:
 
    void resid_correct() {
-      for (size_t obs=0; obs<coldata.size(); obs++)
-         resid[obs] -= par[coldata[obs]];
+      for (size_t obs=0; obs < F->data.size(); obs++)
+         resid[obs] -= par[F->data[obs]];
    }
    
    void resid_decorrect() {
-      for (size_t obs=0; obs<coldata.size(); obs++)
-         resid[obs] += par[coldata[obs]];
+      for (size_t obs=0; obs < F->data.size(); obs++)
+         resid[obs] += par[F->data[obs]];
    }
 
    void collect_lhs_rhs() {
@@ -54,16 +47,16 @@ protected:
          rhs[k] = 0.0;
          lhs[k] = 0.0;
       }
-      for (size_t obs=0; obs<coldata.size(); obs++) {
-         k=coldata[obs];
+      for (size_t obs=0; obs < F->data.size(); obs++) {
+         k=F->data[obs];
          rhs[k] += residPrec[obs] * resid[obs];
          lhs[k] += residPrec[obs];
       }
    }
 
-   Rcpp::IntegerVector coldata;
+   dataFactor *F;
    std::vector<double> lhs, rhs;          // working vectors to collect LHS an RHS of equations
 
 };
 
-#endif /* modelTerm_factor_h */
+#endif /* modelFactor_h */
