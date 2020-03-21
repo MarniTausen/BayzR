@@ -23,11 +23,11 @@ public:
    
    ~dataFactor() {
    }
-   
-protected:
 
    Rcpp::IntegerVector data;
    Rcpp::CharacterVector labels;
+
+protected:
 
 };
 
