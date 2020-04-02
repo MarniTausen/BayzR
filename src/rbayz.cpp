@@ -6,29 +6,29 @@
 // [[Rcpp::plugins("cpp11")]]
 
 #include "parseColNames.h"
-#include "modelTerm.h"
-#include "modelTerm_mean.h"
-#include "modelTerm_resp.h"
-#include "modelTerm_fixed.h"
-#include "modelTerm_fixreg.h"
-#include "modelTerm_random.h"
-#include "modelTerm_ran_cor.h"
-#include "modelTerm_ran2f.h"
-#include "modelTerm_ran2f_2cor.h"
+#include "modelBase.h"
+#include "modelResp.h" // does not exist yet
+#include "modelMean.h" // does not exist yet
+#include "modelFixf.h"
+#include "modelRanf.h"
+#include "modelFreg.h"
+#include "modelRanf_cor.h"  // also add
+#include "modelRan2f.h"  // add
+#include "modelRan2f_2cor.h"  // add
 #include "rbayzExceptions.h"
 
 // These functions are defined below the main function
-void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelTerm *> & model, Rcpp::RObject &terms);
-void collectParInfo(std::vector<modelTerm *> & model, Rcpp::CharacterVector & parNames,
+void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelBase *> & model, Rcpp::RObject &terms);
+void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
                     Rcpp::IntegerVector & parModelNr, Rcpp::IntegerVector & parLogged,
                     Rcpp::CharacterVector & parLoggedNames, Rcpp::CharacterVector & estimNames);
-void writeLoggedSamples(size_t & cycle, std::vector<modelTerm *> & model, Rcpp::IntegerVector & parLogged,
+void writeLoggedSamples(size_t & cycle, std::vector<modelBase *> & model, Rcpp::IntegerVector & parLogged,
                         Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr, bool silent);
-void collectPostStats(std::vector<modelTerm *> & model, Rcpp::NumericVector & postMean,
+void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & postMean,
                       Rcpp::NumericVector & postSD);
-void collectLoggedSamples(std::vector<modelTerm *> &model, Rcpp::IntegerVector & parModelNr,
+void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector & parModelNr,
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples, size_t save);
 
 // The interface defines to pass modelFrame by value, this is a quite 'light' copy (a bunch
@@ -70,7 +70,7 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool
       modelFrame.push_back(v,"residPrec");
 
       // A vector of pointers to modelTerm objects
-      std::vector<modelTerm *> model;
+      std::vector<modelBase *> model;
 
       // Build model by building a model-term from each input column (nCol columns) in the model-frame.
       // Note: when model-frame has flagged intercept, a 'mean' term is added when handling col zero.
@@ -172,25 +172,25 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool
 
 }
 
-void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelTerm *> & model, Rcpp::RObject &terms) {
+void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelBase *> & model, Rcpp::RObject &terms) {
    std::string s = getWrapName(modelFrame, col);
    if (s=="" && col==0) {
-      model.push_back(new modelTerm_resp(modelFrame, col));
+      model.push_back(new modelResp(modelFrame, col));
       int k=0;
       if (terms.hasAttribute("intercept"))
          k = terms.attr("intercept");
       if (k==1)   // model has intercept
-         model.push_back(new modelTerm_mean(modelFrame, 0));
+         model.push_back(new modelMean(modelFrame, 0));
    }
    else if (s=="fixf")
-      model.push_back(new modelTerm_fixed(modelFrame, col));
+      model.push_back(new modelFixf(modelFrame, col));
    else if(s=="ranf") {
       Rcpp::RObject thiscol = modelFrame[col];
       if(thiscol.hasAttribute("evalues")) {
-         model.push_back(new modelTerm_ran_cor(modelFrame, col));
+         model.push_back(new modelRanf_cor(modelFrame, col));
       }
       else {
-         model.push_back(new modelTerm_random(modelFrame, col));
+         model.push_back(new modelRanf(modelFrame, col));
       }
    }
    else if(s=="ran2f") {
@@ -199,10 +199,10 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelT
       if(thiscol.hasAttribute("evectors") && secondcol.hasAttribute("evectors")) {
 //         Rcpp::NumericMatrix m1 = thiscol.attr("evectors");
 //         Rcpp::NumericMatrix m2 = secondcol.attr("evectors");
-         model.push_back(new modelTerm_ran2f_2cor(modelFrame, col));
+         model.push_back(new modelRan2f_2cor(modelFrame, col));
       }
       else if (!thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
-         model.push_back(new modelTerm_ran2f(modelFrame, col));
+         model.push_back(new modelRan2f(modelFrame, col));
       }
       else if (thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
          throw(generalRbayzError("Version of ran2f not yet implemented"));
@@ -212,7 +212,7 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelT
       }
    }
    else if (s=="freg")
-      model.push_back(new modelTerm_fixreg(modelFrame, col));
+      model.push_back(new modelFreg(modelFrame, col));
    else if (col==0 && s!="") {
       throw(generalRbayzError("Cannot handle wrapper function on response column"));
    }
@@ -222,7 +222,7 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelT
    return;
 }
 
-void collectParInfo(std::vector<modelTerm *> & model, Rcpp::CharacterVector & parNames,
+void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
                     Rcpp::IntegerVector & parModelNr, Rcpp::IntegerVector & parLogged,
@@ -313,7 +313,7 @@ void collectParInfo(std::vector<modelTerm *> & model, Rcpp::CharacterVector & pa
 }
 
 // This is the only part that writes to the screen under normal operation (if there are no errors)
-void writeLoggedSamples(size_t & cycle, std::vector<modelTerm *> & model, Rcpp::IntegerVector & parLogged,
+void writeLoggedSamples(size_t & cycle, std::vector<modelBase *> & model, Rcpp::IntegerVector & parLogged,
                         Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr, bool silent) {
    if (silent) return;
    static int writtenHead=0;
@@ -360,7 +360,7 @@ void collectPostStats(std::vector<modelTerm *> & model, Rcpp::NumericVector & po
    }
 }
 
-void collectLoggedSamples(std::vector<modelTerm *> &model, Rcpp::IntegerVector & parModelNr,
+void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector & parModelNr,
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples, size_t save) {
    size_t k=0;
    double x=0.0;

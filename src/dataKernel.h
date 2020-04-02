@@ -21,10 +21,8 @@
 class dataKernel : public dataMatrix {
 public:
     dataKernel(Rcpp::RObject col);
-    virtual ~dataKernel();
+    ~dataKernel();
 protected:
-   Rcpp::NumericMatrix evec;
-// double * evec;  // want to test difference using low-level C arrays for storage
    Rcpp::NumericVector eval;
    size_t nEvalUsed;
    double rrankpct;

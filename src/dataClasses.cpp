@@ -8,7 +8,7 @@
 
 #include "dataKernel.h"
 
-dataKernel::dataKernel(Rcpp::RObject col) {
+dataKernel::dataKernel(Rcpp::RObject col) : dataMatrix(col) {
 
    // The exceptions here should not occur ... as long as set-up of ranf and ran2f and code
    // in rbayz main do not change. It may be possible to add name of the column in error msgs?
