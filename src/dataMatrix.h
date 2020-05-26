@@ -1,7 +1,7 @@
 //
 //  dataMatrix.h
 //  Parent class for storage of (real) matrix. It is quite empty but defines
-//  that all derived classes have a member variable 'data' that stores a matrix.
+//  that all derived classes have a NumericMatrix 'data' that stores a matrix.
 //  Class modelMatrix has matching computational operation on this 'data'.
 //
 //  Created by Luc Janss on 05/03/2020.

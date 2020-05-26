@@ -4,7 +4,7 @@
 //  These kernels are now always stored as sets of eigenvectors and are imported
 //  via ranf or ran2f functions with arguments V=. The ranf and ran2f already
 //  prepare the eigenvector transform.
-//  This is an implementation of dataMatrix class filling matrix 'M' with the
+//  This is an implementation of dataMatrix class filling 'data' with the
 //  set of eigen-vectors of the kernel.
 //
 //  Created by Luc Janss on 05/03/2020.

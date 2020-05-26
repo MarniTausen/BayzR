@@ -24,7 +24,8 @@ public:
       parName = "unknown";  // par is not used!
       hparName = "var.resid";
       for (size_t obs=0; obs<resid.size(); obs++)
-         resid[obs] = Ydata[obs];  // initialize resid vector by copying data-vector in it
+         // initialize resid vector by copying data-vector in it
+         resid[obs] = Ydata[obs];
    }
    
    ~modelResp() {

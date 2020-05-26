@@ -38,7 +38,8 @@ public:
       // Fill Ydata and residuals with a first sample of liabilities
       std::pair<double, double> bounds;
       for (size_t obs=0; obs<resid.size(); obs++) {
-         bounds = liabBounds(catData[obs]);  // obtain liability boundaries for this obs
+         bounds = liabBounds(catData[obs]);  // obtain liability boundaries for this obs, this
+                                             // also depends on current liab or residual?
          Ydata[obs] = R::runif(bounds.first,bounds.second);
          resid[obs] = Ydata[obs];
       }

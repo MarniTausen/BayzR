@@ -1,5 +1,5 @@
 //
-//  modelBase.hpp
+//  modelBase.h
 //
 //  Base class for model (computational) classes.
 //   - declares and set the resid and residPrec vector to the one-by-last and last
@@ -15,7 +15,7 @@
 //
 //  Created by Luc Janss on 03/08/2018.
 
-#ifndef modelBased_h
+#ifndef modelBase_h
 #define modelBase_h
 
 #include <Rcpp.h>

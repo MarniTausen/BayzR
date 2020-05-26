@@ -13,16 +13,16 @@ dataKernel::dataKernel(Rcpp::RObject col) : dataMatrix(col) {
    // The exceptions here should not occur ... as long as set-up of ranf and ran2f and code
    // in rbayz main do not change. It may be possible to add name of the column in error msgs?
    if (col.hasAttribute("evectors"))
-      evec = Rcpp::as<Rcpp::NumericMatrix>(col.attr("evectors"));
+      data = Rcpp::as<Rcpp::NumericMatrix>(col.attr("evectors"));
    else
       throw(generalRbayzError("Eigen-decomp storage is corrupted"));
    if (col.hasAttribute("evalues"))
       eval = Rcpp::as<Rcpp::NumericVector>(col.attr("evalues"));
    else
       throw(generalRbayzError("Eigen-decomp storage is corrupted"));
-   if(evec.nrow() != evec.ncol())
+   if(data.nrow() != data.ncol())
       throw(generalRbayzError("Eigen-decomp has non-square e-vectors matrix"));
-   if(eval.size() != evec.ncol())
+   if(eval.size() != data.ncol())
       throw(generalRbayzError("Eigen-decomp vectors and values size do not match"));
    if(col.hasAttribute("rrankpct"))
       rrankpct = col.attr("rrankpct");

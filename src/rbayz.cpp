@@ -7,8 +7,8 @@
 
 #include "parseColNames.h"
 #include "modelBase.h"
-#include "modelResp.h" // does not exist yet
-#include "modelMean.h" // does not exist yet
+#include "modelResp.h"
+#include "modelMean.h"
 #include "modelFixf.h"
 #include "modelRanf.h"
 #include "modelFreg.h"
@@ -186,12 +186,12 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelB
       model.push_back(new modelFixf(modelFrame, col));
    else if(s=="ranf") {
       Rcpp::RObject thiscol = modelFrame[col];
-      if(thiscol.hasAttribute("evalues")) {
-         model.push_back(new modelRanf_cor(modelFrame, col));
-      }
-      else {
+//      if(thiscol.hasAttribute("evalues")) {
+//         model.push_back(new modelRanf_cor(modelFrame, col));
+//      }
+//      else {
          model.push_back(new modelRanf(modelFrame, col));
-      }
+//      }
    }
    else if(s=="ran2f") {
       Rcpp::RObject thiscol = modelFrame[col];
@@ -199,10 +199,10 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelB
       if(thiscol.hasAttribute("evectors") && secondcol.hasAttribute("evectors")) {
 //         Rcpp::NumericMatrix m1 = thiscol.attr("evectors");
 //         Rcpp::NumericMatrix m2 = secondcol.attr("evectors");
-         model.push_back(new modelRan2f_2cor(modelFrame, col));
+//         model.push_back(new modelRan2f_2cor(modelFrame, col));
       }
       else if (!thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
-         model.push_back(new modelRan2f(modelFrame, col));
+//         model.push_back(new modelRan2f(modelFrame, col));
       }
       else if (thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
          throw(generalRbayzError("Version of ran2f not yet implemented"));
