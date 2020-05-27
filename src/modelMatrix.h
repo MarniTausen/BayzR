@@ -25,8 +25,8 @@ class modelMatrix : public modelBase {
 public:
    
    modelMatrix(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
-      *M = NULL;
-      *F = NULL;
+      M = NULL;
+      F = NULL;
       lhs = 0.0l;
       rhs = 0.0l;
    }
