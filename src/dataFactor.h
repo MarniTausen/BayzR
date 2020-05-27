@@ -18,7 +18,7 @@ public:
       data = d[col];
       for (size_t i=0; i<data.size(); i++)
          data[i] -= 1;
-      labels = coldata.attr("levels");
+      labels = data.attr("levels");
    }
    
    ~dataFactor() {

@@ -20,41 +20,25 @@
 #include <cmath>
 #include "dataMatrix.h"
 
-class modelMatrix : public modelTerm {
+class modelMatrix : public modelBase {
    
 public:
    
-   dataMatrix(Rcpp::DataFrame &d, size_t col) : modelTerm(d, col) {
+   modelMatrix(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
       *M = NULL;
-      *F = NULL;    // make this one derive from modelFactor? - then modelFactor
-      lhs = 0.0l;   // constructor can handle factor set-up.
+      *F = NULL;
+      lhs = 0.0l;
       rhs = 0.0l;
    }
    
-   ~dataMatrix() {
+   ~modelMatrix() {
    }
    
 protected:
 
-   void resid_correct(size_t col) {
-      for (size_t obs=0; obs < F->data.size(); obs++)
-         resid[obs] -= par[col] * M->data(F->data(obs),col);
-   }
-   
-   void resid_decorrect(size_t col) {
-      for (size_t obs=0; obs < F->data.size(); obs++)
-         resid[obs] += par[col] * M->data(F->data(obs),col);
-   }
-
-   void collect_lhs_rhs(size_t col) {
-      lhs = 0.0; rhs=0.0;
-      size_t rowlevel;
-      for (size_t obs=0; obs < F->data.size(); obs++) {
-         rowlevel = F->data(obs);
-         rhs += M->data(rowlevel,col) * residPrec[obs] * resid[obs];
-         lhs += M->data(rowlevel,col) * M->data(rowlevel,col) * residPrec[obs];
-      }
-   }
+   void resid_correct(size_t col);
+   void resid_decorrect(size_t col);
+   void collect_lhs_rhs(size_t col);
 
    dataMatrix *M;
    dataFactor *F;
@@ -63,4 +47,4 @@ protected:
    
 };
 
-#endif /* modelTerm_realmat_h */
+#endif /* modelMatrix_h */

@@ -11,6 +11,7 @@
 #include <Rcpp.h>
 #include <cmath>
 #include "dataMatrix.h"
+#include "modelBase.h"
 
 // Model-term where 'coldata' is a matrix of real numbers (Rcpp NumericMatrix, C++ double), it is
 // a parent class of model-terms for random regression and also the ran_cor (that works like
@@ -22,7 +23,7 @@
 //   constructor
 // - common methods are correction, decorrection, and collection of rhs and lhs vectors
 
-class modelTerm_realmat : public modelTerm {
+class modelMatrix : public modelBase {
    
 public:
    

@@ -13,6 +13,7 @@
 #include "modelFixf.h"
 #include "modelRanf.h"
 #include "modelFreg.h"
+#include "modelMatrix.h"
 
 void modelResp::sample() {
    // Continuous data: sample() is only updating residual variance
@@ -120,3 +121,24 @@ void modelFreg::sample() {
    par[0] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
    resid_correct();
 }
+
+void modelMatrix::resid_correct(size_t col) {
+   for (size_t obs=0; obs < F->data.size(); obs++)
+      resid[obs] -= par[col] * M->data(F->data(obs),col);
+}
+
+void modelMatrix::resid_decorrect(size_t col) {
+   for (size_t obs=0; obs < F->data.size(); obs++)
+      resid[obs] += par[col] * M->data(F->data(obs),col);
+}
+
+void modelMatrix::collect_lhs_rhs(size_t col) {
+   lhs = 0.0; rhs=0.0;
+   size_t rowlevel;
+   for (size_t obs=0; obs < F->data.size(); obs++) {
+      rowlevel = F->data(obs);
+      rhs += M->data(rowlevel,col) * residPrec[obs] * resid[obs];
+      lhs += M->data(rowlevel,col) * M->data(rowlevel,col) * residPrec[obs];
+   }
+}
+
