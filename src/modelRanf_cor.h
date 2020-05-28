@@ -1,38 +1,37 @@
 //
-//  modelTerm_ran_cor.hpp
-//  rbayz
+//  BayzR --- modelRanf_cor.hpp
 //
-//  Created by Luc Janss on 03/08/2018.
-//
-
-#ifndef modelTerm_ran_cor_h
-#define modelTerm_ran_cor_h
-
-#include <Rcpp.h>
-#include "modelTerm_realmat.h"
-#include "priorClasses.h"
-#include "parseColNames.h"
-#include "data_kernel.h"
-
-// random-correlated model term, built from ranf() model term with V=K setting.
-// This is a child-class of modelTerm_realmat because it works on a real matrix with regressions.
+// Computational class to to model ranf with correlation matrix (with V=K setting).
+// This is a child-class of modelMatrix (change to Kernel?) because it works on a real matrix with regressions.
 // - eigenvector data is already stored as coldata through constructor of modelTerm_realmat
 // - eigenvalue data still needs to be set
 // - hpar is one variance
 // - par is set in modelTerm_realmat constructor and is size of coldata columns
 
-class modelTerm_ran_cor : public modelTerm_factor {
+//  Created by Luc Janss on 03/08/2018.
+//
+
+#ifndef modelRanf_cor_h
+#define modelRanf_cor_h
+
+#include <Rcpp.h>
+#include "priorClasses.h"
+#include "parseColNames.h"
+#include "modelMatrix.h"  // maybe should become modelKernel
+#include "dataKernel.h"
+
+class modelRanf_cor : public modelMatrix {  // maybe should become modelKernel
 
 public:
 
-   modelTerm_ran_cor(Rcpp::DataFrame &d, size_t col) : v((Rcpp::Robject)(d[col])) {
+   modelRanf_cor(Rcpp::DataFrame &d, size_t col) : modelMatrix(d,col) {
       hpar.resize(1,1);
       std::vector<std::string> names = parseColNames(d,col);
       parName = parName + "." + names[3];
       hparName = "var." + parName;
    }
 
-   ~modelTerm_ran_cor() {
+   ~modelRanf_cor() {
    }
    
 
@@ -52,34 +51,14 @@ public:
    }
    
 protected:
-   // These methods may be general for working on matrices, it could be organised
-   // by making a class that handles factor+matrix computation, or with multiple inheritance.
-   void resid_correct(size_t col) {
-      for (size_t obs=0; obs < coldata.size(); obs++)
-         resid[obs] -= par[col] * matrixdata(coldata(obs),col);
-   }
-   
-   void resid_decorrect(size_t col) {
-      for (size_t obs=0; obs < coldata.size(); obs++)
-         resid[obs] += par[col] * matrixdata(coldata(obs),col);
-   }
-
-   void collect_lhs_rhs(size_t col) {
-      lhs = 0.0; rhs=0.0;
-      size_t rowlevel;
-      for (size_t obs=0; obs < coldata.size(); obs++) {
-         rowlevel = coldata(obs);
-         rhs += matrixdata(rowlevel,col) * residPrec[obs] * resid[obs];
-         lhs += matrixdata(rowlevel,col) * matrixdata(rowlevel,col) * residPrec[obs];
-      }
-   }
 
 private:
 
-   dataKernel v;
+   size_t nEvalUsed;  // this is in dataKernel
+
    Rcpp::NumericVector eval;
    Rcpp::IntegerVector update;
    
 };
 
-#endif /* modelTerm_ran_cor_h */
+#endif /* modelRanf_cor_h */
