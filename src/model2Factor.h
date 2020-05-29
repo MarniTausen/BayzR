@@ -1,27 +1,23 @@
 //
-//  rbayz -- modelFactor.h
-//  Computational methods to work on one factor:
-//  - declares and initialises a modelFactor object to work on
-//  - sets sizes and names of parameter vectors - but not hpar, because that one differs
-//    for derived classes
-//  This is still not a concrete class -> see derived classes modelFixf and modelRanf.
+//  rbayz -- model2Factor.h
+//  Computational methods to work on two factors.
 //
-//  Created by Luc Janss on 03/08/2018.
+//  Created by Luc Janss on 29/05/2020.
 //
 
-#ifndef modelFactor_h
-#define modelFactor_h
+#ifndef model2Factor_h
+#define model2Factor_h
 
 #include <Rcpp.h>
 #include <cmath>
 #include "modelBase.h"
 #include "dataFactor.h"
 
-class modelFactor : public modelBase {
+class model2Factor : public modelBase {
    
 public:
    
-   modelFactor(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
+   model2Factor(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
       F = new dataFactor(d, col);
       parLevelNames = F->labels;
       par.resize(parLevelNames.size(),0);
@@ -29,7 +25,7 @@ public:
       rhs.resize(parLevelNames.size(),0);
    }
    
-   ~modelFactor() {
+   ~model2Factor() {
       delete F;
    }
    
@@ -39,9 +35,9 @@ protected:
    void resid_decorrect();
    void collect_lhs_rhs();
 
-   dataFactor *F;
+   dataFactor *F1, *F2;
    std::vector<double> lhs, rhs;          // working vectors to collect LHS an RHS of equations
 
 };
 
-#endif /* modelFactor_h */
+#endif /* model2Factor_h */
