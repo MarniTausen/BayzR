@@ -1,30 +1,31 @@
 //
-//  modelTerm_rand2f.hpp
-//  rbayz
+//  BayzR --- modelRand2f
+//  Computational class for two random factors.
 //
 //  Created by Luc Janss on 14/01/2020.
 //
 
-#ifndef modelTerm_ran2f_h
-#define modelTerm_ran2f_h
+#ifndef modelRan2f_h
+#define modelRan2f_h
 
 #include <Rcpp.h>
-#include "modelTerm_2factor.h"
+#include "modelBase.h"
 #include "priorClasses.h"
 
-// Model-term for interaction between two random factors; there are also versions allowing
-// for one or two covariance-structures.
-
-class modelTerm_ran2f : public modelTerm_2factor {
+class modelRan2f : public modelBase {
 
 public:
 
-   modelTerm_ran2f(Rcpp::DataFrame &d, size_t col)  : modelTerm_2factor(d, col) {
+   modelRan2f(Rcpp::DataFrame &d, size_t col)  : modelBase(d, col) {
+      F1 = new dataFactor(d, col);
+      F2 = new dataFactor(d, col);  // how is F2 stored in the R column?
       hpar.resize(1,1);
       hparName = "var." + parName;
    }
 
-   ~modelTerm_ran2f() {
+   ~modelRan2f() {
+      delete F1;
+      delete F2;
    }
 
    void sample() {
@@ -56,6 +57,10 @@ private:
       }
    }
 
+protected:
+   
+   dataFactor *F1, *F2;
+
 };
 
-#endif /* modelTerm_ran2f_h */
+#endif /* modelRan2f_h */

@@ -28,6 +28,8 @@ public:
    Rcpp::CharacterVector labels;
 
 protected:
+   
+   friend class modelFactor, model
 
 };
 
