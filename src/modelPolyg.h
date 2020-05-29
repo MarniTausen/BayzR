@@ -1,28 +1,27 @@
 //
-//  modelTerm.hpp
-//  rbayz
+//  BayzR --- modelTerm.hpp
 //
-//  Created by Luc Janss on 03/08/2018.
-//  Copyright © 2018 Luc Janss. All rights reserved.
+// Model-term for polygenic effect - not yet ready, needs a pedigree data class?
 //
-
-#ifndef modelTerm_polyg_h
-#define modelTerm_polyg_h
-
-#include <Rcpp.h>
-
-// Model-term for polygenic effect.
 // The rbayz wrapper function makes this column a character vector, and stores pedigree
 // as an extra attribute in the column data.
 // - the coldata is CharacterVector
 // - par vector is size of pedigree (but should be unique)
 // - hpar is size 1 and used for genetic variance
 
-class modelTerm_polyg : public modelTerm {
+//  Created by Luc Janss on 03/08/2018.
+//
+
+#ifndef modelPolyg_h
+#define modelPolyg_h
+
+#include <Rcpp.h>
+
+class modelPolyg : public modelBase {
 
 public:
 
-   modelTerm_polyg(Rcpp::DataFrame &d, size_t column) : modelTerm(d, col) {
+   modelPolyg(Rcpp::DataFrame &d, size_t column) : modelBase(d, col) {
       coldata = d[col];
       // need to process the column data, simple character list? Needs index or searching?
       // + need to extract and process pedigree
@@ -30,7 +29,7 @@ public:
       hparName = "var." + parName;
    }
 
-   ~modelTerm_polyg() {
+   ~modelPolyg() {
    }
 
    void sample() {
@@ -42,4 +41,4 @@ private:
 
 };
 
-#endif /* modelTerm_polyg_h */
+#endif /* modelPolyg_h */
