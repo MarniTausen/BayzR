@@ -24,7 +24,7 @@ public:
    ~modelFixf() {
    }
 
-   void msample() {
+   void sample() {
       resid_decorrect();
       collect_lhs_rhs();
       for(size_t k=1; k<par.size(); k++) {  // in fixf par[0] remains zero!, this runs from k=1
