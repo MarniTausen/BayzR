@@ -5,12 +5,12 @@
 //  Created by Luc Janss on 18/01/2020.
 //
 
-#ifndef modelTerm_ran2f_2cor_h
-#define modelTerm_ran2f_2cor_h
+#ifndef modelRan2f_2cor_h
+#define modelRan2f_2cor_h
 
 #include <Rcpp.h>
 #include "model2Factor.h"
-#include "priorClasses.h"
+#include "dataKernel.h"
 #include <vector>
 
 // Model-term for interaction between two random factors both with covariance-structures.
@@ -21,62 +21,45 @@
 // retrieved and stored the matrix. Here we need two matrices and there is no
 // class to store 2 matrices ... therefore need to do it here by copying code from realmat ...
 
-class modelRan2f_2cor : public model2factor {
+class modelRan2f_2cor : public model2Factor {
 
 public:
 
-   modelTerm_ran2f_2cor(Rcpp::DataFrame &d, size_t col)  : modelTerm_2factor(d, col) {
+   modelRan2f_2cor(Rcpp::DataFrame &d, size_t col)  : model2Factor(d, col) {
       hpar.resize(1,1);
       std::vector<std::string> names = parseColNames(d,col);
       parName = parName + "." + names[3] + "." + names[4];
       hparName = "var." + parName;
-      if (col1data.hasAttribute("evectors")) {
-         matrix1data = Rcpp::as<Rcpp::NumericMatrix>(col1data.attr("evectors"));
-      }
-      else {
-         throw(generalRbayzError(std::string("In ran2f: no matrix data attached to variable 1")));
-      }
-      if (col2data.hasAttribute("evectors")) {
-         matrix2data = Rcpp::as<Rcpp::NumericMatrix>(col2data.attr("evectors"));
-      }
-      else {
-         throw(generalRbayzError(std::string("In ran2f: no matrix data attached to variable 2")));
-      }
-      if(matrix1data.nrow() != matrix1data.ncol()) {
-         throw(generalRbayzError(std::string("In ran2f(...,V1=v1) matrix v1 is not square")));
-      }
-      if(matrix2data.nrow() != matrix2data.ncol()) {
-         throw(generalRbayzError(std::string("In ran2f(...,V2=v2) matrix v2 is not square")));
-      }
-      size_t nLevel1=factor1Names.size(), nLevel2=factor2Names.size();
-      if (nLevel1 != matrix1data.nrow()) {
-         throw(generalRbayzError(std::string("In ran2f(F1,...,V1=v1) number of levels in F1 do not match size of v1")));
-      }
-      if (nLevel2 != matrix2data.nrow()) {
-         throw(generalRbayzError(std::string("In ran2f(F1,F2,...,V2=v2) number of levels in F2 do not match size of v2")));
-      }
-      eval1 = Rcpp::as<Rcpp::NumericVector>(col1data.attr("evalues"));
-      eval2 = Rcpp::as<Rcpp::NumericVector>(col2data.attr("evalues"));
-	  // Note: when computing evals for Kronecker product from eval1*eval2 entries, these are not sorted!
-	  // First compute all product eigenvalues, then sort and determine cut-off, then re-fill in unsorted order with only the needed ones.
-	  evalint.resize(nLevel1*nLevel2);
+      Rcpp::RObject col1 = d[col];
+      Rcpp::RObject col2 = col1.attr("factor2");
+      M1 = new dataKernel(col1);
+      M2 = new dataKernel(col2);
+
+      size_t nLevel1=F1->labels.size();
+      size_t nLevel2=F2->labels.size();
+
+      // Note: when computing evals for Kronecker product from eval1*eval2 entries, these are not sorted!
+	   // First compute all product eigenvalues, then sort and determine cut-off,
+      // then re-fill in unsorted order with only the needed ones.
+ 	   evalint.resize(nLevel1*nLevel2);
       intcol1.resize(nLevel1*nLevel2);
       intcol2.resize(nLevel1*nLevel2);
 	  double sumeval = 0.0l;
 	  for (size_t i = 0; i<nLevel1; i++) {
 		  for (size_t j = 0; j<nLevel2; j++) {
-			  if (eval1[i] <= 0.0l || eval2[j] <= 0.0l)
+			  if (M1->eval[i] <= 0.0l || M2->eval[j] <= 0.0l)
 				  evalint[i*nLevel2 + j] = 0.0l;
 			  else
-			      evalint[i*nLevel2 + j] = eval1[i] * eval2[j];
+			      evalint[i*nLevel2 + j] = M1->eval[i] * M2->eval[j];
 			  sumeval += evalint[i*nLevel2 + j];
 		  }
 	  }
 	  std::sort(evalint.begin(), evalint.end(), std::greater<double>());
-	  rrankpct = col1data.attr("rrankpct");
+	  rrankpct = col1.attr("rrankpct");
 	  double eval_sum_cutoff = rrankpct * sumeval / 100.0l;  // this is cut-off on cumulative/sum of eval
 	  sumeval = 0.0l;
 	  unsigned long nEvalUsed=0;
+     /*
 	  while ((sumeval += evalint[nEvalUsed]) < eval_sum_cutoff) nEvalUsed++;
 	  double eval_min_cutoff = evalint[nEvalUsed];  // this is cut-off evalue below which not to use
 	  nEvalUsed = 0;
@@ -95,13 +78,14 @@ public:
       if(nEvalUsed==0)
          throw generalRbayzError("Zero rank in ran2f for VxV; all eigenvalues are below tolerance?");
       workcol.resize(nLevel1*nLevel2,0);
+       */
    }
 
-   ~modelTerm_ran2f_2cor() {
+   ~modelRan2f_2cor() {
    }
 
    void sample() {
-      size_t nLevel1=factor1Names.size(), nLevel2=factor2Names.size();
+      size_t nLevel1=F1->labels.size(), nLevel2=F2->labels.size();
       size_t matrix1col, matrix2col, rowlevel;
       double lhsl, rhsl; // local scalar version, there is also vector lhs and rhs in the object
       for(size_t k=0; k<evalint.size(); k++) {
@@ -109,7 +93,7 @@ public:
          matrix2col = intcol2[k];  // two columns of the two input relationship matrices
          for(size_t i=0; i<nLevel1; i++) {
             for(size_t j=0; j<nLevel2; j++) {
-               workcol[i*nLevel2+j] = matrix1data(i,matrix1col) * matrix2data(j,matrix2col);
+               workcol[i*nLevel2+j] = M1->data(i,matrix1col) * M2->data(j,matrix2col);
             }
          }
 //         Rcpp::Rcout << "Workcol " << k << ": ";
@@ -141,8 +125,7 @@ public:
 
 private:
    
-   Rcpp::NumericMatrix matrix1data, matrix2data;
-   Rcpp::NumericVector eval1, eval2;
+   dataKernel *M1, * M2;
    std::vector<double> evalint, workcol;
    std::vector<size_t> intcol1,intcol2;
    double rrankpct;
@@ -150,4 +133,4 @@ private:
 
 };
 
-#endif /* modelTerm_ran2f_2cor_h */
+#endif /* modelRan2f_2cor_h */

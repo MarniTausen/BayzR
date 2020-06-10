@@ -15,8 +15,6 @@
 #define modelRanf_cor_h
 
 #include <Rcpp.h>
-#include "priorClasses.h"
-#include "parseColNames.h"
 #include "modelMatrix.h"  // maybe should become modelKernel
 #include "dataKernel.h"
 

@@ -35,9 +35,28 @@ public:
    
 protected:
 
-   void resid_correct();
-   void resid_decorrect();
-   void collect_lhs_rhs();
+   void resid_correct() {
+      for (size_t obs=0; obs < F->data.size(); obs++)
+         resid[obs] -= par[F->data[obs]];
+   }
+
+   void resid_decorrect() {
+      for (size_t obs=0; obs < F->data.size(); obs++)
+         resid[obs] += par[F->data[obs]];
+   }
+
+   void collect_lhs_rhs() {
+      size_t k;
+      for(k=0; k<par.size(); k++) {
+         rhs[k] = 0.0;
+         lhs[k] = 0.0;
+      }
+      for (size_t obs=0; obs < F->data.size(); obs++) {
+         k=F->data[obs];
+         rhs[k] += residPrec[obs] * resid[obs];
+         lhs[k] += residPrec[obs];
+      }
+   }
 
    dataFactor *F;
    std::vector<double> lhs, rhs;          // working vectors to collect LHS an RHS of equations

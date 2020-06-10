@@ -31,13 +31,32 @@ public:
       delete C;
    }
    
-   void sample();
-   
+   void sample() {
+      resid_decorrect();
+      collect_lhs_rhs();
+      par[0] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
+      resid_correct();
+   }
+
 protected:
 
-   void resid_correct();
-   void resid_decorrect();
-   void collect_lhs_rhs();
+   void resid_correct() {
+      for (size_t obs=0; obs < C->data.size(); obs++)
+         resid[obs] -= par[0] * C->data[obs];
+   }
+
+   void resid_decorrect() {
+      for (size_t obs=0; obs < C->data.size(); obs++)
+         resid[obs] += par[0] * C->data[obs];
+   }
+
+   void collect_lhs_rhs() {
+      lhs = 0.0; rhs=0.0;
+      for (size_t obs=0; obs < C->data.size(); obs++) {
+         rhs += residPrec[obs] * resid[obs] * C->data[obs];
+         lhs += C->data[obs] * residPrec[obs] * C->data[obs];
+      }
+   }
 
    dataCovar *C;
    double lhs, rhs;

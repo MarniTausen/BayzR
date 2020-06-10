@@ -48,8 +48,14 @@ public:
    ~modelLiab() {
    }
 
+   std::pair<double, double> liabBounds(int i) {
+      std::pair<double, double> bounds;
+      // not yet finished here ...
+      return bounds;
+   }
+
    void sample();
-   
+
 private:
    Rcpp::IntegerVector catData;
    std::vector<double> thresholds;

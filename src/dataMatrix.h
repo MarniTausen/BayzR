@@ -18,10 +18,8 @@ class dataMatrix {
 public:
    dataMatrix(Rcpp::RObject col) { }
    virtual ~dataMatrix();
-protected:
-      Rcpp::NumericMatrix data;
+   Rcpp::NumericMatrix data;
    // double * data;  // want to test difference using low-level C arrays for storage
-friend class modelMatrix;
 };
 
 #endif /* dataMatrix_h */

@@ -31,7 +31,19 @@ public:
    ~modelResp() {
    }
 
-   void sample();
+   void sample() {
+      // Continuous data: sample() is only updating residual variance
+      size_t obs, nobs=resid.size();
+      double sum=0.0;
+      for (obs=0; obs<nobs; obs++)
+         sum += resid[obs]*resid[obs]*residPrec[obs];
+      sum *= hpar[0];  // the sum was computed divided by the old variance!
+      hpar[0] = gprior.samplevar(sum, nobs);
+      // the residPrec vector should be re-filled
+      double temp = 1.0/hpar[0];
+      for (obs=0; obs<nobs; obs++)
+         residPrec[obs] = temp;
+   }
    
 protected:
    Rcpp::NumericVector Ydata;

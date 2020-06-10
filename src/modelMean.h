@@ -27,7 +27,17 @@ public:
    ~modelMean() {
    }
 
-   void sample();
+   void sample() {
+      size_t obs, nobs=resid.size();
+      double sum=0.0, temp=0.0;
+      for (obs=0; obs<nobs; obs++) resid[obs] += par[0];
+      for (obs=0; obs<nobs; obs++) {
+         sum += resid[obs]*residPrec[obs];
+         temp += residPrec[obs];
+      }
+      par[0] = R::rnorm((sum/temp), sqrt(1.0/temp));
+      for (obs=0; obs<nobs; obs++) resid[obs] -= par[0];
+   }
 
 private:
 };

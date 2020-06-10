@@ -337,7 +337,7 @@ void writeLoggedSamples(size_t & cycle, std::vector<modelBase *> & model, Rcpp::
    Rcpp::Rcout << std::endl;
 }
 
-void collectPostStats(std::vector<modelTerm *> & model, Rcpp::NumericVector & postMean,
+void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & postMean,
                       Rcpp::NumericVector & postSD) {
    size_t k=0;
    for(size_t mt=0; mt<model.size(); mt++) {

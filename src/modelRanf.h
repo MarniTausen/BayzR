@@ -14,7 +14,6 @@
 
 #include <Rcpp.h>
 #include "modelFactor.h"
-#include "priorClasses.h"
 
 class modelRanf : public modelFactor {
 
@@ -28,7 +27,20 @@ public:
    ~modelRanf() {
    }
 
-   void sample();
+   void sample() {
+      resid_decorrect();
+      collect_lhs_rhs();
+      for(size_t k=0; k<par.size(); k++) {
+         // random effect: add 1/hpar[0] in lhs
+         par[k] = R::rnorm( (rhs[k]/(lhs[k]+(1/hpar[0]))), sqrt(1.0/(lhs[k]+(1/hpar[0]))));
+      }
+      resid_correct();
+      // update hyper-par (variance) using SSQ of random effects
+      double ssq=0.0;
+      for(size_t k=0; k<par.size(); k++)
+         ssq += par[k]*par[k];
+      hpar[0] = gprior.samplevar(ssq,par.size());
+   }
 
 };
 

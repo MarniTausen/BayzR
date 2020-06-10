@@ -15,14 +15,12 @@
 
 #include <stdio.h>
 #include <Rcpp.h>
-#include "rbayzExceptions.h"
 #include "dataMatrix.h"
 
 class dataKernel : public dataMatrix {
 public:
     dataKernel(Rcpp::RObject col);
     ~dataKernel();
-protected:
    Rcpp::NumericVector eval;
    size_t nEvalUsed;
    double rrankpct;
