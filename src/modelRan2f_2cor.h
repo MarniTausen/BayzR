@@ -9,7 +9,7 @@
 #define modelTerm_ran2f_2cor_h
 
 #include <Rcpp.h>
-#include "modelTerm_2factor.h"
+#include "model2Factor.h"
 #include "priorClasses.h"
 #include <vector>
 
@@ -21,7 +21,7 @@
 // retrieved and stored the matrix. Here we need two matrices and there is no
 // class to store 2 matrices ... therefore need to do it here by copying code from realmat ...
 
-class modelTerm_ran2f_2cor : public modelTerm_2factor {
+class modelRan2f_2cor : public model2factor {
 
 public:
 

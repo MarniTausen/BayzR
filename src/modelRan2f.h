@@ -9,23 +9,19 @@
 #define modelRan2f_h
 
 #include <Rcpp.h>
-#include "modelBase.h"
 #include "priorClasses.h"
+#include "model2Factor.h"
 
-class modelRan2f : public modelBase {
+class modelRan2f : public model2Factor {
 
 public:
 
-   modelRan2f(Rcpp::DataFrame &d, size_t col)  : modelBase(d, col) {
-      F1 = new dataFactor(d, col);
-      F2 = new dataFactor(d, col);  // how is F2 stored in the R column?
+   modelRan2f(Rcpp::DataFrame &d, size_t col)  : model2Factor(d, col) {
       hpar.resize(1,1);
       hparName = "var." + parName;
    }
 
    ~modelRan2f() {
-      delete F1;
-      delete F2;
    }
 
    void sample() {

@@ -20,16 +20,21 @@ public:
          data[i] -= 1;
       labels = data.attr("levels");
    }
-   
+
+   // second constructor which takes an Rcpp::RObject as argument, but this
+   // should be a factor: an interger vector with an attribute "levels".
+   dataFactor(Rcpp::RObject col) {
+      data = Rcpp::as<Rcpp::IntegerVector>(col);
+      for (size_t i=0; i<data.size(); i++)
+         data[i] -= 1;
+      labels = col.attr("levels");
+   }
+
    ~dataFactor() {
    }
 
    Rcpp::IntegerVector data;
    Rcpp::CharacterVector labels;
-
-protected:
-   
-   friend class modelFactor, model
 
 };
 
