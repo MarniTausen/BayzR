@@ -69,7 +69,7 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool
       modelFrame.push_back(e,"residual");
       modelFrame.push_back(v,"residPrec");
 
-      // A vector of pointers to modelTerm objects
+      // A vector of pointers to modelBase objects
       std::vector<modelBase *> model;
 
       // Build model by building a model-term from each input column (nCol columns) in the model-frame.

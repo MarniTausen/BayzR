@@ -47,7 +47,7 @@ dataKernel::dataKernel(Rcpp::RObject col) : dataMatrix(col) {
  */
 }
 
- dataKernel::~dataKernel() {
+dataKernel::~dataKernel() {
     // needs clean up when using malloc in constructor
 }
 

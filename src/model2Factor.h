@@ -38,6 +38,7 @@ public:
          }
       }
       for(size_t i=0; i<F1->data.size(); i++) { // is this right??
+                                                // This should be 'design' to link observation to interaction level
          intdata.push_back(F1->data[i]*nLevel2 + F2->data[i]);
       }
       lhs.resize(parLevelNames.size(),0);

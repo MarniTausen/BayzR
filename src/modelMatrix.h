@@ -25,8 +25,9 @@ class modelMatrix : public modelBase {
 public:
    
    modelMatrix(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
-      M = NULL;
-      F = NULL;
+      M = NULL;   // these objects are not yet allocated here, this happens
+      F = NULL;   // in the constructors of the derived classes Kernel and xxx ...
+                  // but maybe F can be done here??
       lhs = 0.0l;
       rhs = 0.0l;
    }
@@ -34,8 +35,6 @@ public:
    ~modelMatrix() {
    }
    
-protected:
-
    void resid_correct(size_t col) {
       for (size_t obs=0; obs < F->data.size(); obs++)
          resid[obs] -= par[col] * M->data(F->data(obs),col);

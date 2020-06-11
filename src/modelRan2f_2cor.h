@@ -59,10 +59,10 @@ public:
 	  double eval_sum_cutoff = rrankpct * sumeval / 100.0l;  // this is cut-off on cumulative/sum of eval
 	  sumeval = 0.0l;
 	  unsigned long nEvalUsed=0;
-     /*
 	  while ((sumeval += evalint[nEvalUsed]) < eval_sum_cutoff) nEvalUsed++;
 	  double eval_min_cutoff = evalint[nEvalUsed];  // this is cut-off evalue below which not to use
 	  nEvalUsed = 0;
+      /*
       for(size_t i=0; i<nLevel1; i++) {
          for(size_t j=0; j<nLevel2; j++) {
             if ( !(eval1[i] <= 0.0l || eval2[j] <= 0.0l) && (eval1[i]*eval2[j] >= eval_min_cutoff) ) {
