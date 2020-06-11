@@ -63,6 +63,8 @@ public:
    ~dataKernel() {
        // needs clean up when using new or malloc in constructor
    }
+   
+   void check(){}
 
    Rcpp::NumericVector eval;
    size_t nEvalUsed;

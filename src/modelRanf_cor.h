@@ -33,18 +33,22 @@ public:
    
 
    void sample() {
-      for(size_t k=0; k < M->nEvalUsed; k++) {
+      dataKernel *K = static_cast<dataKernel *>(M);   // not yet a good solution for this,
+                        // M is a pointer to dataMatrix but allocated to point to a dataKernel object.
+                        // M can access the methods in dataMatrix, but not the extra eigenvalue
+                        // information in dataKernel. Now K can get to the extra member variables.
+      for(size_t k=0; k < K->nEvalUsed; k++) {
          resid_decorrect(k);
          collect_lhs_rhs(k);
-         lhs = lhs + (1.0/( M->eval[k]*hpar[0] ));  // lhs with variance added
+         lhs = lhs + (1.0/( K->eval[k]*hpar[0] ));  // lhs with variance added
          par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
          resid_correct(k);
       }
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
-      for(size_t k=0; k< M->nEvalUsed; k++)
-         ssq += par[k]*par[k]/M->eval[k];
-      hpar[0] = gprior.samplevar(ssq, M->nEvalUsed);
+      for(size_t k=0; k< K->nEvalUsed; k++)
+         ssq += par[k]*par[k]/K->eval[k];
+      hpar[0] = gprior.samplevar(ssq, K->nEvalUsed);
    }
 
 };

@@ -18,6 +18,7 @@ class dataMatrix {
 public:
    dataMatrix(Rcpp::RObject col) { }
    virtual ~dataMatrix();
+   virtual void check();
    Rcpp::NumericMatrix data;
    // double * data;  // want to test difference using low-level C arrays for storage
 };
