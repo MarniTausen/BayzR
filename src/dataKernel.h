@@ -66,7 +66,6 @@ public:
    
    void check(){}
 
-   Rcpp::NumericVector eval;
    size_t nEvalUsed;
    double rrankpct;
 };
