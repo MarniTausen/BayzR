@@ -16,6 +16,7 @@
 
 #include <Rcpp.h>
 #include "modelKernel.h"
+#include "dataKernel.h"
 
 class modelRanf_cor : public modelKernel {
 

@@ -11,6 +11,7 @@
 #include <Rcpp.h>
 #include "priorClasses.h"
 #include "model2Factor.h"
+#include "dataFactor.h"
 
 class modelRan2f : public model2Factor {
 

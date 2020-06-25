@@ -13,6 +13,7 @@
 #define modelMean_h
 
 #include <Rcpp.h>
+#include "modelBase.h"
 
 
 class modelMean : public modelBase {

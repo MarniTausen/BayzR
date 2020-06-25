@@ -37,9 +37,7 @@ public:
    // correct & collect methods not needed here, the ones inherited from modelMatrix are OK
 
    // need to finish sample ...
-   void sample() {
-      
-   }
+   // sample() is not here but in Ranf_cor
    
 };
 

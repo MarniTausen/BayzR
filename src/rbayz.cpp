@@ -12,9 +12,9 @@
 #include "modelFixf.h"
 #include "modelRanf.h"
 #include "modelFreg.h"
-#include "modelRanf_cor.h"  // also add
-#include "modelRan2f.h"  // add
-#include "modelRan2f_2cor.h"  // add
+#include "modelRanf_cor.h"
+#include "modelRan2f.h"
+#include "modelRan2f_2cor.h"
 #include "rbayzExceptions.h"
 
 // These functions are defined below the main function
@@ -186,12 +186,12 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelB
       model.push_back(new modelFixf(modelFrame, col));
    else if(s=="ranf") {
       Rcpp::RObject thiscol = modelFrame[col];
-//      if(thiscol.hasAttribute("evalues")) {
-//         model.push_back(new modelRanf_cor(modelFrame, col));
-//      }
-//      else {
+      if(thiscol.hasAttribute("evalues")) {
+         model.push_back(new modelRanf_cor(modelFrame, col));
+      }
+      else {
          model.push_back(new modelRanf(modelFrame, col));
-//      }
+      }
    }
    else if(s=="ran2f") {
       Rcpp::RObject thiscol = modelFrame[col];

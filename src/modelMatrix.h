@@ -18,7 +18,9 @@
 
 #include <Rcpp.h>
 #include <cmath>
+#include "dataFactor.h"
 #include "dataMatrix.h"
+#include "modelBase.h"
 
 class modelMatrix : public modelBase {
    
