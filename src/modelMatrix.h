@@ -27,14 +27,16 @@ class modelMatrix : public modelBase {
 public:
    
    modelMatrix(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
-      M = NULL;   // these objects are not yet allocated here, this happens
-      F = NULL;   // in the constructors of the derived classes Kernel and xxx ...
-                  // but maybe F can be done here??
+      Rcpp::RObject col_asRObject = d[col];
+      M = new dataMatrix(col_asRObject);
+      F = new dataFactor(d, col);
       lhs = 0.0l;
       rhs = 0.0l;
    }
    
    ~modelMatrix() {
+      delete M;
+      delete F;
    }
    
    void resid_correct(size_t col) {

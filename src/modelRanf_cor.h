@@ -16,9 +16,9 @@
 
 #include <Rcpp.h>
 #include "modelKernel.h"
-#include "dataKernel.h"
+#include "dataMatrix.h"
 
-class modelRanf_cor : public modelKernel {
+class modelRanf_cor : public modelMattrix {
 
 public:
 
