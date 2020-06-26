@@ -59,6 +59,21 @@ public:
       }
    }
 
+   void sample() {
+      for(size_t k=0; k < M->nColUsed; k++) {
+         resid_decorrect(k);
+         collect_lhs_rhs(k);
+         lhs = lhs + (1.0/( M->weights[k]*hpar[0] ));   // lhs with variance added
+         par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));  // Note weights still stored as variances, not inverse
+         resid_correct(k);
+      }
+      // update hyper-par (variance) using SSQ of random effects
+      double ssq=0.0;
+      for(size_t k=0; k< M->nColUsed; k++)
+         ssq += par[k]*par[k]/M->Weights[k];
+      hpar[0] = gprior.samplevar(ssq, M->nColUsed);
+   }
+
    /* old code from ranf_cor for comparison
    void resid_correct(size_t col) {
       for (size_t obs=0; obs < coldata.size(); obs++)
