@@ -27,31 +27,31 @@ public:
             // to start making the inverses already here because some eigenvalues can be zero ...
          }
          else
-            throw(generalRbayzError("Eigen-decomp storage corrupted - not evalues"));
+            throw(generalRbayzError("Eigen-decomp storage corrupted - no evalues"));
          if(data.nrow() != data.ncol())
             throw(generalRbayzError("Eigen-decomp has non-square e-vectors matrix"));
-         if(eval.size() != data.ncol())
+         if(weights.size() != data.ncol())
             throw(generalRbayzError("Eigen-decomp vectors and values size do not match"));
          if(col.hasAttribute("rrankpct"))
             rrankpct = col.attr("rrankpct");
          else
             rrankpct = 99;
          double sumeval = 0.0l;
-         for (size_t i = 0; i<eval.size() && eval[i] > 0; i++) sumeval += eval[i];
+         for (size_t i = 0; i<weights.size() && weights[i] > 0; i++) sumeval += weights[i];
          double eval_cutoff = rrankpct * sumeval / 100.0l;
-
+         nColUsed = 0;
+         sumeval = 0.0l;
+         while (sumeval < eval_cutoff) sumeval += weights[nColUsed++];
+         // this message can be moved to the modelTerm routine; and it must be different for ran2f_2cor.
+         Rcpp::Rcout << "In ranf with V rrankpct=" << rrankpct << " uses " << nColUsed << "eigenvectors\n";
       }
-      nColUsed = 0;
-      sumeval = 0.0l;
-      while (sumeval < eval_cutoff) sumeval += eval[nColUsed++];
-      // this message can be moved to the modelTerm routine; and it must be different for ran2f_2cor.
-      Rcpp::Rcout << "In ranf with V rrankpct=" << rrankpct << " uses " << nColUsed << "eigenvectors\n";
-   }
-   else {
-      Rcpp::Rcout << "Matrix input not (yet) supported on column xxx\n";
+      else {
+         Rcpp::Rcout << "Matrix input not (yet) supported on column xxx\n";
+      }
    }
 
-   virtual ~dataMatrix();
+   ~dataMatrix() {
+   }
 
    Rcpp::NumericMatrix data;
    Rcpp::NumericVector weights;

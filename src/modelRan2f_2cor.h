@@ -10,7 +10,7 @@
 
 #include <Rcpp.h>
 #include "model2Factor.h"
-#include "dataKernel.h"
+#include "dataMatrix.h"
 #include <vector>
 
 // Model-term for interaction between two random factors both with covariance-structures.
@@ -32,8 +32,8 @@ public:
       hparName = "var." + parName;
       Rcpp::RObject col1 = d[col];
       Rcpp::RObject col2 = col1.attr("factor2");
-      M1 = new dataKernel(col1);
-      M2 = new dataKernel(col2);
+      M1 = new dataMatrix(col1);
+      M2 = new dataMatrix(col2);
 
       size_t nLevel1=F1->labels.size();
       size_t nLevel2=F2->labels.size();
@@ -47,10 +47,10 @@ public:
 	  double sumeval = 0.0l;
 	  for (size_t i = 0; i<nLevel1; i++) {
 		  for (size_t j = 0; j<nLevel2; j++) {
-			  if (M1->eval[i] <= 0.0l || M2->eval[j] <= 0.0l)
+			  if (M1->weights[i] <= 0.0l || M2->weights[j] <= 0.0l)
 				  evalint[i*nLevel2 + j] = 0.0l;
 			  else
-			      evalint[i*nLevel2 + j] = M1->eval[i] * M2->eval[j];
+			      evalint[i*nLevel2 + j] = M1->weights[i] * M2->weights[j];
 			  sumeval += evalint[i*nLevel2 + j];
 		  }
 	  }
@@ -125,7 +125,7 @@ public:
 
 private:
    
-   dataKernel *M1, * M2;
+   dataMatrix *M1, * M2;
    std::vector<double> evalint, workcol;
    std::vector<size_t> intcol1,intcol2;
    double rrankpct;
