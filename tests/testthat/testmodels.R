@@ -189,56 +189,56 @@ test_that("Genotype and Environment continous", {
 
 })
 
-test_that("GRM tests", {
+#test_that("GRM tests", {
 
-    n_samples <- 5000
+#    n_samples <- 5000
 
-    Genotype_classes = c("A", "B", "C", "D")
+#    Genotype_classes = c("A", "B", "C", "D")
 
-    GRM = matrix(c(1, 0.5, 0.25, 0.125,
-                   0.5, 1, 0.25, 0.125,
-                   0.25, 0.25, 1, 0.125,
-                   0.125, 0.125, 0.125, 1), ncol=4, nrow=4)
+#    GRM = matrix(c(1, 0.5, 0.25, 0.125,
+#                   0.5, 1, 0.25, 0.125,
+#                   0.25, 0.25, 1, 0.125,
+#                   0.125, 0.125, 0.125, 1), ncol=4, nrow=4)
 
-    rownames(GRM) <- Genotype_classes
-    colnames(GRM) <- Genotype_classes
+#    rownames(GRM) <- Genotype_classes
+#    colnames(GRM) <- Genotype_classes
 
-    Genotype_effects <- c(125, 90, 60, 30)
-    names(Genotype_effects) <- Genotype_classes
+#    Genotype_effects <- c(125, 90, 60, 30)
+#    names(Genotype_effects) <- Genotype_classes
 
-    Genotypes <- Genotype_classes[runif(n_samples, 1, length(Genotype_classes)+1)]
+#    Genotypes <- Genotype_classes[runif(n_samples, 1, length(Genotype_classes)+1)]
 
-    Env_1_names <- c("0C", "5C", "10C", "15C", "20C", "25C", "30C")
-    Env_1_effects <- c(-100, -40, 10, 160, 60, 20, -30)
-    names(Env_1_effects) <- c(Env_1_names)
+#    Env_1_names <- c("0C", "5C", "10C", "15C", "20C", "25C", "30C")
+#    Env_1_effects <- c(-100, -40, 10, 160, 60, 20, -30)
+#    names(Env_1_effects) <- c(Env_1_names)
 
-    Env_1 <- Env_1_names[runif(n_samples, 1, length(Env_1_names)+1)]
+#    Env_1 <- Env_1_names[runif(n_samples, 1, length(Env_1_names)+1)]
 
-    Env_2_names <- c("ph5", "ph6", "ph7", "ph8", "ph9")
-    Env_2_effects <- c(-60, 10, 80, 20, -40)
-    names(Env_2_effects) <- c(Env_2_names)
+#    Env_2_names <- c("ph5", "ph6", "ph7", "ph8", "ph9")
+#    Env_2_effects <- c(-60, 10, 80, 20, -40)
+#    names(Env_2_effects) <- c(Env_2_names)
 
-    Env_2 <- Env_2_names[runif(n_samples, 1, length(Env_2_names)+1)]
+#    Env_2 <- Env_2_names[runif(n_samples, 1, length(Env_2_names)+1)]
 
-    intercept <- 300
+#    intercept <- 300
     #noise <- rnorm(n_samples, mean=0, sd=40)
 
-    Response <- intercept + sapply(Genotypes, function(x) Genotype_effects[x]) +
-    1.5*sapply(Env_1, function(x) Env_1_effects[x]) +
-    1.5*sapply(Env_2, function(x) Env_2_effects[x])
+#    Response <- intercept + sapply(Genotypes, function(x) Genotype_effects[x]) +
+#    1.5*sapply(Env_1, function(x) Env_1_effects[x]) +
+#    1.5*sapply(Env_2, function(x) Env_2_effects[x])
 
-    fit <- bayz(Response ~ ranf(Genotypes) + ranf(Genotypes, V=GRM) + fixf(Env_1) + fixf(Env_2), chain=c(1e4,100,10), silent=TRUE)
+#    fit <- bayz(Response ~ ranf(Genotypes) + ranf(Genotypes, V=GRM) + fixf(Env_1) + fixf(Env_2), chain=c(1e4,100,10), silent=TRUE)
 
     #print(summary(fit))
 
-    expect_gte(summary(fit)$Heritability$Broad.sense.Heritability[2], 0.9)
+#    expect_gte(summary(fit)$Heritability$Broad.sense.Heritability[2], 0.9)
     #expect_equal(is.na(summary(fit)$Heritability$Heritability[2]), TRUE)
 
-    fit <- bayz(Response ~ ranf(Genotypes, V=GRM) + ran2f(Genotypes, Genotypes, V1=GRM, V2=GRM) + fixf(Env_1) + fixf(Env_2), chain=c(1e4,100,10), silent=TRUE)
+#    fit <- bayz(Response ~ ranf(Genotypes, V=GRM) + ran2f(Genotypes, Genotypes, V1=GRM, V2=GRM) + fixf(Env_1) + fixf(Env_2), chain=c(1e4,100,10), silent=TRUE)
 
-    print(summary(fit))
+#    print(summary(fit))
 
-    expect_gte(summary(fit)$Heritability$Heritability[2]+summary(fit)$Heritability$Heritability[3], 0.9)
+#    expect_gte(summary(fit)$Heritability$Heritability[2]+summary(fit)$Heritability$Heritability[3], 0.9)
     #expect_equal(is.na(summary(fit)$Heritability$Heritability[2]), TRUE)
 
-})
+#})
