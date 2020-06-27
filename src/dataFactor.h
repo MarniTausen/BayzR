@@ -19,6 +19,7 @@ public:
       for (size_t i=0; i<data.size(); i++)
          data[i] -= 1;
       labels = data.attr("levels");
+
    }
 
    // second constructor which takes an Rcpp::RObject as argument, but this

@@ -30,6 +30,10 @@ public:
       Rcpp::RObject col_asRObject = d[col];
       M = new dataMatrix(col_asRObject);
       F = new dataFactor(d, col);
+      par.resize(M->nColUsed,0);
+      // here level-names for the regression coefficients are not filled in parLevelNames,
+      // therefor automatically the levels 1,2,3,... are inserted in collectParInfo.
+      // It would be nicer to collect the column names (if available), or else fill with "col"+1,2,3...
       lhs = 0.0l;
       rhs = 0.0l;
    }
@@ -59,7 +63,7 @@ public:
       }
    }
 
-   void sample() {
+   void update_regressions() {
       for(size_t k=0; k < M->nColUsed; k++) {
          resid_decorrect(k);
          collect_lhs_rhs(k);
@@ -67,12 +71,10 @@ public:
          par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));  // Note weights still stored as variances, not inverse
          resid_correct(k);
       }
-      // update hyper-par (variance) using SSQ of random effects
-      double ssq=0.0;
-      for(size_t k=0; k< M->nColUsed; k++)
-         ssq += par[k]*par[k]/M->weights[k];
-      hpar[0] = gprior.samplevar(ssq, M->nColUsed);
    }
+   
+   // Here no sample() yet, modelMatrix remains virtual. The derived classes implement sample()
+   // by combining update_regressions() with update of hyper-paramters for that derived class.
 
    /* old code from ranf_cor for comparison
    void resid_correct(size_t col) {

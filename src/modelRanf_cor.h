@@ -28,6 +28,14 @@ public:
    ~modelRanf_cor() {
    }
    
+   void sample() {
+      update_regressions();
+      // update hyper-par (variance) using SSQ of random effects
+      double ssq=0.0;
+      for(size_t k=0; k< M->nColUsed; k++)
+         ssq += par[k]*par[k]/M->weights[k];
+      hpar[0] = gprior.samplevar(ssq, M->nColUsed);
+   }
 
 
 };

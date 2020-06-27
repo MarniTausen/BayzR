@@ -43,7 +43,7 @@ public:
          sumeval = 0.0l;
          while (sumeval < eval_cutoff) sumeval += weights[nColUsed++];
          // this message can be moved to the modelTerm routine; and it must be different for ran2f_2cor.
-         Rcpp::Rcout << "In ranf with V rrankpct=" << rrankpct << " uses " << nColUsed << "eigenvectors\n";
+         Rcpp::Rcout << "In ranf with V rrankpct=" << rrankpct << " uses " << nColUsed << " eigenvectors\n";
       }
       else {
          Rcpp::Rcout << "Matrix input not (yet) supported on column xxx\n";

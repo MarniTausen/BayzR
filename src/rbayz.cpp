@@ -260,8 +260,9 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
    
    // Fill names of all estimates (parameter%level), and fill parEstFirst, parEstLast which tell where each
    // parameter-vector can be found in the estimates list. This runs one loop, but that requires to set pointers to
-   // par or hpar vectors (names, levels); alternative is to copy 2nd part of code 2 times in loops above....
-   size_t nEstimates=1;   // to fill First and Last on index-base 1, after loop nEstimates will be 1 more than total levels
+   // par or hpar vectors (names, levels); alternative is to copy 2nd part of code two times in loops above....
+   size_t nEstimates=1;  // to fill First and Last on index-base 1, after loop nEstimates
+                         // will be 1 more than total levels
    {
       std::vector<double> *par_ptr;
       std::string *name_ptr;
@@ -284,12 +285,15 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
          if (par_ptr->size()==1) {  // for parameter-vectors size 1, estimate name is same as parameter name
             estimNames.push_back(*name_ptr);
          }
-         else {                                                 // parameter-vector >1: the estimNames get appended %level
-            if (par_ptr->size() != levelName_ptr->size()) {     //  level names not filled in the model-term object!
-               for (size_t level=0; level < levelName_ptr->size(); level++) {
+         else {                    // parameter-vector >1: the estimNames get appended %level
+            if (par_ptr->size() != levelName_ptr->size()) {
+               // Here is a piece of code filling dummy level names (1,2,...) when the length of
+               // the levelNames does not match the length of the parameter vector. It guarantees
+               // to have the right number of level names also when not set or not correctly set.
+               for (size_t level=0; level < par_ptr->size(); level++) {
                   s = *name_ptr;
                   s += "%";
-                  s += std::to_string(level+1);                  // fill level names with 1,2,....,Nlevels
+                  s += std::to_string(level+1);
                   estimNames.push_back(s);
                }
             }
@@ -307,6 +311,8 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
    
    if (estimNames.size() != (nEstimates-1))
       throw(generalRbayzError("Error in collecting parameter-info lists"));
+      // This error should in principle not happen, every time nEstimates is increased with the
+      // size of a parameter vector, also this same number of names is pushed_back in estimNames.
 
    return;
 
