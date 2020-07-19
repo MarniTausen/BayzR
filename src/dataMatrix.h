@@ -13,6 +13,13 @@
 #include <stdio.h>
 #include <Rcpp.h>
 #include "rbayzExceptions.h"
+#include <string>
+#include <vector>
+//#include "nameTools.h"  // including nameTools.h to get the definition of getMatrixNames
+                          // does not work, maybe because the includes make a loop?
+                          // Now I just add an extra declaration of getMatrixNames()...
+
+void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat);
 
 class dataMatrix {
 
@@ -21,6 +28,11 @@ public:
       if (col.hasAttribute("evectors")) {
          double rrankpct;
          data = Rcpp::as<Rcpp::NumericMatrix>(col.attr("evectors"));
+//         std::vector<std::string> attr = data.attributeNames();
+//         Rcpp::Rcout << "Attributes in matrix data:";
+//         for(size_t i=0; i<attr.size(); i++)
+//            Rcpp::Rcout << " " << attr[i];
+//         Rcpp::Rcout << "\n";
          if (col.hasAttribute("evalues")) {
             weights = Rcpp::as<Rcpp::NumericVector>(col.attr("evalues"));
             // the weigts should actually be the inverse eigen-values, but it is dangerous
@@ -28,6 +40,8 @@ public:
          }
          else
             throw(generalRbayzError("Eigen-decomp storage corrupted - no evalues"));
+         getMatrixNames(labels, data);
+
          if(data.nrow() != data.ncol())
             throw(generalRbayzError("Eigen-decomp has non-square e-vectors matrix"));
          if(weights.size() != data.ncol())
@@ -55,6 +69,7 @@ public:
 
    Rcpp::NumericMatrix data;
    Rcpp::NumericVector weights;
+   std::vector<std::string> labels;
    size_t nColUsed;
 
    // double * data;  // want to test difference using low-level C arrays for storage

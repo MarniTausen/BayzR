@@ -21,6 +21,7 @@
 #include "dataFactor.h"
 #include "dataMatrix.h"
 #include "modelBase.h"
+#include "nameTools.h"
 
 class modelMatrix : public modelBase {
    
@@ -32,8 +33,9 @@ public:
       F = new dataFactor(d, col);
       par.resize(M->nColUsed,0);
       // here level-names for the regression coefficients are not filled in parLevelNames,
-      // therefor automatically the levels 1,2,3,... are inserted in collectParInfo.
+      // therefore automatically the levels 1,2,3,... are inserted in collectParInfo.
       // It would be nicer to collect the column names (if available), or else fill with "col"+1,2,3...
+      builObsIndex(obsIndex,F,M);
       lhs = 0.0l;
       rhs = 0.0l;
    }
@@ -45,21 +47,21 @@ public:
    
    void resid_correct(size_t col) {
       for (size_t obs=0; obs < F->data.size(); obs++)
-         resid[obs] -= par[col] * M->data(F->data(obs),col);
+         resid[obs] -= par[col] * M->data(obsIndex[obs],col);
    }
 
    void resid_decorrect(size_t col) {
       for (size_t obs=0; obs < F->data.size(); obs++)
-         resid[obs] += par[col] * M->data(F->data(obs),col);
+         resid[obs] += par[col] * M->data(obsIndex[obs],col);
    }
 
    void collect_lhs_rhs(size_t col) {
       lhs = 0.0; rhs=0.0;
-      size_t rowlevel;
+      size_t matrixrow;
       for (size_t obs=0; obs < F->data.size(); obs++) {
-         rowlevel = F->data(obs);
-         rhs += M->data(rowlevel,col) * residPrec[obs] * resid[obs];
-         lhs += M->data(rowlevel,col) * M->data(rowlevel,col) * residPrec[obs];
+         matrixrow = obsIndex[obs];
+         rhs += M->data(matrixrow,col) * residPrec[obs] * resid[obs];
+         lhs += M->data(matrixrow,col) * M->data(matrixrow,col) * residPrec[obs];
       }
    }
 
@@ -102,7 +104,8 @@ public:
    dataFactor *F;
    double lhs, rhs;          // lhs, rhs will be scalar here (per iteration)
    std::vector<double> fit;
-   
+   std::vector<size_t> obsIndex;
+
 };
 
 #endif /* modelMatrix_h */

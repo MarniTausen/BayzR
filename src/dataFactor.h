@@ -9,6 +9,10 @@
 #define dataFactor_h
 
 #include <Rcpp.h>
+#include <vector>
+#include <string>
+
+void CharVec2cpp(std::vector<std::string> & labels, Rcpp::CharacterVector templabels);
 
 class dataFactor {
    
@@ -18,8 +22,8 @@ public:
       data = d[col];
       for (size_t i=0; i<data.size(); i++)
          data[i] -= 1;
-      labels = data.attr("levels");
-
+      Rcpp::CharacterVector templabels = data.attr("levels");
+      CharVec2cpp(labels, templabels);
    }
 
    // second constructor which takes an Rcpp::RObject as argument, but this
@@ -28,14 +32,15 @@ public:
       data = Rcpp::as<Rcpp::IntegerVector>(col);
       for (size_t i=0; i<data.size(); i++)
          data[i] -= 1;
-      labels = col.attr("levels");
+      Rcpp::CharacterVector templabels = data.attr("levels");
+      CharVec2cpp(labels, templabels);
    }
 
    ~dataFactor() {
    }
 
    Rcpp::IntegerVector data;
-   Rcpp::CharacterVector labels;
+   std::vector<std::string> labels;
 
 };
 
