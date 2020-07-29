@@ -30,7 +30,7 @@ public:
       std::string s;  // Make threshold names
       for (size_t cat=0; cat<par.size(); cat++) {
          s = std::to_string(categories[cat]) + ":" + std::to_string(categories[cat+1]);
-         parLevelNames.push_back(s);
+         parLabels.push_back(s);
       }
       // there is a second set of thresholds including the -INF and +INF ones for internal computations
       thresholds.resize(categories.size()+1);

@@ -13,6 +13,7 @@
 //#include "dataFactor.h"
 
 // Transform R CharacterVector to the c++ equivalent vector<string>
+// Note: the C++ vector should be empty, the algorithm uses push_back.
 
 void CharVec2cpp(std::vector<std::string> & CppStrings, Rcpp::CharacterVector RStrings) {
    std::string s;

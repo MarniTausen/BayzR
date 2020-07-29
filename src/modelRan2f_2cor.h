@@ -35,13 +35,13 @@ public:
       size_t nLevel1=M1->data.nrow();           // note levels are now the matrix size
       size_t nLevel2=M2->data.nrow();
       par.resize(nLevel1*nLevel2,0);            // redo these sizes, model2Factor constructor
-      parLevelNames.resize(nLevel1*nLevel2,""); // may have set them wrong
+      parLabels.resize(nLevel1*nLevel2,"");     // may have set them wrong
       for(size_t i=0; i<nLevel1; i++) {         // ... and redo these labels based on matrix
          for(size_t j=0; j<nLevel2; j++) {      // names and order
             Rcpp::String s = M1->labels[i];
             s += "%";
             s += M2->labels[j];
-            parLevelNames[i*nLevel2+j]=s;
+            parLabels[i*nLevel2+j]=s;
          }
       }
       // compute all eigenvalues (and their sum) of the interaction (Kronecker product) matrix

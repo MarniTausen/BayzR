@@ -34,14 +34,14 @@ public:
             Rcpp::String s = F1->labels[i];
             s += "%";
             s += F2->labels[j];
-            parLevelNames.push_back(s);
+            parLabels.push_back(s);
          }
       }
       for(size_t i=0; i<F1->data.size(); i++) {
          intdata.push_back(F1->data[i]*nLevel2 + F2->data[i]);
       }
-      lhs.resize(parLevelNames.size(),0);
-      rhs.resize(parLevelNames.size(),0);
+      lhs.resize(parLabels.size(),0);
+      rhs.resize(parLabels.size(),0);
    }
    
    ~model2Factor() {

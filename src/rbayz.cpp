@@ -267,18 +267,18 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
    {
       std::vector<double> *par_ptr;
       std::string *name_ptr;
-      Rcpp::CharacterVector *levelName_ptr;
+      std::vector<std::string> *label_ptr;
       std::string s;
       for(size_t par=0; par<parModelNr.size(); par++) {
          if (parHyper[par]) {
             par_ptr = &(model[parModelNr[par]]->hpar);
             name_ptr = &(model[parModelNr[par]]->hparName);
-            levelName_ptr = &(model[parModelNr[par]]->hparLevelNames);
+            label_ptr = &(model[parModelNr[par]]->hparLabels);
          }
          else {
             par_ptr = &(model[parModelNr[par]]->par);
             name_ptr = &(model[parModelNr[par]]->parName);
-            levelName_ptr = &(model[parModelNr[par]]->parLevelNames);
+            label_ptr = &(model[parModelNr[par]]->parLabels);
          }
          parEstFirst.push_back(nEstimates);
          nEstimates += par_ptr->size();
@@ -287,22 +287,18 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
             estimNames.push_back(*name_ptr);
          }
          else {                    // parameter-vector >1: the estimNames get appended %level
-            if (par_ptr->size() != levelName_ptr->size()) {
-               // Here is a piece of code filling dummy level names (1,2,...) when the length of
-               // the levelNames does not match the length of the parameter vector. It guarantees
-               // to have the right number of level names also when not set or not correctly set.
+            if (par_ptr->size() != label_ptr->size()) {
+               // Here is a piece of code filling dummy labels (1,2,...) when the length of
+               // the labels does not match the length of the parameter vector. This mostly happens
+               // when label-vector is not filled, but also avoids conflict when the two don't match.
                for (size_t level=0; level < par_ptr->size(); level++) {
-                  s = *name_ptr;
-                  s += "%";
-                  s += std::to_string(level+1);
+                  s = *name_ptr + "%" + std::to_string(level+1);
                   estimNames.push_back(s);
                }
             }
             else {
-               for(size_t level=0; level < levelName_ptr->size(); level++) {
-                  s = *name_ptr;
-                  s += "%";
-                  s += Rcpp::as<std::string>((*levelName_ptr)[level]);
+               for(size_t level=0; level < label_ptr->size(); level++) {
+                  s = *name_ptr + "%" + (*label_ptr)[level];
                   estimNames.push_back(s);
                }
             }

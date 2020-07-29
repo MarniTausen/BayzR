@@ -43,7 +43,7 @@ public:
    
    std::vector<double> par, hpar;
    std::string parName, hparName;
-   Rcpp::CharacterVector parLevelNames, hparLevelNames;
+   std::vector<std::string> parLabels, hparLabels;
    
 protected:
    Rcpp::NumericVector resid;

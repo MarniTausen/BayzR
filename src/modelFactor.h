@@ -17,16 +17,21 @@
 #include "modelBase.h"
 #include "dataFactor.h"
 
+void CharVec2cpp(std::vector<std::string> & labels, Rcpp::CharacterVector templabels);
+
 class modelFactor : public modelBase {
    
 public:
    
    modelFactor(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
       F = new dataFactor(d, col);
-      parLevelNames = F->labels;
-      par.resize(parLevelNames.size(),0);
-      lhs.resize(parLevelNames.size(),0);
-      rhs.resize(parLevelNames.size(),0);
+      parLabels = F->labels;            // I think this would make a copy, but actually only
+                                        // a reference is enough. The double storage arises here
+                                        // because all model-classes have a parLabels vector, which
+                                        // here happens to be equal to the labels of the Factor object.
+      par.resize(parLabels.size(),0);
+      lhs.resize(parLabels.size(),0);
+      rhs.resize(parLabels.size(),0);
    }
    
    ~modelFactor() {
