@@ -30,7 +30,6 @@ void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & po
                       Rcpp::NumericVector & postSD);
 void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector & parModelNr,
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples, size_t save);
-void addNoteMessage(Rcpp::CharacterVector notesMessages & notes, std::string s);
 
 // The interface defines to pass modelFrame by value, this is a quite 'light' copy (a bunch
 // of pointers); also modelFrame is modified within the main function, but these modifications
@@ -379,8 +378,4 @@ void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector &
          k++;
       }
    }
-}
-
-void addNoteMessage(Rcpp::CharacterVector notesMessages & notes, std::string s) {
-   notes.push_back(s);
 }

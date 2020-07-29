@@ -75,8 +75,9 @@ public:
       nEvalUsed = 0;
       for(size_t i=0; i<nLevel1; i++) {
          for(size_t j=0; j<nLevel2; j++) {
-            if ( !(eval1[i] <= 0.0l || eval2[j] <= 0.0l) && (eval1[i]*eval2[j] >= eval_min_cutoff) ) {
-               evalint[nEvalUsed]=eval1[i]*eval2[j];
+            if ( !(M1->weights[i] <= 0.0l || M2->weights[j] <= 0.0l)
+                    && (M1->weights[i]*M2->weights[j] >= eval_min_cutoff) ) {
+               evalint[nEvalUsed]=M1->weights[i] * M2->weights[j];
                intcol1[nEvalUsed]=i;
                intcol2[nEvalUsed]=j;
                nEvalUsed++;
@@ -93,7 +94,7 @@ public:
       std::vector<size_t> obsIndex1, obsIndex2;  // these are local and will go out of scope
       builObsIndex(obsIndex1,F1,M1);             // when constructor finishes
       builObsIndex(obsIndex2,F2,M2);
-      for(obs=0: obs<F1->data.size(); obs++) {
+      for(size_t obs=0; obs<F1->data.size(); obs++) {
          intdata[obs] = obsIndex1[obs]*nLevel2 + obsIndex2[obs];
       }
       workcol.resize(nLevel1*nLevel2,0);
@@ -118,7 +119,6 @@ public:
    }
    
    void sample() {
-      size_t nLevel1=F1->labels.size(), nLevel2=F2->labels.size();
       size_t rowlevel;
       double lhsl, rhsl; // local scalar version, there is also vector lhs and rhs in the object
       for(size_t k=0; k<evalint.size(); k++) {
