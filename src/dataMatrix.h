@@ -40,8 +40,6 @@ public:
          }
          else
             throw(generalRbayzError("Eigen-decomp storage corrupted - no evalues"));
-         getMatrixNames(labels, data);
-
          if(data.nrow() != data.ncol())
             throw(generalRbayzError("Eigen-decomp has non-square e-vectors matrix"));
          if(weights.size() != data.ncol())
@@ -58,6 +56,7 @@ public:
          while (sumeval < eval_cutoff) sumeval += weights[nColUsed++];
          // this message can be moved to the modelTerm routine; and it must be different for ran2f_2cor.
          Rcpp::Rcout << "In ranf with V rrankpct=" << rrankpct << " uses " << nColUsed << " eigenvectors\n";
+         getMatrixNames(labels, data);  // can be moved outside if-else when other matrix forms are also coded
       }
       else {
          Rcpp::Rcout << "Matrix input not (yet) supported on column xxx\n";
@@ -70,7 +69,9 @@ public:
    Rcpp::NumericMatrix data;
    Rcpp::NumericVector weights;
    std::vector<std::string> labels;
-   size_t nColUsed;
+   size_t nColUsed;  // I want to get rid of this nColUsed, the computing algorithms should
+                     // just get the sizes from vector size() or matrix nrow() ncol(),
+                     // but the Rcpp matrices are difficult to resize ....
 
    // double * data;  // want to test difference using low-level C arrays for storage
 };

@@ -30,6 +30,7 @@ void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & po
                       Rcpp::NumericVector & postSD);
 void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector & parModelNr,
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples, size_t save);
+void addNoteMessage(Rcpp::CharacterVector notesMessages & notes, std::string s);
 
 // The interface defines to pass modelFrame by value, this is a quite 'light' copy (a bunch
 // of pointers); also modelFrame is modified within the main function, but these modifications
@@ -43,10 +44,10 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool
    // handles chain being NULL, but it can be done here, so that warning message
    // can come in output.
    
-   // Vectors to collect error and warning messages are defined outside the try-block,
+   // Vectors to collect error and 'notes' messages are defined outside the try-block,
    // so it remains available in case of errors.
    Rcpp::CharacterVector errorMessages;
-   Rcpp::CharacterVector warningMessages;
+   Rcpp::CharacterVector notesMessages;
    std::string lastDone;
 
    try {     // a large try-block wraps nearly all of code, in case of normal exectution
@@ -382,4 +383,8 @@ void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector &
          k++;
       }
    }
+}
+
+void addNoteMessage(Rcpp::CharacterVector notesMessages & notes, std::string s) {
+   notes.push_back(s);
 }

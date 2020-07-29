@@ -56,8 +56,6 @@ private:
 
 protected:
    
-   dataFactor *F1, *F2;
-
 };
 
 #endif /* modelRan2f_h */
