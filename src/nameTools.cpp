@@ -36,16 +36,21 @@ void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat)
    Rcpp::CharacterVector matNames;
    if (mat.hasAttribute("dimnames")) {
       Rcpp::List dimnames = Rcpp::as<Rcpp::List>(mat.attr("dimnames"));
-      if(dimnames[0]==R_NilValue) {  // we only need element 0 (the row names)
-         throw(generalRbayzError("There are no rownames on matrix input"));
+      if(dimnames[0]!=R_NilValue) {
+         matNames = dimnames[0];
       }
-      matNames = dimnames[0];
+      else if (dimnames[0]!=R_NilValue) {
+            matNames = dimnames[1];
+      }
+      else {
+         throw(generalRbayzError("There are no rownames or colnames on matrix input"));
+      }
    }
    else {
       throw(generalRbayzError("There are no col and rownames on matrix input"));
    }
    if(mat.nrow() != matNames.size())
-      throw(generalRbayzError("Dimnames (rows) corrupted: length does not match matrix row size"));
+      throw(generalRbayzError("Dimnames corrupted: length does not match matrix row size"));
    CharVec2cpp(names, matNames);
    
 }

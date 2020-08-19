@@ -197,12 +197,10 @@ void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelB
       Rcpp::RObject thiscol = modelFrame[col];
       Rcpp::RObject secondcol = thiscol.attr("factor2");
       if(thiscol.hasAttribute("evectors") && secondcol.hasAttribute("evectors")) {
-//         Rcpp::NumericMatrix m1 = thiscol.attr("evectors");
-//         Rcpp::NumericMatrix m2 = secondcol.attr("evectors");
-//         model.push_back(new modelRan2f_2cor(modelFrame, col));
+         model.push_back(new modelRan2f_2cor(modelFrame, col));
       }
       else if (!thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
-//         model.push_back(new modelRan2f(modelFrame, col));
+         model.push_back(new modelRan2f(modelFrame, col));
       }
       else if (thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
          throw(generalRbayzError("Version of ran2f not yet implemented"));
@@ -240,7 +238,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
             parLoggedNames.push_back(model[mt]->hparName);
          }
          else
-         parLogged.push_back(0);
+            parLogged.push_back(0);
       }
    }
    for(size_t mt=0; mt<model.size(); mt++) {
@@ -254,7 +252,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
             parLoggedNames.push_back(model[mt]->parName);
          }
          else
-         parLogged.push_back(0);
+            parLogged.push_back(0);
       }
    }
    

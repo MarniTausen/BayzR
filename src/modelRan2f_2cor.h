@@ -69,9 +69,9 @@ public:
       // now can build information on the interaction-evectors to use: from which M1 and M2 column
       // each derives (intcol1 and intcol2 gives entries), and the eigenvalue for that combination.
       // Combinations falling below the cut-off are skipped and do not get in the list.
-      evalint.resize(nEvalUsed);
-      intcol1.resize(nEvalUsed);
-      intcol2.resize(nEvalUsed);
+      evalint.resize(nEvalUsed+1);
+      intcol1.resize(nEvalUsed+1);
+      intcol2.resize(nEvalUsed+1);
       nEvalUsed = 0;
       for(size_t i=0; i<nLevel1; i++) {
          for(size_t j=0; j<nLevel2; j++) {

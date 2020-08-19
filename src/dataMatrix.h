@@ -28,11 +28,10 @@ public:
       if (col.hasAttribute("evectors")) {
          double rrankpct;
          data = Rcpp::as<Rcpp::NumericMatrix>(col.attr("evectors"));
-//         std::vector<std::string> attr = data.attributeNames();
-//         Rcpp::Rcout << "Attributes in matrix data:";
-//         for(size_t i=0; i<attr.size(); i++)
-//            Rcpp::Rcout << " " << attr[i];
-//         Rcpp::Rcout << "\n";
+         std::vector<std::string> att = data.attributeNames();
+         Rcpp::Rcout << "Handling evector matrix with attributes: ";
+         for(size_t i=0; i<att.size(); i++) Rcpp::Rcout << " " << att[i];
+         Rcpp::Rcout << "\n";
          if (col.hasAttribute("evalues")) {
             weights = Rcpp::as<Rcpp::NumericVector>(col.attr("evalues"));
             // the weigts should actually be the inverse eigen-values, but it is dangerous

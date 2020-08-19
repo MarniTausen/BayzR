@@ -16,14 +16,22 @@ ran2f <- function(x1, x2, V1=NULL, V2=NULL, rrankpct=99, prior=NULL) {
     x1 <- as.factor(x1)
     x2 <- as.factor(x2)
     if(!is.null(V1)) {
+        if(is.null(rownames(V1))) {
+            stop("There are no rownames on V1")
+        }
         EVdecomp <- eigen(V1)
         colnames(EVdecomp$vectors) <- paste("evec",1:ncol(EVdecomp$vectors),sep="")
+        rownames(EVdecomp$vectors) <- rownames(V1)
         attr(x1, "evalues") <- EVdecomp$values
         attr(x1, "evectors") <- EVdecomp$vectors
     }
     if(!is.null(V2)) {
+        if(is.null(rownames(V2))) {
+            stop("There are no rownames on V2")
+        }
         EVdecomp <- eigen(V2)
         colnames(EVdecomp$vectors) <- paste("evec",1:ncol(EVdecomp$vectors),sep="")
+        rownames(EVdecomp$vectors) <- rownames(V2)
         attr(x2, "evalues") <- EVdecomp$values
         attr(x2, "evectors") <- EVdecomp$vectors
     }
