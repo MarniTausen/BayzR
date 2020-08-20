@@ -91,13 +91,13 @@ public:
       // also redo the 'intdata' vector from 2Factor class
       // Build observation index from observation indices to the M1 and M2 matrix from temporary
       // indexes that link observations to each matrix
-      std::vector<size_t> obsIndex1, obsIndex2;  // these are local and will go out of scope
-      builObsIndex(obsIndex1,F1,M1);             // when constructor finishes
+      builObsIndex(obsIndex1,F1,M1);
       builObsIndex(obsIndex2,F2,M2);
       for(size_t obs=0; obs<F1->data.size(); obs++) {
          intdata[obs] = obsIndex1[obs]*nLevel2 + obsIndex2[obs];
       }
-      workcol.resize(nLevel1*nLevel2,0);
+      workcol.resize(nLevel1*nLevel2,0.0l);
+      regcoeff.resize(nEvalUsed+1,0.0l);
    }
 
    ~modelRan2f_2cor() {
@@ -130,7 +130,7 @@ public:
          // the workcol still needs to be multiplied over the factor, from this
          // point all should work the same as in realmat....
          for (size_t obs=0; obs < intdata.size(); obs++) {
-            resid[obs] += par[k] * workcol[intdata[obs]];
+            resid[obs] += regcoeff[k] * workcol[intdata[obs]];
          }
          lhsl = 0.0; rhsl=0.0;
          for (size_t obs=0; obs < intdata.size(); obs++) {
@@ -139,22 +139,33 @@ public:
             lhsl += workcol[rowlevel] * workcol[rowlevel] * residPrec[obs];
          }
          lhsl = lhsl + (1.0/(evalint[k]*hpar[0]));  // lhs with variance added
-         par[k] = R::rnorm( (rhsl/lhsl), sqrt(1.0/lhsl));
+         regcoeff[k] = R::rnorm( (rhsl/lhsl), sqrt(1.0/lhsl));
          for (size_t obs=0; obs < intdata.size(); obs++)
-            resid[obs] -= par[k] * workcol[intdata[obs]];
+            resid[obs] -= regcoeff[k] * workcol[intdata[obs]];
       }
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
       for(size_t k=0; k<evalint.size(); k++)
-         ssq += par[k]*par[k]/evalint[k];
+         ssq += regcoeff[k]*regcoeff[k]/evalint[k];
       hpar[0] = gprior.samplevar(ssq,evalint.size());
+   }
+   
+   void prepForOutput() {
+      for(size_t row=0; row<par.size(); row++)
+         par[row]=0.0l;
+      for(size_t k=0; k<evalint.size(); k++) {
+         makeIntCol(k);
+         for(size_t row=0; row<par.size(); row++)
+            par[row] += regcoeff[k]*workcol[row];
+      }
    }
 
 private:
    
    dataMatrix *M1, * M2;
-   std::vector<double> evalint, workcol;
+   std::vector<double> evalint, workcol, regcoeff;
    std::vector<size_t> intcol1,intcol2;
+   std::vector<size_t> obsIndex1, obsIndex2;
    double rrankpct;
 
 };

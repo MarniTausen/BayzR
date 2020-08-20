@@ -31,7 +31,7 @@ public:
       Rcpp::RObject col_asRObject = d[col];
       M = new dataMatrix(col_asRObject);
       F = new dataFactor(d, col);
-      par.resize(M->nColUsed,0);
+      regcoeff.resize(M->nColUsed,0);
       // here level-names for the regression coefficients are not filled in parLevelNames,
       // therefore automatically the levels 1,2,3,... are inserted in collectParInfo.
       // It would be nicer to collect the column names (if available), or else fill with "col"+1,2,3...
@@ -47,12 +47,12 @@ public:
    
    void resid_correct(size_t col) {
       for (size_t obs=0; obs < F->data.size(); obs++)
-         resid[obs] -= par[col] * M->data(obsIndex[obs],col);
+         resid[obs] -= regcoeff[col] * M->data(obsIndex[obs],col);
    }
 
    void resid_decorrect(size_t col) {
       for (size_t obs=0; obs < F->data.size(); obs++)
-         resid[obs] += par[col] * M->data(obsIndex[obs],col);
+         resid[obs] += regcoeff[col] * M->data(obsIndex[obs],col);
    }
 
    void collect_lhs_rhs(size_t col) {
@@ -70,7 +70,7 @@ public:
          resid_decorrect(k);
          collect_lhs_rhs(k);
          lhs = lhs + (1.0/( M->weights[k]*hpar[0] ));   // lhs with variance added
-         par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));  // Note weights still stored as variances, not inverse
+         regcoeff[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));  // Note weights still stored as variances, not inverse
          resid_correct(k);
       }
    }
@@ -104,6 +104,7 @@ public:
    dataFactor *F;
    double lhs, rhs;          // lhs, rhs will be scalar here (per iteration)
    std::vector<double> fit;
+   std::vector<double> regcoeff;
    std::vector<size_t> obsIndex;
 
 };

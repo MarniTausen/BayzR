@@ -118,12 +118,11 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool
 
       // Run the model by calling the sample() method for each modelTerm
       for (size_t cycle=1, save=0; cycle <= chain[0]; cycle++) {
-         for(size_t mt=0; mt<model.size(); mt++) {
-            model[mt]->sample();
-         }
+         for(size_t mt=0; mt<model.size(); mt++) model[mt]->sample();
          if (cycle % nShow == 0 )
             writeLoggedSamples(cycle, model, parLogged, parLoggedNames, parModelNr, silent);
          if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {
+            for(size_t mt=0; mt<model.size(); mt++) model[mt]->prepForOutput();
             collectPostStats(model, postMean, postSD);
             collectLoggedSamples(model, parModelNr, parLogged, loggedSamples, save);
             save++;  // save is counter for output (saved) cycles

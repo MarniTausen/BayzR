@@ -39,7 +39,13 @@ public:
    virtual ~modelBase() {
    }
    
+   // sample is pure virtual, the base class cannot give a definition, and
+   // all derived classes must implement it to create a concrete class.
    virtual void sample()=0;
+
+   // prepForOutput is for model classes that need to make a transform of
+   // parameters for output, the base class defines an 'empty' version.
+   virtual void prepForOutput() { };
    
    std::vector<double> par, hpar;
    std::string parName, hparName;

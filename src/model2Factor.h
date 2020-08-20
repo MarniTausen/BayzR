@@ -27,7 +27,9 @@ public:
       size_t nLevel1=F1->labels.size();
       size_t nLevel2=F2->labels.size();
       // at the moment this still sets-up interaction coding and solutions for
-      // all combinations ...
+      // all combinations. At the moment, only random interaction effects are available,
+      // so it will run OK for interaction-levels not present in the data, but without
+      // additional correlation structures they will be estimated at zero.
       par.resize(nLevel1*nLevel2,0);
       for(size_t i=0; i<nLevel1; i++) {
          for(size_t j=0; j<nLevel2; j++) {
