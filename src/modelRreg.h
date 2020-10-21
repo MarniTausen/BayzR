@@ -14,14 +14,15 @@
 #include "modelMatrix.h"
 #include "dataMatrix.h"
 
-class modelRanf_cor : public modelMatrix {
+class modelRreg : public modelMatrix {
 
 public:
 
    modelRreg(Rcpp::DataFrame &d, size_t col) : modelMatrix(d,col) {
+      // code needs updating, is copied from ranf_cor
       hpar.resize(1,1);
       std::vector<std::string> names = parseColNames(d,col);
-      parName = parName + "." + names[3];
+      parName = parName + "." + names[4];
       hparName = "var." + parName;
    }
 

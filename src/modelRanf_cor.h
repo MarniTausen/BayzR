@@ -21,7 +21,7 @@ public:
    modelRanf_cor(Rcpp::DataFrame &d, size_t col) : modelMatrix(d,col) {
       hpar.resize(1,1);
       std::vector<std::string> names = parseColNames(d,col);
-      parName = parName + "." + names[3];
+      parName = parName + "." + names[4];
       hparName = "var." + parName;
       // note: modelMatrix has set-up the parameter vector to hold regressions on
       // the eigenvectors, but the output of this model class should be the random

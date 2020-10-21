@@ -57,6 +57,7 @@ void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat)
 
 void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, dataMatrix *M) {
    int errors=0;
+//   Rcpp::Rcout << "Going to resize obsIndex to " << F->data.size() << "\n";
    obsIndex.resize(F->data.size(),0);
    // Build a sorted list of the matrix labels paired with matrix entry-rows
    std::vector< std::pair<std::string, size_t> > matLabelsSorted;

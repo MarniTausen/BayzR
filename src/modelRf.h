@@ -1,17 +1,13 @@
 //
-// rbayz ---- modelRan2f_2cor.hpp
-// Model-class for interaction between two random factors both with covariance-structures.
-// Note: does not derive from modelMatrix (like Ranf_cor), but from 2Factor, the computations
-// and set-up are quite different from the modelMatrix methods because here we have 2 matrices.
-// Note2: with correlation matrices, the levels of the factor variable are no longer the levels
-// in the data, but become the names (and order) of the names on the matrices, there can be more
-// levels in the matrices than in the data.
+// rbayz ---- modelRf.hpp
+// Model-class for random factors  - this one now prepared to work with 3-way interaction
+// and 2 variance matrices (needs more work). Copied from modelRan2f_2cor.
 //
-// Created by Luc Janss on 18/01/2020.
+// Created by Luc Janss on 14/09/2020.
 //
 
-#ifndef modelRan2f_2cor_h
-#define modelRan2f_2cor_h
+#ifndef modelRf_h
+#define modelRf_h
 
 #include <Rcpp.h>
 #include "model2Factor.h"
@@ -19,11 +15,11 @@
 #include "nameTools.h"
 #include <vector>
 
-class modelRan2f_2cor : public model2Factor {
+class modelRf: public model2Factor {
 
 public:
 
-   modelRan2f_2cor(Rcpp::DataFrame &d, size_t col)  : model2Factor(d, col) {
+   modelRf(Rcpp::DataFrame &d, size_t col)  : model2Factor(d, col) {
       hpar.resize(1,1);
       std::vector<std::string> names = parseColNames(d,col);
       parName = parName + "." + names[4] + "." + names[5];

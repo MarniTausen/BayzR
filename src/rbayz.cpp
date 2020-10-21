@@ -18,6 +18,7 @@
 #include "rbayzExceptions.h"
 
 // These functions are defined below the main function
+std::vector<std::string> modelTerms = parseModel(Rcpp::String modelFormula);
 void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelBase *> & model, Rcpp::RObject &terms);
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
@@ -37,7 +38,8 @@ void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector &
 // The return value is a List, to check if program terminated normally or with errors check $nError.
 
 // [[Rcpp::export]]
-Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool silent) {
+Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame modelFrame,
+                     Rcpp::IntegerVector chain, bool silent) {
 
    // Some check of chain settings is needed. Also the rbayz wrapper function now
    // handles chain being NULL, but it can be done here, so that warning message
@@ -48,6 +50,7 @@ Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool
    Rcpp::CharacterVector errorMessages;
    Rcpp::CharacterVector notesMessages;
    std::string lastDone;
+   std::vector<std::string> modelTerms = parseModel(modelFormula);
 
    try {     // a large try-block wraps nearly all of code, in case of normal exectution
              // the code builds a return list and returns before the catch().
