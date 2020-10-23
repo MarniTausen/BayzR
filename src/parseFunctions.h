@@ -39,6 +39,31 @@ std::vector<std::string> splitString(std::string text, char splitchar) {
    return parts;
 }
 
+
+std::vector<std::string> parseModel(Rcpp::String mf) {
+   std::string modelformula = Rcpp::as<std::string>(mf);
+   // remove all spaces in the model formula
+   size_t pos;
+   while((pos=modelformula.find(' '))!=std::string::npos) modelformula.erase(pos,1);
+   // split on ~, it must create two pieces that are the response term and list of explanatory terms
+   std::vector<std::string> lhsrhs = splitString(modelformula,"~");
+   if(lhsrhs.size() != 2)
+      throw(generalRbayzError("Model-formula has no ~ to separate response and explanatory terms"));
+   if(lhsrhs[0].size()==0)
+      throw(generalRbayzError("Model-formula has no response term"));
+   if(lhsrhs[1].size()==0)
+      throw(generalRbayzError("Model-formula has no explanatory terms"));
+   // split the RHS string on + to make list of explanatory model terms
+   std::vector<std::string> parts = splitString(lhsrhs[1],"+");
+   // Check for the first RHS term to be 0 or 1, and if not add a term '1' to set an intercept
+   if(! (parts[0]=="0" || parts[0]=="1") )
+      parts.push_front("1");
+   // Finally put the response term also in front of the list of 'parts'
+   parts.push_front(lhsrhs[0]);
+   return parts;
+}
+
+
 std::vector<std::string> parseColNames(Rcpp::DataFrame & d, size_t col) {
    std::vector<std::string> names(7,"");
    Rcpp::CharacterVector AllColNames = d.names();

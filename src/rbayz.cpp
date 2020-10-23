@@ -38,7 +38,7 @@ void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector &
 // The return value is a List, to check if program terminated normally or with errors check $nError.
 
 // [[Rcpp::export]]
-Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame modelFrame,
+Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
                      Rcpp::IntegerVector chain, bool silent) {
 
    // Some check of chain settings is needed. Also the rbayz wrapper function now
@@ -50,20 +50,19 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame modelFrame,
    Rcpp::CharacterVector errorMessages;
    Rcpp::CharacterVector notesMessages;
    std::string lastDone;
-   std::vector<std::string> modelTerms = parseModel(modelFormula);
 
    try {     // a large try-block wraps nearly all of code, in case of normal exectution
              // the code builds a return list and returns before the catch().
              // In case of errors, catch() builds a return list with the messages vector.
 
-      // I found a strange behaviour with modelFrame (a DataFrame): as soon as I add a column to
-      // it (makes a copy), R converts it to a list, and attributes row.names, and terms get lost,
-      // and method .nrow() is no longer available! So I need to collect these things before losing them.
-      size_t nRow = modelFrame.nrow();
-      size_t nCol = modelFrame.size();                  // nr columns of input, later it will grow
-      Rcpp::RObject terms = modelFrame.attr("terms");
-      Rcpp::CharacterVector rowNames = modelFrame.attr("row.names");
-      if(terms.isNULL()) throw(generalRbayzError("Input model frame is lacking terms"));
+      // A list of all model-terms: response, intercept, all other model explanatory terms.
+      // Intercept is added by parseModel() when user has not put in 0 or 1 as first explanatory term.
+      std::vector<std::string> modelTerms = parseModel(modelFormula);
+      
+      // A 'data frame' to hold residual data, so far with two sub-vectors for one response
+      // ... need to think more how to best do this. Need own (simple) matrix class?
+      std::vector<std::vector<double>> residData;
+      residData.push_back(new )
       
       // All model-terms must have access to the vector of residuals and residual precisions.
       // To organize this, two vectors are added to the model-frame.
