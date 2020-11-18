@@ -42,4 +42,4 @@ public:
 
 };
 
-#endif /* modelRanf_cor_h */
+#endif /* modelRreg */
