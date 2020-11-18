@@ -58,9 +58,10 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
 
       // split the modelFormula in a list of response (LHS) and explanatory (RHS) terms.
       // getModelRHSTerms makes sure there is a "0" or "1" to specify if a mean is needed.
-      removeSpaces(modelFormula);
-      std::vector<std::string> modelLHSTerms = getModelLHSTerms(modelFormula);
-      std::vector<std::string> modelRHSTerms = getModelRHSTerms(modelFormula);
+      std::string CmodelFormula(modelFormula); // c++-version, don't like these Rcpp strings :-(
+      removeSpaces(CmodelFormula);
+      std::vector<std::string> modelLHSTerms = getModelLHSTerms(CmodelFormula);
+      std::vector<std::string> modelRHSTerms = getModelRHSTerms(CmodelFormula);
 
       // Create a 'data frame' (as simpleMatrix) to hold residual data and precisions
       simpleMatrix residData(inputData.nrow,2*modelLHSTerms.size());

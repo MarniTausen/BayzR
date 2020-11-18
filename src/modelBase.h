@@ -24,8 +24,9 @@
 
 #include <Rcpp.h>
 #include <vector>
-#include "parseColNames.h"
+#include "parseFunctions.h"
 #include "priorClasses.h"
+#include "nameTools.h"
 #include "simpleMatrix.h"
 
 class modelBase {
@@ -35,12 +36,13 @@ public:
    modelBase(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
                  : gprior(modelTerm)
    {
-      resid = e[2*resp];
-      residPrec = e[2*resp+1];
+      resid = e.data[2*resp];
+      residPrec = e.data[2*resp+1];
+      Nresid = e.nrow;
       parName = getVarNames(modelTerm);
-      varNames = splitString(parName,":");
+      varNames = splitString(parName,':');
       // Search the varNames in the data-frame (column names) and fill varColIndex.
-      // The searching of names is not efficient now, see comments in findDatColumn().
+      // The searching of names is not efficient now, see comments in findDataColumn().
       for(size_t i=0; i<varNames.size(); i++) {
          varColIndex.push_back(findDataColumn(d, varNames[i]));
       }
@@ -48,7 +50,7 @@ public:
       // Already link it by setting an Robject? It would only be a reference, so
       // the overhead of having this Robject in every model object is minimal.
       // But .... needs to be a vector of Robjects?
-      Rcpp::Environment Renv();
+      Rcpp::Environment Renv;
       for(size_t i=0; i<varNames.size(); i++) {
          varInEnvironment.push_back(Renv.exists(varNames[i]));
       }
@@ -79,6 +81,7 @@ public:
    
 protected:
    double *resid, *residPrec;
+   size_t Nresid;
    GenericPrior gprior;
 
 };

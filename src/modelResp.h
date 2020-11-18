@@ -23,13 +23,13 @@ public:
             : modelBase(modelTerm, d, e, resp)
    {
       if(varColIndex[0] >= 0)
-         Ydata = d[col];
+         Ydata = d[varColIndex[0]];
       else {  // this can be modified to use vector from the environment
          throw generalRbayzError("Not yet ready to use response ("+parName+") from R environment");
       }
       hpar.resize(1,1.0);
       hparName = "var.resid";
-      for (size_t obs=0; obs<resid.size(); obs++)
+      for (size_t obs=0; obs<Nresid; obs++)
          // initialize resid vector by copying data-vector in it
          resid[obs] = Ydata[obs];
    }
@@ -39,15 +39,15 @@ public:
 
    void sample() {
       // Continuous data: sample() is only updating residual variance
-      size_t obs, nobs=resid.size();
+      size_t obs;
       double sum=0.0;
-      for (obs=0; obs<nobs; obs++)
+      for (obs=0; obs<Nresid; obs++)
          sum += resid[obs]*resid[obs]*residPrec[obs];
       sum *= hpar[0];  // the sum was computed divided by the old variance!
-      hpar[0] = gprior.samplevar(sum, nobs);
+      hpar[0] = gprior.samplevar(sum, Nresid);
       // the residPrec vector should be re-filled
       double temp = 1.0/hpar[0];
-      for (obs=0; obs<nobs; obs++)
+      for (obs=0; obs<Nresid; obs++)
          residPrec[obs] = temp;
    }
    

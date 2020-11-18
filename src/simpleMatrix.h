@@ -6,6 +6,8 @@
 //  - accessible with double index ->data[col][row] - NOTE col first!
 //    or alternatively, ->data[col] is a pointer to the data of column `col`
 //  - constructor specifies number of rows first!
+// Note: the actual elements need to be accessed as object->data[] (column) or ->data[][] (element),
+//    at least the first one can be made more fancy by adding a function for operator[]?
 //
 //  Created by Luc Janss on 23/10/2020.
 //

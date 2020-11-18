@@ -28,7 +28,9 @@ class modelMatrix : public modelBase {
 public:
    
    modelMatrix(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelBase(modelTerm, d, e, resp) {
+         : modelBase(modelTerm, d, e, resp)
+   {
+      size_t col = varColIndex[0]; 
       Rcpp::RObject col_asRObject = d[col];
       M = new dataMatrix(col_asRObject);
       F = new dataFactor(d, col);

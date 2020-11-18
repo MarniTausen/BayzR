@@ -38,32 +38,30 @@ std::vector<std::string> splitString(std::string text, char splitchar) {
    return parts;
 }
 
-std::vector<std::string> getModelLHSTerms(Rcpp::String mf) {
-   std::string modelformula = Rcpp::as<std::string>(mf);
+std::vector<std::string> getModelLHSTerms(std::string mf) {
    // split on ~, it must create two pieces that are the response term and list of explanatory terms
-   std::vector<std::string> lhsrhs = splitString(modelformula,"~");
+   std::vector<std::string> lhsrhs = splitString(mf,'~');
    if(lhsrhs.size() != 2)
       throw(generalRbayzError("Model-formula has no ~ to separate response and explanatory terms"));
    if(lhsrhs[0].size()==0)
       throw(generalRbayzError("Model-formula has no response term(s)"));
    // split the first part on + to make list of the LHS terms
-   std::vector<std::string> parts = splitString(lhsrhs[0],"+");
+   std::vector<std::string> parts = splitString(lhsrhs[0],'+');
    return parts;
 }
 
-std::vector<std::string> getModelRHSTerms(Rcpp::String mf) {
-   std::string modelformula = Rcpp::as<std::string>(mf);
+std::vector<std::string> getModelRHSTerms(std::string mf) {
    // split on ~, it must create two pieces that are the response term and list of explanatory terms
-   std::vector<std::string> lhsrhs = splitString(modelformula,"~");
+   std::vector<std::string> lhsrhs = splitString(mf,'~');
    // split the RHS string on + to make list of explanatory model terms
-   std::vector<std::string> parts = splitString(lhsrhs[1],"+");
+   std::vector<std::string> parts = splitString(lhsrhs[1],'+');
    if(lhsrhs[1].size()==0) {   // RHS string was empty, insert default intercept
-      parts.push_front("1");
+      parts.insert(parts.begin(),"1");
       return parts;
    }
    // RHS string not empty: check if there is an explicit "0" or "1", if not add a "1" term
    if( ! (parts[0]=="0" || parts[0]=="1") )
-      parts.push_front("1");
+      parts.insert(parts.begin(),"1");
    return parts;
 }
 
@@ -93,9 +91,9 @@ std::vector<std::string> parseColNames(Rcpp::DataFrame & d, size_t col) {
       return names;
    // now we're dealing with at least one term inside the function, it must start with variable name(s)
    std::vector<std::string> varNames = splitString(arguments[0], ':');
-   for(size_t i=0; i<varNames.size && i<3; i++ )
+   for(size_t i=0; i<varNames.size() && i<3; i++ )
       names[i+1] = varNames[i];
-   if (varNames.size>3)
+   if (varNames.size() > 3)
       throw(generalRbayzError("There is a model term with more then 3-way interaction"));
    if (names[0]=="ranf" || names[0]=="rf") {    // for ranf and rf search for V= argument
       for(size_t i=1; i<arguments.size(); i++)

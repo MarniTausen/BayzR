@@ -8,7 +8,6 @@
 #ifndef nameTools_h
 #define nameTools_h
 
-#include <stdio.h>
 #include <vector>
 #include <string>
 #include <Rcpp.h>
@@ -17,6 +16,7 @@
 
 void CharVec2cpp(std::vector<std::string> & labels, Rcpp::CharacterVector templabels);
 void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat);
+int findDataColumn(Rcpp::DataFrame d, std::string name);
 void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, dataMatrix *M);
 
 #endif /* nameTools_h */
