@@ -12,14 +12,12 @@
 #include "modelFixf.h"
 #include "modelRanf.h"
 #include "modelFreg.h"
+#include "modelRreg.h"
 #include "modelRanf_cor.h"
-#include "modelRan2f.h"
-#include "modelRan2f_2cor.h"
 #include "rbayzExceptions.h"
 #include "simpleMatrix.h"
 
 // These functions are defined below the main function
-std::vector<std::string> modelTerms = parseModel(Rcpp::String modelFormula);
 void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelBase *> & model, Rcpp::RObject &terms);
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
@@ -64,7 +62,7 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
       std::vector<std::string> modelRHSTerms = getModelRHSTerms(CmodelFormula);
 
       // Create a 'data frame' (as simpleMatrix) to hold residual data and precisions
-      simpleMatrix residData(inputData.nrow,2*modelLHSTerms.size());
+      simpleMatrix residData(inputData.nrow(),2*modelLHSTerms.size());
       
       // A vector of pointers to modelBase objects
       std::vector<modelBase *> model;
@@ -74,7 +72,7 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
       for(size_t resp=0; resp<modelLHSTerms.size(); resp++) {
          model.push_back(new modelResp(modelLHSTerms[resp], inputData, residData, resp));
          for(size_t term=0; term<modelRHSTerms.size(); term++) {
-            std::string fname = modelRHSTerms[term].substr(0, modelRHSTerms[term].find('(')));
+            std::string fname = modelRHSTerms[term].substr(0, modelRHSTerms[term].find('('));
             if (fname=="1")
                model.push_back(new modelMean(modelRHSTerms[term], inputData, residData, resp));
             else if (fname=="0")
@@ -182,6 +180,7 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
 
 // arguments for modelobject constructors are now:
 //           modelTerm (string), inputData, residData, response-number
+/* should not be need anymore, code is now in the main function
 void buildModelTerm(std::vector<modelBase *> & model, std::string modelTerm, Rcpp::DataFrame & data,
                     simpleMatrix & resid, size_t respnr) {
    std::string s = getWrapName(modelFrame, col);
@@ -230,6 +229,7 @@ void buildModelTerm(std::vector<modelBase *> & model, std::string modelTerm, Rcp
    }
    return;
 }
+ */
 
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,

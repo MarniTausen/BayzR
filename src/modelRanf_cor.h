@@ -19,10 +19,12 @@ class modelRanf_cor : public modelMatrix {
 public:
 
    modelRanf_cor(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelMatrix(modelTerm, d, e, resp) {
+         : modelMatrix(modelTerm, d, e, resp)
+   {
       hpar.resize(1,1);
-      std::vector<std::string> names = parseColNames(d,col);
-      parName = parName + "." + names[4];
+      // modified: the parName is still the name(s) of variables, it needs some
+      // modifications if multiple objects have the same variables. In old code
+      // matrix names were added, but I think it gets too much to keep that system.
       hparName = "var." + parName;
       // note: modelMatrix has set-up the parameter vector to hold regressions on
       // the eigenvectors, but the output of this model class should be the random

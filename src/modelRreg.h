@@ -22,8 +22,6 @@ public:
          : modelMatrix(modelTerm, d, e, resp) {
       // code needs updating, is copied from ranf_cor
       hpar.resize(1,1);
-      std::vector<std::string> names = parseColNames(d,col);
-      parName = parName + "." + names[4];
       hparName = "var." + parName;
    }
 
