@@ -19,7 +19,8 @@ class modelRf: public model2Factor {
 
 public:
 
-   modelRf(Rcpp::DataFrame &d, size_t col)  : model2Factor(d, col) {
+   modelRf(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+            : model2Factor(modelTerm, d, e, resp) {
       hpar.resize(1,1);
       std::vector<std::string> names = parseColNames(d,col);
       parName = parName + "." + names[4] + "." + names[5];

@@ -5,7 +5,7 @@
 
 // [[Rcpp::plugins("cpp11")]]
 
-#include "parseColNames.h"
+#include "parseFunctions.h"
 #include "modelBase.h"
 #include "modelResp.h"
 #include "modelMean.h"
@@ -16,6 +16,7 @@
 #include "modelRan2f.h"
 #include "modelRan2f_2cor.h"
 #include "rbayzExceptions.h"
+#include "simpleMatrix.h"
 
 // These functions are defined below the main function
 std::vector<std::string> modelTerms = parseModel(Rcpp::String modelFormula);
@@ -51,44 +52,49 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
    Rcpp::CharacterVector notesMessages;
    std::string lastDone;
 
-   try {     // a large try-block wraps nearly all of code, in case of normal exectution
+   try {     // a large try-block wraps nearly all of code, in case of normal execution
              // the code builds a return list and returns before the catch().
              // In case of errors, catch() builds a return list with the messages vector.
 
-      // A list of all model-terms: response, intercept, all other model explanatory terms.
-      // Intercept is added by parseModel() when user has not put in 0 or 1 as first explanatory term.
-      std::vector<std::string> modelTerms = parseModel(modelFormula);
-      
-      // A 'data frame' to hold residual data, so far with two sub-vectors for one response
-      // ... need to think more how to best do this. Need own (simple) matrix class?
-      std::vector<std::vector<double>> residData;
-      residData.push_back(new )
-      
-      // All model-terms must have access to the vector of residuals and residual precisions.
-      // To organize this, two vectors are added to the model-frame.
-      Rcpp::NumericVector e(nRow,0);
-      Rcpp::NumericVector v(nRow,1);
-      modelFrame.push_back(e,"residual");
-      modelFrame.push_back(v,"residPrec");
+      // split the modelFormula in a list of response (LHS) and explanatory (RHS) terms.
+      // getModelRHSTerms makes sure there is a "0" or "1" to specify if a mean is needed.
+      removeSpaces(modelFormula);
+      std::vector<std::string> modelLHSTerms = getModelLHSTerms(modelFormula);
+      std::vector<std::string> modelRHSTerms = getModelRHSTerms(modelFormula);
 
+      // Create a 'data frame' (as simpleMatrix) to hold residual data and precisions
+      simpleMatrix residData(inputData.nrow,2*modelLHSTerms.size());
+      
       // A vector of pointers to modelBase objects
       std::vector<modelBase *> model;
 
-      // Build model by building a model-term from each input column (nCol columns) in the model-frame.
-      // Note: when model-frame has flagged intercept, a 'mean' term is added when handling col zero.
-      bool modelBuildError=FALSE;
-      for(size_t col=0; col<nCol; col++) {
-         try {
-            buildModelTerm(modelFrame, col, model, terms);
-         }
-         catch (generalRbayzError &err) {        // model building continues after a generalRBayzError,
-            errorMessages.push_back(err.what());      // modelBuildError is set TRUE and will throw exception below.
-            modelBuildError=TRUE;                // Any other exception will directly jump to outer catch().
+      // Build the modelling objects. The RHS terms are nested within the LHS (response)
+      // terms to build a explanatory term for every response.
+      for(size_t resp=0; resp<modelLHSTerms.size(); resp++) {
+         model.push_back(new modelResp(modelLHSTerms[resp], inputData, residData, resp));
+         for(size_t term=0; term<modelRHSTerms.size(); term++) {
+            std::string fname = modelRHSTerms[term].substr(0, modelRHSTerms[term].find('(')));
+            if (fname=="1")
+               model.push_back(new modelMean(modelRHSTerms[term], inputData, residData, resp));
+            else if (fname=="0")
+               continue;
+            else if (fname=="fx")
+               model.push_back(new modelFixf(modelRHSTerms[term], inputData, residData, resp));
+            else if (fname=="rn") {
+               if(modelRHSTerms[term].find("V=") != std::string::npos)
+                  model.push_back(new modelRanf_cor(modelRHSTerms[term], inputData, residData, resp));
+               else
+                  model.push_back(new modelRanf(modelRHSTerms[term], inputData, residData, resp));
+            }
+            else if (fname=="rg")
+               model.push_back(new modelFreg(modelRHSTerms[term], inputData, residData, resp));
+            else if (fname=="rr")
+               model.push_back(new modelRreg(modelRHSTerms[term], inputData, residData, resp));
+            else
+               throw (generalRbayzError("Unknow model (function) term: "+fname));
          }
       }
-      if (modelBuildError)
-         throw(generalRbayzError("Bayz terminates after model building"));
-
+         
       // Parameter information vectors
       Rcpp::CharacterVector parNames;               // collected names of used hpar and par vectors (where size>0)
       Rcpp::LogicalVector parHyper;                 // if it is a hpar (TRUE) or par (FALSE) vector
@@ -173,7 +179,10 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
 
 }
 
-void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelBase *> & model, Rcpp::RObject &terms) {
+// arguments for modelobject constructors are now:
+//           modelTerm (string), inputData, residData, response-number
+void buildModelTerm(std::vector<modelBase *> & model, std::string modelTerm, Rcpp::DataFrame & data,
+                    simpleMatrix & resid, size_t respnr) {
    std::string s = getWrapName(modelFrame, col);
    if (s=="" && col==0) {
       model.push_back(new modelResp(modelFrame, col));

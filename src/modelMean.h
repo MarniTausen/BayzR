@@ -5,6 +5,9 @@
 // - this one has no data!
 // - par is size 1 to hold mean
 // - hpar is not used
+// Note: the mean-term goes through the parsing because there is a "1" inserted in the
+// model-terms, but it means the name set in the base-class constructor is "1" and needs
+// to be changed.
 //
 //  Created by Luc Janss on 03/08/2018.
 //
@@ -19,8 +22,9 @@
 class modelMean : public modelBase {
    
 public:
-   
-   modelMean(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
+
+   modelMean(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : modelBase(modelTerm, d, e, resp) {
       par.resize(1,0);
       parName = "mean";
    }

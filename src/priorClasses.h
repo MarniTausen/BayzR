@@ -10,80 +10,79 @@
 #define GenericPrior_h
 
 #include <Rcpp.h>
-#include "parseColNames.h"
+#include "parseFunctions.h"
 #include "rbayzExceptions.h"
 
-/********
-
- GenericPrior object holds 'generic' prior information from R bayzPrior object, and
- has methods to sample various types of parameters: samplevar (variance), samplefreq (frequency), ...
- There is now only one constructor that needs the model-term data-column, and extracts the
- prior information from it (if available).
- Every model-term has a GenericPrior member, and the modelTerm constructor also constructs
- GenericPrior with the data-column input.
- It is not necessary that a data-column has a prior, this can be OK if there is no prior needed
- or when a default can be used.
- Internal storage is quite similar as in the R bayzPrior object, with a list of the parameters
- and other settings of the prior, and a "dist" member (from the "dist" attribute in bayzPrior)
- that has a little text-string with the name of the distribution.
- The GenericPrior constructor checks if there is a "prior" attribute in the data-column, if
- it is of type bayzPrior and list, and if it has a "dist" attribute, and if all OK copies
- the list in 'members' and dist in 'dist'.
- A status is set in the GenericPrior:
-   0 (OK)
-   1: there was no prior (can be OK)
-   2: there was a prior attribute in the data column, but it was not an R class bayzPrior and list
-   3: the prior attribute did not have a "dist" attribute (wrongly built).
- Status >1 should be reason to terminate running, but I need to think how to report errors and quit.
- Throw? 
- ********/
+/* GenericPrior object: to hold prior information in a generic way, bascically
+   a map of (parameter, value) pairs and a "dist" string for the distribution.
+   However, the construction has moved from R to inside bayz, so that
+   it needs a check that the `dist` is compatible with the specified parameters.
+   Better make separate classes for each prior? But how to initialise the correct object?
+ */
 
 class GenericPrior {
    
 public:
    
-   GenericPrior(Rcpp::DataFrame &d, size_t c) {
-      status=0;
-      dist="";
-      modelName = getWrapName(d, c) + "." + getVarName(d, c);
-      Rcpp::RObject col = d[c];  // data column referred to as RObject
-      if(col.hasAttribute("prior")) {
-         Rcpp::RObject temp = col.attr("prior");
-         if (temp.inherits("list") && temp.inherits("bayzPrior")) {
-            if(temp.hasAttribute("dist")) {
-               dist = Rcpp::as<std::string>(temp.attr("dist"));
-               elements = Rcpp::as<Rcpp::List>(temp);
+   // initialisation from a model term, a string like "rf(A:B, V=..., prior=ichi(...))"
+   GenericPrior(std::string modelTerm) {
+      size_t pos1, pos2, pos3;
+      if ( (pos1=modelTerm.find("prior=")) != std::string:npos) {
+         // Note: if prior= is not found, nothing happens here and a default will be used.
+         useDefault=FALSE;
+         pos1 += 6;   // now pos1 has moved where there should be the distribution name
+         pos2 = modelTerm.find('(',pos1);
+         pos3 = modelTerm.find(')',pos2);
+         dist = modelTerm.substr(pos1,(pos2-pos1));
+         std::vector<std::string> parlist = splitString(modelTerm.substr(pos2+1,(pos3-pos2-1),","));
+         std::string parname;
+         double parvalue;
+         for(size_t i=0; i<parlist.size(); i++) {
+            if((pos1 = parlist[i].find('=')) == std::string::npos) {
+               throw(generalRbayzError("Error in parameter specification <"
+                                       +parlist[i]+"> in "+modelTerm));
             }
-            else {          // prior was missing dist attribute
-               throw(generalRbayzError(std::string("Prior is not a correct bayzPrior object in model-term ")+modelName));
-               status=3;
+            else {
+               parname = parlist[i].substr(0,pos1);
+               try {
+                  parvalue = std::stod(parlist[i].substr(pos1+1,std::string::npos));
+               }
+               catch (std::exception& e) {
+                  throw(generalRbayzError("Error to get value from parameter <"
+                                          +parlist[i]+"> in "+modelTerm));
+               }
+               param.push_back(std::make_pair(parname,parvalue));
             }
          }
-         else {            // prior attribute not of correct R class
-            throw(generalRbayzError(std::string("Prior is not a correct bayzPrior object in model-term ")+modelName));
-            status=2;
+         if(dist=="ichi") {
+            if(param.find("scale") == param.end())
+               throw(generalRbayzError("Error ichi prior is missing scale parameter in "+modelTerm));
+            if(param.find("df") == param.end())
+               throw(generalRbayzError("Error ichi prior is missing df parameter in "+modelTerm));
          }
-      }
-      else {               // no "prior" attribute in the col
-         status=1;
+         // else if(dist==...)  // add checks for other distributions
+         else {
+            throw(generalRbayzError("Unknown prior distribution in "+modelTerm));
+         }
       }
    }
-   
+
    ~GenericPrior() {}
-   int status;
+
+   bool useDefault=TRUE;
    std::string dist, modelName;
-   Rcpp::List elements;
+   std::map<std::string,double> param;
    
    double samplevar(double ssq, size_t n) {
-      if (status==1 || dist=="ichi") {
+      if (useDefault || dist=="ichi") {
          double scale, dfprior, dftotal;
-         if (status==1) {  // using uniform if no prior given
+         if (useDefault) {  // using uniform if no prior given
             scale = 0.0;
             dfprior = -2.0;
          }
          else {           // here not sure what will happen if "scale" or "df" are not in the list ...
-            scale = elements["scale"];
-            dfprior = elements["df"];
+            scale = param.find("scale")->second;
+            dfprior = param.find("df")->second;
          }
          ssq += dfprior*scale;
          dftotal = dfprior+double(n);

@@ -22,8 +22,9 @@ class modelLiab : public modelResp {
    
 public:
    
-   modelLiab(Rcpp::DataFrame &d, size_t col) : modelResp(d, col) {
-      catData = Rcpp::as<Rcpp::IntegerVector>(d[col]);
+   modelLiab(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : modelResp(modelTerm, d, e, resp) {
+      catData = Rcpp::as<Rcpp::IntegerVector>(d[varColIndex[0]]);
       Rcpp::IntegerVector categories = Rcpp::sort_unique(catData);
       par.resize(categories.size()-1);
       parName = "thresh";

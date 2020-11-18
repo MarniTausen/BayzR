@@ -18,7 +18,8 @@ class modelRreg : public modelMatrix {
 
 public:
 
-   modelRreg(Rcpp::DataFrame &d, size_t col) : modelMatrix(d,col) {
+   modelRreg(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : modelMatrix(modelTerm, d, e, resp) {
       // code needs updating, is copied from ranf_cor
       hpar.resize(1,1);
       std::vector<std::string> names = parseColNames(d,col);

@@ -23,7 +23,8 @@ class modelRan2f_2cor : public model2Factor {
 
 public:
 
-   modelRan2f_2cor(Rcpp::DataFrame &d, size_t col)  : model2Factor(d, col) {
+   modelRan2f_2cor(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : model2Factor(modelTerm, d, e, resp) {
       hpar.resize(1,1);
       std::vector<std::string> names = parseColNames(d,col);
       parName = parName + "." + names[4] + "." + names[5];

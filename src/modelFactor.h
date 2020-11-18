@@ -1,9 +1,12 @@
 //
 //  rbayz -- modelFactor.h
-//  Computational methods to work on one factor:
-//  - declares and initialises a modelFactor object to work on
+//  Computational methods to work on one factor that is modelled fixed, or random without
+//  correlations (modelFixf and modelRanf derive from this and only use small modifications
+//  to use common code from modelFactor).
+//  - declares and initialises a modelFactor object
 //  - sets sizes and names of parameter vectors - but not hpar, because that one differs
-//    for derived classes
+//    for derived classes (fixf has no hpar)
+//  - now sets up factor with any number of interactions using new features from dataFactor
 //  This is still not a concrete class -> see derived classes modelFixf and modelRanf.
 //
 //  Created by Luc Janss on 03/08/2018.
@@ -23,8 +26,18 @@ class modelFactor : public modelBase {
    
 public:
    
-   modelFactor(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
-      F = new dataFactor(d, col);
+   modelFactor(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : modelBase(modelTerm, d, e, resp)
+   {
+      F = new dataFactor();
+      for(size_t i=0; i<varColIndex.size(); i++) {
+         if(varColIndex[i] >= 0)  // The factor is in the data frame in column varColIndex[i]
+            F.addVariable(d, varColIndex[i]);
+         else {  // The factor is in the R environment (all checked in modelBase constructor)
+            F.addVariable(varNames[i]);
+         }
+      }
+
       parLabels = F->labels;            // I think this would make a copy, but actually only
                                         // a reference is enough. The double storage arises here
                                         // because all model-classes have a parLabels vector, which

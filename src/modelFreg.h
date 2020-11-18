@@ -22,8 +22,15 @@ class modelFreg : public modelBase {
    
 public:
    
-   modelFreg(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
-      C = new dataCovar(d, col);
+   modelFreg(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : modelBase(modelTerm, d, e, resp)
+   {
+      if(varColIndex[0] >= 0)
+         C = new dataCovar(d, varColIndex[0]);
+      else {
+         // here expand dataCovar to handle an Robject? -> see dataFactor code where it is already done.
+         throw generalRbayzError("Not yet ready to use variable ("+varNames[0]+") from R environment");
+      }
       par.resize(1,0);
    }
    

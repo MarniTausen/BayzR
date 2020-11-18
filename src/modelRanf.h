@@ -19,7 +19,8 @@ class modelRanf : public modelFactor {
 
 public:
 
-   modelRanf(Rcpp::DataFrame &d, size_t col)  : modelFactor(d, col) {
+   modelRanf(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : modelFactor(modelTerm, d, e, resp) {
       hpar.resize(1,1);
       hparName = "var." + parName;
    }

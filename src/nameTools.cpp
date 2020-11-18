@@ -55,6 +55,27 @@ void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat)
    
 }
 
+// Find 'name' in the column-names of a data frame.
+// The column names are not sorted, so applying a simple sequential search, but it will
+// get slow if the data frame is large (e.g. with large covariate data in it!).
+// The c++ find will do the same and does not return the index, so I just made a simple
+// search myself that goes over the vector of names.
+// Could be improved by making a sorted version of the column names and using binary_search,
+// but ideally then also storing and re-using the sorted version for all look-ups.
+// Then the sorted names must be prepared in the main functinon....?
+int findDataColumn(Rcpp::DataFrame d, std::string name) {
+   std::vector<std::string> colnames;
+   CharVec2cpp(colnames, d.names());
+   int col;
+   for(col=0; col<colnames.size(); col++) {
+      if(colnames[col]==name) break;
+   }
+   if(col==colnames.size())
+      return -1;
+   else
+      return col;
+}
+
 void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, dataMatrix *M) {
    int errors=0;
 //   Rcpp::Rcout << "Going to resize obsIndex to " << F->data.size() << "\n";

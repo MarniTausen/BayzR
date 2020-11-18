@@ -1,5 +1,5 @@
 //
-//  parseColNames
+//  parseFunctions
 //  Created by Luc Janss on 03/08/2018.
 //  Copyright © 2018 Luc Janss. All rights reserved.
 //
@@ -9,20 +9,19 @@
 #include <string>
 #include "rbayzExceptions.h"
 
-#ifndef parseColNames_h
-#define parseColNames_h
+#ifndef parseFunctions_h
+#define parseFunctions_h
 
-// Function parseColNames retrieves names from a model-term: the function name, up to 3 variable names
-// and up to 3 variance-matrices.
-// Function getWrapName is a shortcut to return the function name
-// Function getVarName is a shortcut to return the first variable
-// Input is the model-frame, and the column number for which to extract the name (count from 0).
-// Return is a vector of strings with 7 slots (0-6) for:
-// 0: function name, 1,2,3: variable names, 4,5,6: variance matrix names.
-// If anything is not available it is set "".
+void removeSpaces(std::string &s) {
+   size_t pos;
+   while((pos=s.find(' '))!=std::string::npos) s.erase(pos,1);
+}
 
 std::vector<std::string> splitString(std::string text, char splitchar) {
    std::vector<std::string> parts;
+   if (text=="") {
+      return parts;
+   }
    size_t split=0, nextsplit;
    while (split != std::string::npos) {
       // find next split position starting from current split position
@@ -39,30 +38,34 @@ std::vector<std::string> splitString(std::string text, char splitchar) {
    return parts;
 }
 
-
-std::vector<std::string> parseModel(Rcpp::String mf) {
+std::vector<std::string> getModelLHSTerms(Rcpp::String mf) {
    std::string modelformula = Rcpp::as<std::string>(mf);
-   // remove all spaces in the model formula
-   size_t pos;
-   while((pos=modelformula.find(' '))!=std::string::npos) modelformula.erase(pos,1);
    // split on ~, it must create two pieces that are the response term and list of explanatory terms
    std::vector<std::string> lhsrhs = splitString(modelformula,"~");
    if(lhsrhs.size() != 2)
       throw(generalRbayzError("Model-formula has no ~ to separate response and explanatory terms"));
    if(lhsrhs[0].size()==0)
-      throw(generalRbayzError("Model-formula has no response term"));
-   if(lhsrhs[1].size()==0)
-      throw(generalRbayzError("Model-formula has no explanatory terms"));
-   // split the RHS string on + to make list of explanatory model terms
-   std::vector<std::string> parts = splitString(lhsrhs[1],"+");
-   // Check for the first RHS term to be 0 or 1, and if not add a term '1' to set an intercept
-   if(! (parts[0]=="0" || parts[0]=="1") )
-      parts.push_front("1");
-   // Finally put the response term also in front of the list of 'parts'
-   parts.push_front(lhsrhs[0]);
+      throw(generalRbayzError("Model-formula has no response term(s)"));
+   // split the first part on + to make list of the LHS terms
+   std::vector<std::string> parts = splitString(lhsrhs[0],"+");
    return parts;
 }
 
+std::vector<std::string> getModelRHSTerms(Rcpp::String mf) {
+   std::string modelformula = Rcpp::as<std::string>(mf);
+   // split on ~, it must create two pieces that are the response term and list of explanatory terms
+   std::vector<std::string> lhsrhs = splitString(modelformula,"~");
+   // split the RHS string on + to make list of explanatory model terms
+   std::vector<std::string> parts = splitString(lhsrhs[1],"+");
+   if(lhsrhs[1].size()==0) {   // RHS string was empty, insert default intercept
+      parts.push_front("1");
+      return parts;
+   }
+   // RHS string not empty: check if there is an explicit "0" or "1", if not add a "1" term
+   if( ! (parts[0]=="0" || parts[0]=="1") )
+      parts.push_front("1");
+   return parts;
+}
 
 std::vector<std::string> parseColNames(Rcpp::DataFrame & d, size_t col) {
    std::vector<std::string> names(7,"");
@@ -110,15 +113,32 @@ std::vector<std::string> parseColNames(Rcpp::DataFrame & d, size_t col) {
 // I found using argument DataFrame d, column names of the data frame are changed, by
 //  defining as reference &d it is not changed. Looks like data frame is not a reference,
 //  but making a copy.
-std::string getWrapName(Rcpp::DataFrame & d, size_t col) {
-   std::vector<std::string> names = parseColNames(d,col);
-   return(names[0]);
+std::string getWrapName(std::string modelTerm) {
+   size_t pos1;
+   pos1 = modelTerm.find('(');
+   return(modelTerm.substr(0,pos1));
 }
 
-std::string getVarName(Rcpp::DataFrame & d, size_t col) {
-   std::vector<std::string> names = parseColNames(d,col);
-   return(names[1]);
+// Get the string of 'variable' names from a model-term, this is the column-name(s) put as
+// first argument in the model-term function, optionally with interactions.
+// Syntax-wise it is the first string coming after the first opening parenthesis (until the
+// first comma or closing parenthesis), or if there is no opening parenthesis the whole model-term.
+// Examples:
+//    fx(herd) -> "herd"
+//    rn(herd:year, V...) -> "herd:year"
+//  from response side it includes cases where there is no opening parenthesis:
+//    fat -> "fat"
+//    probit(rustscore) -> "rustscore"
+std::string getVarNames(std::string modelTerm) {
+   size_t pos1,pos2;
+   pos1 = modelTerm.find('(');
+   if(pos1==std::string::npos) {   // if there is no opening parenthesis, use the
+      return(modelTerm);           // whole modelTerm as name and ready to return
+   }
+   pos2 = modelTerm.find_first_of("),",pos1);
+   std::string temp = modelTerm.substr(pos1+1,pos2-pos1-1);
+   return(temp);
 }
 
 
-#endif /* parseColNames_h */
+#endif /* parseFunctions_h */

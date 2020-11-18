@@ -18,7 +18,8 @@ class modelFixf : public modelFactor {
    
 public:
    
-   modelFixf(Rcpp::DataFrame &d, size_t col) : modelFactor(d, col) {
+   modelFixf(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+      : modelFactor(modelTerm, d, e, resp) {
    }
 
    ~modelFixf() {

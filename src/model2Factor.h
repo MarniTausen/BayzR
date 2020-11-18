@@ -17,7 +17,8 @@ class model2Factor : public modelBase {
    
 public:
    
-   model2Factor(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
+   model2Factor(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : modelBase(modelTerm, d, e, resp) {
       Rcpp::RObject col1 = d[col];
       Rcpp::RObject col2 = col1.attr("factor2");
       std::vector<std::string> names = parseColNames(d,col);

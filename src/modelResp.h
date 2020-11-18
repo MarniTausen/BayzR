@@ -4,6 +4,7 @@
 //  standard continuous data case, there are derived classes for non-linear models.
 // - the coldata is NumericVector (double)
 // - hpar vector is size 1 to hold residual variance
+// note: modelBase constructor has set parName to name of response variable
 //
 //  Created by Luc Janss on 03/08/2018.
 //
@@ -18,10 +19,15 @@ class modelResp : public modelBase {
    
 public:
    
-   modelResp(Rcpp::DataFrame &d, size_t col) : modelBase(d, col) {
-      Ydata = d[col];
+   modelResp(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+            : modelBase(modelTerm, d, e, resp)
+   {
+      if(varColIndex[0] >= 0)
+         Ydata = d[col];
+      else {  // this can be modified to use vector from the environment
+         throw generalRbayzError("Not yet ready to use response ("+parName+") from R environment");
+      }
       hpar.resize(1,1.0);
-      parName = "unknown";  // par is not used!
       hparName = "var.resid";
       for (size_t obs=0; obs<resid.size(); obs++)
          // initialize resid vector by copying data-vector in it

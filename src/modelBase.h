@@ -2,16 +2,20 @@
 //  modelBase.h
 //
 //  Base class for model (computational) classes.
-//   - declares and set the resid and residPrec vector to the one-by-last and last
-//     column of the model-frame
-//   - declare par and hpar vectors, and vectors to hold names of the parameter and
-//     hyper-parameter (parName, hparName), and labels for their levels ((h)parLevelNames).
-//    * the base class cannot set sizes or fill all names, if a derived class fails to
-//       intialize properly problems can occur!
-//    * for parName a default is set, but sometimes needs changing in a derived class.
-//   - gprior member variable is declared and filled from information in the data column
-//   - define sample() as pure virtual function, all derived classes should make an
+//  Of course, this constructor is run first for construction of every model-class object,
+//  so it allows to prepare things that can be used by all model-classes.
+//  - resid and residPred pointers are set, they depend on the response that is handled
+//  - define all common variables: parameters, names, parameter labels
+//  - this also checks and finds/links variable names to data-frame columns, or
+//    checks that they can be found in the R environment
+//  - defines that all model objects have a grprior objects and retrieves information
+//    from a prior= setting in it, when available.
+//  - defines sample() as pure virtual function, all derived classes should make an
 //     implementation of this for proper working!
+// Note:
+//    * the base class cannot set sizes or fill all names of paranmeters, if a derived
+//      class fails to intialize properly problems can occur!
+//    * for parName a default is set as the variable name, but sometimes needs changing.
 //
 //  Created by Luc Janss on 03/08/2018.
 
@@ -22,18 +26,38 @@
 #include <vector>
 #include "parseColNames.h"
 #include "priorClasses.h"
+#include "simpleMatrix.h"
 
 class modelBase {
    
 public:
 
-   modelBase(Rcpp::DataFrame &d, size_t col) : gprior(d, col) {
-      resid = d[d.size()-2];
-      residPrec = d[d.size()-1];
-      if(getWrapName(d,col)=="")
-         parName = getVarName(d, col);
-      else
-         parName = getWrapName(d, col) + "." + getVarName(d, col);
+   modelBase(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+                 : gprior(modelTerm)
+   {
+      resid = e[2*resp];
+      residPrec = e[2*resp+1];
+      parName = getVarNames(modelTerm);
+      varNames = splitString(parName,":");
+      // Search the varNames in the data-frame (column names) and fill varColIndex.
+      // The searching of names is not efficient now, see comments in findDatColumn().
+      for(size_t i=0; i<varNames.size(); i++) {
+         varColIndex.push_back(findDataColumn(d, varNames[i]));
+      }
+      // Also search the varNames in the R environment and fill varInEnvironment.
+      // Already link it by setting an Robject? It would only be a reference, so
+      // the overhead of having this Robject in every model object is minimal.
+      // But .... needs to be a vector of Robjects?
+      Rcpp::Environment Renv();
+      for(size_t i=0; i<varNames.size(); i++) {
+         varInEnvironment.push_back(Renv.exists(varNames[i]));
+      }
+      // Check that every varName is found either in the data frame or in the environment.
+      for(size_t i=0; i<varNames.size(); i++) {
+         if( (varColIndex[i] == -1) && (varInEnvironment[i]==FALSE) )
+            throw generalRbayzError("Variable name not found: "+varNames[i]);
+      }
+
    }
 
    virtual ~modelBase() {
@@ -49,11 +73,12 @@ public:
    
    std::vector<double> par, hpar;
    std::string parName, hparName;
-   std::vector<std::string> parLabels, hparLabels;
+   std::vector<std::string> parLabels, hparLabels, varNames;
+   std::vector<int> varColIndex;
+   std::vector<bool> varInEnvironment;
    
 protected:
-   Rcpp::NumericVector resid;
-   Rcpp::NumericVector residPrec;
+   double *resid, *residPrec;
    GenericPrior gprior;
 
 };

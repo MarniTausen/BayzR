@@ -17,7 +17,8 @@ class modelRan2f : public model2Factor {
 
 public:
 
-   modelRan2f(Rcpp::DataFrame &d, size_t col)  : model2Factor(d, col) {
+   modelRan2f(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : model2Factor(modelTerm, d, e, resp) {
       hpar.resize(1,1);
       hparName = "var." + parName;
    }
