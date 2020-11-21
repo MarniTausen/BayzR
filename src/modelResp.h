@@ -29,9 +29,17 @@ public:
       }
       hpar.resize(1,1.0);
       hparName = "var.resid";
-      for (size_t obs=0; obs<Nresid; obs++)
-         // initialize resid vector by copying data-vector in it
+      // initialize resid and residPrec vectors; resid starts as the observed responses
+      for (size_t obs=0; obs<Nresid; obs++) {
          resid[obs] = Ydata[obs];
+         residPrec[obs] = 1.0;
+      }
+      Rcpp::Rcout << "Response object ready, Nresid=" << Nresid << "\n";
+      for(size_t i=0; i < Nresid; i++) {
+         Rcpp::Rcout << " " << resid[i];
+      }
+      Rcpp::Rcout << "\n";
+      
    }
    
    ~modelResp() {

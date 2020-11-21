@@ -31,8 +31,10 @@ public:
    {
       F = new dataFactor();
       for(size_t i=0; i<varColIndex.size(); i++) {
-         if(varColIndex[i] >= 0)  // The factor is in the data frame in column varColIndex[i]
+         if(varColIndex[i] >= 0)  { // The factor is in the data frame in column varColIndex[i]
+            Rcpp::Rcout << "Setting up factor from column " << varColIndex[i] << "\n";
             F->addVariable(d, varColIndex[i]);
+         }
          else {  // The factor is in the R environment (all checked in modelBase constructor)
             F->addVariable(varNames[i]);
          }

@@ -49,11 +49,25 @@ public:
          throw generalRbayzError("Variable is not a factor (unfortunately cannot get the name here)\n");
       }
       data = Rcpp::as<Rcpp::IntegerVector>(col);
+      for(size_t i=0; i < data.size(); i++) {
+         Rcpp::Rcout << " " << data[i];
+      }
       for (size_t i=0; i<data.size(); i++)
          data[i] -= 1;
+      Rcpp::Rcout << "\n";
       Rcpp::CharacterVector templabels = data.attr("levels");
       CharVec2cpp(labels, templabels);
       Nvar=1;
+      Rcpp::Rcout << "Factor set-up with " << labels.size() << " levels\n";
+      for(size_t i=0; i < data.size(); i++) {
+         Rcpp::Rcout << " " << data[i];
+      }
+      Rcpp::Rcout << "\n";
+      for(size_t i=0; i < labels.size(); i++) {
+         Rcpp::Rcout << " " << labels[i];
+      }
+      Rcpp::Rcout << "\n";
+
    }
 
    // addVariables adds another variable in a factor
@@ -71,7 +85,7 @@ public:
    void addVariable(Rcpp::RObject Rcol) {
       if(Nvar==0)
          setupFirstVariable(Rcol);
-      else {
+      else { // add (interact) another factor with already stored factor(s)
          if (!Rf_isFactor(Rcol)) {
             throw generalRbayzError("Variable is not a factor (unfortunately cannot get the name here)\n");
          }
@@ -79,6 +93,8 @@ public:
          std::vector<std::string> newFactorLabels;
          CharVec2cpp(newFactorLabels, data.attr("levels"));
          Rcpp::IntegerVector newdata = Rcpp::as<Rcpp::IntegerVector>(Rcol);
+         for (size_t i=0; i<newdata.size(); i++)
+            newdata[i] -= 1;
          size_t nLevel1=oldlabels.size();
          size_t nLevel2=newFactorLabels.size();
          labels.resize(nLevel1 * nLevel2);

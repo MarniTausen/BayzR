@@ -2,9 +2,6 @@
 #include <string>
 #include <Rcpp.h>
 #include <cmath>
-
-// [[Rcpp::plugins("cpp11")]]
-
 #include "parseFunctions.h"
 #include "modelBase.h"
 #include "modelResp.h"
@@ -17,8 +14,10 @@
 #include "rbayzExceptions.h"
 #include "simpleMatrix.h"
 
+// [[Rcpp::plugins("cpp11")]]
+
 // These functions are defined below the main function
-void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelBase *> & model, Rcpp::RObject &terms);
+//void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelBase *> & model, Rcpp::RObject &terms);
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
@@ -37,7 +36,7 @@ void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector &
 // The return value is a List, to check if program terminated normally or with errors check $nError.
 
 // [[Rcpp::export]]
-Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
+Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
                      Rcpp::IntegerVector chain, bool silent) {
 
    // Some check of chain settings is needed. Also the rbayz wrapper function now
@@ -56,10 +55,10 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
 
       // split the modelFormula in a list of response (LHS) and explanatory (RHS) terms.
       // getModelRHSTerms makes sure there is a "0" or "1" to specify if a mean is needed.
-      std::string CmodelFormula(modelFormula); // c++-version, don't like these Rcpp strings :-(
-      removeSpaces(CmodelFormula);
-      std::vector<std::string> modelLHSTerms = getModelLHSTerms(CmodelFormula);
-      std::vector<std::string> modelRHSTerms = getModelRHSTerms(CmodelFormula);
+      std::string formulaAsCppstring = convertFormula(modelFormula);
+      removeSpaces(formulaAsCppstring);
+      std::vector<std::string> modelLHSTerms = getModelLHSTerms(formulaAsCppstring);
+      std::vector<std::string> modelRHSTerms = getModelRHSTerms(formulaAsCppstring);
 
       // Create a 'data frame' (as simpleMatrix) to hold residual data and precisions
       simpleMatrix residData(inputData.nrow(),2*modelLHSTerms.size());
@@ -77,15 +76,15 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
                model.push_back(new modelMean(modelRHSTerms[term], inputData, residData, resp));
             else if (fname=="0")
                continue;
-            else if (fname=="fx")
+            else if (fname=="fx" || fname=="fixf")
                model.push_back(new modelFixf(modelRHSTerms[term], inputData, residData, resp));
-            else if (fname=="rn") {
+            else if (fname=="rn" || fname=="ranf") {
                if(modelRHSTerms[term].find("V=") != std::string::npos)
                   model.push_back(new modelRanf_cor(modelRHSTerms[term], inputData, residData, resp));
                else
                   model.push_back(new modelRanf(modelRHSTerms[term], inputData, residData, resp));
             }
-            else if (fname=="rg")
+            else if (fname=="rg" || fname=="freg")
                model.push_back(new modelFreg(modelRHSTerms[term], inputData, residData, resp));
             else if (fname=="rr")
                model.push_back(new modelRreg(modelRHSTerms[term], inputData, residData, resp));
@@ -93,7 +92,7 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
                throw (generalRbayzError("Unknow model (function) term: "+fname));
          }
       }
-         
+      
       // Parameter information vectors
       Rcpp::CharacterVector parNames;               // collected names of used hpar and par vectors (where size>0)
       Rcpp::LogicalVector parHyper;                 // if it is a hpar (TRUE) or par (FALSE) vector
@@ -150,8 +149,8 @@ Rcpp::List rbayz_cpp(Rcpp::String modelFormula, Rcpp::DataFrame inputData,
       for(size_t i=0; i<nEstimates; i++)
           postSD[i] = sqrt(postSD[i]/double(nSamples) - postMean[i]*postMean[i]);
       lastDone="Computing postMeans and PostSDs";
-      Rcpp::DataFrame estimates = Rcpp::DataFrame::create
-               (Rcpp::Named("postMean")=postMean, Rcpp::Named("postSD")=postSD);
+     Rcpp::DataFrame estimates = Rcpp::DataFrame::create
+              (Rcpp::Named("postMean")=postMean, Rcpp::Named("postSD")=postSD);
       estimates.attr("row.names") = estimNames;
       lastDone="Setting up estimates dataframe";
       result.push_back(0,"nError");

@@ -38,6 +38,16 @@ std::vector<std::string> splitString(std::string text, char splitchar) {
    return parts;
 }
 
+std::string convertFormula(Rcpp::Formula f) {
+   Rcpp::Function deparse("deparse");
+   Rcpp::CharacterVector formparts = deparse(f,Rcpp::Named("width.cutoff")=100);
+   std::string s;
+   for(size_t i=0; i<formparts.size(); i++ ) {
+      s += Rcpp::as<std::string>(formparts[i]);
+   }
+   return(s);
+}
+
 std::vector<std::string> getModelLHSTerms(std::string mf) {
    // split on ~, it must create two pieces that are the response term and list of explanatory terms
    std::vector<std::string> lhsrhs = splitString(mf,'~');

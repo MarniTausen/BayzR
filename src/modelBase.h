@@ -6,7 +6,7 @@
 //  so it allows to prepare things that can be used by all model-classes.
 //  - resid and residPred pointers are set, they depend on the response that is handled
 //  - define all common variables: parameters, names, parameter labels
-//  - this also checks and finds/links variable names to data-frame columns, or
+//  - this also checks and finds/links variable-names to data-frame columns, or
 //    checks that they can be found in the R environment
 //  - defines that all model objects have a grprior objects and retrieves information
 //    from a prior= setting in it, when available.
@@ -44,7 +44,10 @@ public:
       // Search the varNames in the data-frame (column names) and fill varColIndex.
       // The searching of names is not efficient now, see comments in findDataColumn().
       for(size_t i=0; i<varNames.size(); i++) {
-         varColIndex.push_back(findDataColumn(d, varNames[i]));
+         if (varNames[i]=="1" || varNames[i]=="0")
+            varColIndex.push_back(-1);
+         else
+            varColIndex.push_back(findDataColumn(d, varNames[i]));
       }
       // Also search the varNames in the R environment and fill varInEnvironment.
       // Already link it by setting an Robject? It would only be a reference, so
@@ -52,14 +55,18 @@ public:
       // But .... needs to be a vector of Robjects?
       Rcpp::Environment Renv;
       for(size_t i=0; i<varNames.size(); i++) {
-         varInEnvironment.push_back(Renv.exists(varNames[i]));
+         if (varNames[i]=="1" || varNames[i]=="0")
+            varInEnvironment.push_back(FALSE);
+         else
+            varInEnvironment.push_back(Renv.exists(varNames[i]));
       }
-      // Check that every varName is found either in the data frame or in the environment.
+      // Check that every varName is found either in the data frame or in the environment
+      // (Except for names "1" and "0"
       for(size_t i=0; i<varNames.size(); i++) {
-         if( (varColIndex[i] == -1) && (varInEnvironment[i]==FALSE) )
+         if( ! (varNames[i]=="1" || varNames[i]=="0") &&
+                (varColIndex[i] == -1) && (varInEnvironment[i]==FALSE) )
             throw generalRbayzError("Variable name not found: "+varNames[i]);
       }
-
    }
 
    virtual ~modelBase() {

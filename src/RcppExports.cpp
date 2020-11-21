@@ -5,22 +5,35 @@
 
 using namespace Rcpp;
 
-// rbayz_cpp
-Rcpp::List rbayz_cpp(Rcpp::DataFrame modelFrame, Rcpp::IntegerVector chain, bool silent);
-RcppExport SEXP _BayzR_rbayz_cpp(SEXP modelFrameSEXP, SEXP chainSEXP, SEXP silentSEXP) {
+// mfactor_cpp
+Rcpp::IntegerVector mfactor_cpp(Rcpp::List fact_list);
+RcppExport SEXP _BayzR_mfactor_cpp(SEXP fact_listSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type modelFrame(modelFrameSEXP);
+    Rcpp::traits::input_parameter< Rcpp::List >::type fact_list(fact_listSEXP);
+    rcpp_result_gen = Rcpp::wrap(mfactor_cpp(fact_list));
+    return rcpp_result_gen;
+END_RCPP
+}
+// rbayz_cpp
+Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData, Rcpp::IntegerVector chain, bool silent);
+RcppExport SEXP _BayzR_rbayz_cpp(SEXP modelFormulaSEXP, SEXP inputDataSEXP, SEXP chainSEXP, SEXP silentSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< Rcpp::Formula >::type modelFormula(modelFormulaSEXP);
+    Rcpp::traits::input_parameter< Rcpp::DataFrame >::type inputData(inputDataSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type chain(chainSEXP);
     Rcpp::traits::input_parameter< bool >::type silent(silentSEXP);
-    rcpp_result_gen = Rcpp::wrap(rbayz_cpp(modelFrame, chain, silent));
+    rcpp_result_gen = Rcpp::wrap(rbayz_cpp(modelFormula, inputData, chain, silent));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_BayzR_rbayz_cpp", (DL_FUNC) &_BayzR_rbayz_cpp, 3},
+    {"_BayzR_mfactor_cpp", (DL_FUNC) &_BayzR_mfactor_cpp, 1},
+    {"_BayzR_rbayz_cpp", (DL_FUNC) &_BayzR_rbayz_cpp, 4},
     {NULL, NULL, 0}
 };
 

@@ -20,7 +20,7 @@ test_that("Genotype effect model", {
     names(Response) <- NULL
 
 
-    fit <- bayz(Response ~ ranf(Genotypes, prior=ichi()), chain=c(1e4,100,10), silent=TRUE)
+    fit <- bayz(Response ~ rn(Genotypes, prior=ichi()), chain=c(1e4,100,10), silent=TRUE)
 
     #print(summary(fit))
 
@@ -67,7 +67,7 @@ test_that("Genotype and Environment effects model", {
     2*sapply(Env_2, function(x) Env_2_effects[x])
     names(Response) <- NULL
 
-    fit <- bayz(Response ~ ranf(Genotypes), chain=c(1e4,100,10), silent=TRUE)
+    fit <- bayz(Response ~ rn(Genotypes), chain=c(1e4,100,10), silent=TRUE)
 
     #print(summary(fit))
 
@@ -122,14 +122,14 @@ test_that("Genotype and Environment interactions effects model", {
     0.03*(sapply(Env_1, function(x) Env_1_effects[x])*sapply(Env_2, function(x) Env_2_effects[x]))
     names(Response) <- NULL
 
-    fit <- bayz(Response ~ ranf(Genotypes), chain=c(1e4,100,10), silent=TRUE)
+    fit <- bayz(Response ~ rn(Genotypes), chain=c(1e4,100,10), silent=TRUE)
 
     #print(summary(fit))
 
     expect_gte(summary(fit)$Heritability$Heritability[2], 0.05)
     expect_lte(summary(fit)$Heritability$Heritability[2], 0.25)
 
-    fit <- bayz(Response ~ ranf(Genotypes) + fixf(Env_1) + fixf(Env_2), chain=c(1e4,100,10), silent=TRUE)
+    fit <- bayz(Response ~ rn(Genotypes) + fx(Env_1) + fx(Env_2), chain=c(1e4,100,10), silent=TRUE)
 
     #print(summary(fit))
 
@@ -181,7 +181,7 @@ test_that("Genotype and Environment continous", {
     expect_gte(summary(fit)$Heritability$Heritability[2], 0.15)
     expect_lte(summary(fit)$Heritability$Heritability[2], 0.4)
 
-    fit <- bayz(Response ~ ranf(Genotypes) + freg(Env_1) + freg(Env_2), chain=c(1e4,100,10), silent=TRUE)
+    fit <- bayz(Response ~ rn(Genotypes) + rg(Env_1) + rg(Env_2), chain=c(1e4,100,10), silent=TRUE)
 
     #print(summary(fit))
 

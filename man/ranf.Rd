@@ -2,22 +2,22 @@
 % Please edit documentation in R/ranf.R
 \name{ranf}
 \alias{ranf}
-\title{Set Random variable}
+\title{Specify fit of a random factor, optionally with a kernel/similarity matrix}
 \usage{
 ranf(x, V = NULL, rrankpct = 99, prior = NULL)
 }
 \arguments{
-\item{x}{Variable vector which should be set to random in a model.}
+\item{x}{Variable (forced to be factor) to be used as random effect in the model.}
 
-\item{V}{Similarity/var-covar matrix to be included so that x~N(0,Vsigma^2). Uses eigen decomposition}
+\item{V}{Kernel/similarity/var-covar matrix to be included so that x~N(0,Vsigma^2). Uses eigen decomposition.}
 
-\item{rrankpct}{Reduced Rank threshold for including eigenvectors in percent (default 99\%)}
+\item{rrankpct}{Reduced Rank threshold for including eigenvectors, given in percent (default 99)}
 
 \item{prior}{Prior information to be added.}
 }
 \value{
-Random variable information.
+Object storing the factor information.
 }
 \description{
-Sets a variable to a random variable in a linear mixed model.
+Specify fit of a random factor, optionally with a kernel/similarity matrix
 }
