@@ -49,19 +49,19 @@ public:
    }
    
    void resid_correct(size_t col) {
-      for (size_t obs=0; obs < F->data.size(); obs++)
+      for (size_t obs=0; obs < F->data.nelem; obs++)
          resid[obs] -= regcoeff[col] * M->data(obsIndex[obs],col);
    }
 
    void resid_decorrect(size_t col) {
-      for (size_t obs=0; obs < F->data.size(); obs++)
+      for (size_t obs=0; obs < F->data.nelem; obs++)
          resid[obs] += regcoeff[col] * M->data(obsIndex[obs],col);
    }
 
    void collect_lhs_rhs(size_t col) {
       lhs = 0.0; rhs=0.0;
       size_t matrixrow;
-      for (size_t obs=0; obs < F->data.size(); obs++) {
+      for (size_t obs=0; obs < F->data.nelem; obs++) {
          matrixrow = obsIndex[obs];
          rhs += M->data(matrixrow,col) * residPrec[obs] * resid[obs];
          lhs += M->data(matrixrow,col) * M->data(matrixrow,col) * residPrec[obs];

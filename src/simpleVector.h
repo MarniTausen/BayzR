@@ -1,43 +1,67 @@
 //
-//  simpleMatrix.h
-//  Class to hold a matrix of doubles, quite basic functionality but designed for performance.
-//  - all memory allocated as one block
-//  - organized column-major so computations go fastest working by column
-//  - accessible with double index ->data[col][row] - NOTE col first!
-//    or alternatively, ->data[col] is a pointer to the data of column `col`
-//  - constructor specifies number of rows first!
-// Note: the actual elements need to be accessed as object->data[] (column) or ->data[][] (element),
-//    at least the first one can be made more fancy by adding a function for operator[]?
+//  simpleVector.h
+//  Wrapper around a basic C-style vector (pointer to block of memory), but with
+//  C++ allocation using new. Now with version for Integer data (simpleIntVector) and
+//  preparing also one for doubles (SimpleDblVector).
+//  Developing now two uses:
+//   - if at declaration size is known, can use constructor with size and it will initialise with 0
+//   - if vector is class member and size is not known at construction, constructor with no arguments
+//     can be used, it will not allocated the vector yet. Then use initWith() to both allocated and
+//     initialise it with inpput from an Rcpp vector.
+//  To access the vector elements use .data[i] or ->data[i], size is stored as member variable nelem.
 //
 //  Created by Luc Janss on 23/10/2020.
 //
 
-#ifndef simpleMatrix_h
-#define simpleMatrix_h
+#ifndef simpleIntVector_h
+#define simpleIntVector_h
 
+#include <Rcpp.h>
 #include <algorithm>
 
-class simpleMatrix {
+class simpleIntVector {
 
 public:
-   simpleMatrix(size_t nr, size_t nc) {
-      data0 = new double[nr*nc];    // a block of memory nrows * ncolumns
-      data  = new double*[nc];      // a list of column-pointers to index it by column
-      for(size_t i=0; i<nc; i++)
-         data[i] = data0 + i*nr;
-      nrow = nr; ncol = nc;
-      std::fill_n(data0, nr*nc, 0.0l);
+   
+   simpleIntVector() : nelem(0) {
+   }
+   
+   simpleIntVector(size_t n) {
+      if (nelem <= 0) {
+         throw(generalRbayzError("Zero or negative size in initialisation in simpleVector"));
+      }
+      nelem = n;
+      data  = new int[n];
+      std::fill_n(data, n, 0);
    }
 
-   ~simpleMatrix() {
-      delete[] data;
-      delete[] data0;
+   ~simpleIntVector() {
+      if (nelem>0) {
+         delete[] data;
+      }
+   }
+   
+   int& operator[](size_t i) {
+      return(data[i]);
+   }
+   
+   void initWith(Rcpp::IntegerVector v) {
+      if(nelem>0) {
+         throw(generalRbayzError("Cannot initialise already allocated vector in simpleVector"));
+         // can be extended to re-allocate
+      }
+      size_t n = v.size();
+      data  = new int[n];
+      nelem = n;
+      for(size_t i=0; i<nelem; i++)
+         data[i] = v[i];
    }
 
-   double *data0;
-   double **data;
-   size_t nrow,ncol;
+   int *data;
+   size_t nelem;
    
 };
 
-#endif /* simpleMatrix_h */
+
+
+#endif /* simpleIntVector_h */

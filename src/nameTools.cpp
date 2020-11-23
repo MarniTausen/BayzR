@@ -79,7 +79,7 @@ int findDataColumn(Rcpp::DataFrame d, std::string name) {
 void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, dataMatrix *M) {
    int errors=0;
 //   Rcpp::Rcout << "Going to resize obsIndex to " << F->data.size() << "\n";
-   obsIndex.resize(F->data.size(),0);
+   obsIndex.resize(F->data.nelem,0);
    // Build a sorted list of the matrix labels paired with matrix entry-rows
    std::vector< std::pair<std::string, size_t> > matLabelsSorted;
    for(size_t i=0; i< M->labels.size(); i++)
@@ -88,7 +88,7 @@ void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, dataMatrix *M) 
    // Make the index that links observations to matrix rows
    std::string s;
    std::vector< std::pair<std::string, size_t> >::iterator it;
-   for(size_t i=0; i<F->data.size(); i++) {
+   for(size_t i=0; i<F->data.nelem; i++) {
       s = F->labels[F->data[i]];
       if ( (it = std::lower_bound(matLabelsSorted.begin(), matLabelsSorted.end(), s, compString2Pair)) != matLabelsSorted.end()) {
          obsIndex[i]=it->second;

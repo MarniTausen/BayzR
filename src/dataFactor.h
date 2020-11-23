@@ -11,6 +11,7 @@
 #include <Rcpp.h>
 #include <vector>
 #include <string>
+#include "simpleVector.h"
 
 void CharVec2cpp(std::vector<std::string> & labels, Rcpp::CharacterVector templabels);
 
@@ -20,7 +21,7 @@ public:
 
    // It is now possible to setup an 'empty' dataFactor object, it can be
    // filled with the addVariable() function.
-   dataFactor() {
+   dataFactor() : data() {
       Nvar=0;
    }
    
@@ -29,18 +30,18 @@ public:
    // The string-interface is interpreted as passing the name of an object
    // that should be in the R environment, and names are already checked in
    // the modelBase constructor.
-   dataFactor(Rcpp::DataFrame &d, size_t col) {
+   dataFactor(Rcpp::DataFrame &d, size_t col) : data() {
       Rcpp::RObject Rcol = Rcpp::as<Rcpp::RObject>(d[col]);
       setupFirstVariable(Rcol);
    }
 
-   dataFactor(std::string varname) {
+   dataFactor(std::string varname) : data() {
       Rcpp::Environment Renv;
       Rcpp::RObject Rcol = Renv[varname];
       setupFirstVariable(Rcol);
    }
 
-   dataFactor(Rcpp::RObject Rcol) {
+   dataFactor(Rcpp::RObject Rcol) : data() {
       setupFirstVariable(Rcol);
    }
 
@@ -48,26 +49,14 @@ public:
       if (!Rf_isFactor(col)) {
          throw generalRbayzError("Variable is not a factor (unfortunately cannot get the name here)\n");
       }
-      data = Rcpp::as<Rcpp::IntegerVector>(col);
-      for(size_t i=0; i < data.size(); i++) {
-         Rcpp::Rcout << " " << data[i];
-      }
-      for (size_t i=0; i<data.size(); i++)
+      Rcpp::IntegerVector tempvec = Rcpp::as<Rcpp::IntegerVector>(col);
+      data.initWith(tempvec);
+      for (size_t i=0; i< data.nelem; i++) {
          data[i] -= 1;
-      Rcpp::Rcout << "\n";
-      Rcpp::CharacterVector templabels = data.attr("levels");
+      }
+      Rcpp::CharacterVector templabels = col.attr("levels");
       CharVec2cpp(labels, templabels);
       Nvar=1;
-      Rcpp::Rcout << "Factor set-up with " << labels.size() << " levels\n";
-      for(size_t i=0; i < data.size(); i++) {
-         Rcpp::Rcout << " " << data[i];
-      }
-      Rcpp::Rcout << "\n";
-      for(size_t i=0; i < labels.size(); i++) {
-         Rcpp::Rcout << " " << labels[i];
-      }
-      Rcpp::Rcout << "\n";
-
    }
 
    // addVariables adds another variable in a factor
@@ -91,10 +80,9 @@ public:
          }
          std::vector<std::string> oldlabels(labels);
          std::vector<std::string> newFactorLabels;
-         CharVec2cpp(newFactorLabels, data.attr("levels"));
+         CharVec2cpp(newFactorLabels, Rcol.attr("levels"));
          Rcpp::IntegerVector newdata = Rcpp::as<Rcpp::IntegerVector>(Rcol);
-         for (size_t i=0; i<newdata.size(); i++)
-            newdata[i] -= 1;
+         // note: newdata still has level-coding from 1
          size_t nLevel1=oldlabels.size();
          size_t nLevel2=newFactorLabels.size();
          labels.resize(nLevel1 * nLevel2);
@@ -104,8 +92,8 @@ public:
             }
          }
          // Replace existing data-level-coding with codes to match the new interaction
-         for(size_t i=0; i<data.size(); i++) {
-            data[i] = data[i]*nLevel2 + newdata[i];
+         for(size_t i=0; i<data.nelem; i++) {
+            data[i] = data[i]*nLevel2 + newdata[i]-1;
          }
          Nvar++;
       }
@@ -114,7 +102,7 @@ public:
    ~dataFactor() {
    }
 
-   Rcpp::IntegerVector data;
+   simpleIntVector data;
    std::vector<std::string> labels;
    int Nvar;  // The number of (interacting) variables in this factor
 

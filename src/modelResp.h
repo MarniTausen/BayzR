@@ -34,12 +34,6 @@ public:
          resid[obs] = Ydata[obs];
          residPrec[obs] = 1.0;
       }
-      Rcpp::Rcout << "Response object ready, Nresid=" << Nresid << "\n";
-      for(size_t i=0; i < Nresid; i++) {
-         Rcpp::Rcout << " " << resid[i];
-      }
-      Rcpp::Rcout << "\n";
-      
    }
    
    ~modelResp() {

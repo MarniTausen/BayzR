@@ -32,7 +32,6 @@ public:
       F = new dataFactor();
       for(size_t i=0; i<varColIndex.size(); i++) {
          if(varColIndex[i] >= 0)  { // The factor is in the data frame in column varColIndex[i]
-            Rcpp::Rcout << "Setting up factor from column " << varColIndex[i] << "\n";
             F->addVariable(d, varColIndex[i]);
          }
          else {  // The factor is in the R environment (all checked in modelBase constructor)
@@ -56,12 +55,12 @@ public:
 protected:
 
    void resid_correct() {
-      for (size_t obs=0; obs < F->data.size(); obs++)
+      for (size_t obs=0; obs < F->data.nelem; obs++)
          resid[obs] -= par[F->data[obs]];
    }
 
    void resid_decorrect() {
-      for (size_t obs=0; obs < F->data.size(); obs++)
+      for (size_t obs=0; obs < F->data.nelem; obs++)
          resid[obs] += par[F->data[obs]];
    }
 
@@ -71,7 +70,7 @@ protected:
          rhs[k] = 0.0;
          lhs[k] = 0.0;
       }
-      for (size_t obs=0; obs < F->data.size(); obs++) {
+      for (size_t obs=0; obs < F->data.nelem; obs++) {
          k=F->data[obs];
          rhs[k] += residPrec[obs] * resid[obs];
          lhs[k] += residPrec[obs];
