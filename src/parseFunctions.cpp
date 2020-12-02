@@ -9,6 +9,7 @@
 #include <string>
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
+#include "nameTools.h"
 
 void removeSpaces(std::string &s) {
    size_t pos;
@@ -50,20 +51,19 @@ std::string convertFormula(Rcpp::Formula f) {
 // 1: Factor, 2: IntegerVector, 3: NumericVector, 4: CharacterVector, 5: LogicalVector
 // 6: (Numeric/double) Matrix, 7: DataFrame, 8: List, 9: all other
 int getVariableType(Rcpp::RObject x) {
-   if(is<NumericVector>(x)){
-           if(Rf_isMatrix(x)) return(6);
-           else return(3);
-       }
-       else if(is<IntegerVector>(x)){
-           if(Rf_isFactor(x)) return(1);
-           else return(2);
-       }
-       else if(is<CharacterVector>(x)) return(4);
-       else if(is<LogicalVector>(x)) return(5);
-       else if(is<DataFrame>(x)) return(7);
-       else if(is<List>(x)) return(8);
-       else return(9);
+   if(Rcpp::is<Rcpp::NumericVector>(x)){
+      if(Rf_isMatrix(x)) return(6);
+      else return(3);
    }
+   else if(Rcpp::is<Rcpp::IntegerVector>(x)){
+      if(Rf_isFactor(x)) return(1);
+      else return(2);
+   }
+   else if(Rcpp::is<Rcpp::CharacterVector>(x)) return(4);
+   else if(Rcpp::is<Rcpp::LogicalVector>(x)) return(5);
+   else if(Rcpp::is<Rcpp::DataFrame>(x)) return(7);
+   else if(Rcpp::is<Rcpp::List>(x)) return(8);
+   else return(9);
 }
 
 // Search and retrieve a variable 'name' by searching in the dataframe 'd' or in the R
@@ -72,14 +72,14 @@ Rcpp::RObject getVariableObject(Rcpp::DataFrame &d, std::string name) {
    bool foundInEnv;
    Rcpp::RObject tempObject;
    Rcpp::Environment Renv;
-   colnr = findDataColumn(d, name);  // returns -1 if not found
-   if(colnr>=0) {                    // found in data frame
+   int colnr = findDataColumn(d, name);  // returns -1 if not found
+   if(colnr>=0) {                        // found in data frame
       tempObject = Rcpp::as<Rcpp::RObject>(d[colnr]);
    }
-   else {                           // search in R environment
+   else {                               // search in R environment
       foundInEnv = Renv.exists(name);
       if(foundInEnv) tempObject = Renv[name];
-      else return R_NilValue;      // not found in data frame or environment!
+      else return R_NilValue;           // not found in data frame or environment!
    }
    return tempObject;
 }

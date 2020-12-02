@@ -54,7 +54,7 @@ public:
             varType.push_back(0);
          }
          else {
-            varObjects.push_back(getVariableObject(d,varNames[i]);
+            varObjects.push_back(getVariableObject(d,varNames[i]));
             if(varObjects.back() != R_NilValue)
                varType.push_back(getVariableType(varObjects.back()));
             else {
@@ -67,9 +67,13 @@ public:
    virtual ~modelBase() {
    }
    
-   // sample is pure virtual, the base class cannot give a definition, and
-   // all derived classes must implement it to create a concrete class.
-   virtual void sample()=0;
+   // First sample() was pure virtual (no implementation in this base class), but it does not
+   // allow to make modelBase objects, and I do that now sometimes to inspect variables before
+   // making the definite model object. As an alternative to pure virtual, now modelBase has
+   // a sampling implementation, but it throws an error :-).
+   virtual void sample() {
+      throw generalRbayzError("Inappropriate model built with a base class sample() method");
+   }
 
    // prepForOutput is for model classes that need to make a transform of
    // parameters for output, the base class defines an 'empty' version.

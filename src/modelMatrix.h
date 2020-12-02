@@ -38,7 +38,7 @@ public:
          throw generalRbayzError("rr() model not supported, can now only deal with <factor>;<matrix> input");
       F = new dataFactor(varObjects[0]);
       M = new dataMatrix(varObjects[1]);
-      regcoeff.resize(M->nColUsed,0);
+      regcoeff.resize(M->ncol,0);
       // here level-names for the regression coefficients are not filled in parLevelNames,
       // therefore automatically the levels 1,2,3,... are inserted in collectParInfo.
       // It would be nicer to collect the column names (if available), or else fill with "col"+1,2,3...
@@ -53,27 +53,30 @@ public:
    }
    
    void resid_correct(size_t col) {
+      double * colptr = M->data[col];
       for (size_t obs=0; obs < F->data.nelem; obs++)
-         resid[obs] -= regcoeff[col] * M->data(obsIndex[obs],col);
+         resid[obs] -= regcoeff[col] * colptr[obsIndex[obs]];
    }
 
    void resid_decorrect(size_t col) {
+      double * colptr = M->data[col];
       for (size_t obs=0; obs < F->data.nelem; obs++)
-         resid[obs] += regcoeff[col] * M->data(obsIndex[obs],col);
+         resid[obs] += regcoeff[col] * colptr[obsIndex[obs]];
    }
 
    void collect_lhs_rhs(size_t col) {
       lhs = 0.0; rhs=0.0;
       size_t matrixrow;
+      double * colptr = M->data[col];
       for (size_t obs=0; obs < F->data.nelem; obs++) {
          matrixrow = obsIndex[obs];
-         rhs += M->data(matrixrow,col) * residPrec[obs] * resid[obs];
-         lhs += M->data(matrixrow,col) * M->data(matrixrow,col) * residPrec[obs];
+         rhs += colptr[matrixrow] * residPrec[obs] * resid[obs];
+         lhs += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
       }
    }
 
    void update_regressions() {
-      for(size_t k=0; k < M->nColUsed; k++) {
+      for(size_t k=0; k < M->ncol; k++) {
          resid_decorrect(k);
          collect_lhs_rhs(k);
          lhs = lhs + (1.0/( M->weights[k]*hpar[0] ));   // lhs with variance added

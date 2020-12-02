@@ -9,7 +9,7 @@
 #define dataCovar_h
 
 #include <Rcpp.h>
-#include "simpleVector"
+#include "simpleVector.h"
 
 class dataCovar : public simpleDblVector {
 
@@ -22,8 +22,6 @@ public:
    
    ~dataCovar() {
    }
-   
-   Rcpp::NumericVector data;
    
 };
 

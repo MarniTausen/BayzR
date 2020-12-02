@@ -22,11 +22,10 @@ public:
    modelResp(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
             : modelBase(modelTerm, d, e, resp)
    {
-      if(varColIndex[0] >= 0)
-         Ydata = d[varColIndex[0]];
-      else {  // this can be modified to use vector from the environment
-         throw generalRbayzError("Not yet ready to use response ("+parName+") from R environment");
-      }
+      // For now there is no check on the response vector to be correctly numerical, in future
+      // rbayz main may need to make a triage for different types of response and then construct
+      // appropriate response objects. x
+      Ydata = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
       hpar.resize(1,1.0);
       hparName = "var.resid";
       // initialize resid and residPrec vectors; resid starts as the observed responses

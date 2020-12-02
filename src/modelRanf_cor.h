@@ -31,7 +31,7 @@ public:
       // effects on the original scale (eigen-vectors x regressions). So the par-vector
       // has size the number of matrix rows, and the prepForOutput() computes the
       // random effects from the regression coefficients when output is needed.
-      par.resize(M->data.nrow(),0);
+      par.resize(M->nrow,0);
       parLabels = M->labels; // I believe this makes a deep copy, but a shallow copy would be enough
    }
 
@@ -42,17 +42,17 @@ public:
       update_regressions();
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
-      for(size_t k=0; k< M->nColUsed; k++)
+      for(size_t k=0; k< M->ncol; k++)
          ssq += regcoeff[k]*regcoeff[k]/M->weights[k];
-      hpar[0] = gprior.samplevar(ssq, M->nColUsed);
+      hpar[0] = gprior.samplevar(ssq, M->ncol);
    }
 
    // prepForOutput puts the transform to breeding values in the par-vector
    void prepForOutput() {
-      for(size_t row=0; row< M->data.nrow(); row++) {
+      for(size_t row=0; row< M->nrow; row++) {
          par[row]=0.0l;
-         for(size_t col=0; col<M->nColUsed; col++) {
-            par[row] += M->data(row,col) * regcoeff[col];
+         for(size_t col=0; col<M->ncol; col++) {
+            par[row] += M->data[col][row] * regcoeff[col];
          }
       }
    };
