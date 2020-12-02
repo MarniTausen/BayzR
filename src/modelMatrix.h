@@ -30,10 +30,14 @@ public:
    modelMatrix(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
          : modelBase(modelTerm, d, e, resp)
    {
-      size_t col = varColIndex[0]; 
-      Rcpp::RObject col_asRObject = d[col];
-      M = new dataMatrix(col_asRObject);
-      F = new dataFactor(d, col);
+      // For now only allowing a matrix input where there is an index variable set (model
+      // made with id;matrix). It could be extended to allow for no id, so that matrix needs to
+      // be aliged 1:1 with data records, then the 'id' is bascially a 1:1 link too (in algebra
+      // use an identity matrix to link the matrix rows to the data rows).
+      if( ! (varType[0]==1 && varType[1]==6 && hasIndexVariable) )
+         throw generalRbayzError("rr() model not supported, can now only deal with <factor>;<matrix> input");
+      F = new dataFactor(varObjects[0]);
+      M = new dataMatrix(varObjects[1]);
       regcoeff.resize(M->nColUsed,0);
       // here level-names for the regression coefficients are not filled in parLevelNames,
       // therefore automatically the levels 1,2,3,... are inserted in collectParInfo.

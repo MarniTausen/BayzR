@@ -1,6 +1,8 @@
 //
 //  dataMatrix.h
-//  Class for storage of matrix input data: a kernel/similarity matrix, or matrix of covariates.
+//  Class for storage of matrix input data (matrix of covariates).
+//  This is a slightly specialised (derived) version of simpleMatrix: it also has
+//  names for the rows, and weights.
 //  The different types of input are loaded based on attributes found in the column data.
 //  Class modelMatrix has matching computational operations on this 'data'.
 //
@@ -15,17 +17,36 @@
 #include "rbayzExceptions.h"
 #include <string>
 #include <vector>
+#include "simpleMatrix.h"
+#include "simpleVector.h"
 //#include "nameTools.h"  // including nameTools.h to get the definition of getMatrixNames
                           // does not work, maybe because the includes make a loop?
                           // Now I just add an extra declaration of getMatrixNames()...
 
 void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat);
 
-class dataMatrix {
+class dataMatrix : public simpleMatrix {
 
 public:
-   dataMatrix(Rcpp::RObject col) {
+   dataMatrix(Rcpp::RObject col) : simpleMatrix(col) {
+      // constuctor of simpleMatrix has already done the matrix data, here add
+      // weights and labels, and column-center the covariates.
+      Rcpp::NumericMatrix tempdata = Rcpp::as<Rcpp::NumericMatrix>(col);
+      V.initWith(tempdata.ncol(), 1.0l);
+      weights = V.data;  // the weights pointer in a dataMatrix object is the 'data' in V
+      getMatrixNames(labels, tempdata);
+      double * datacol;
+      size_t i,j;
+      double sum;
+      for(i=0; i<ncol; i++) {
+         datacol = data[i];
+         sum=0.0l;
+         for(j=0; j<nrow; j++) sum+=datacol[j];
+         for(j=0; j<nrow; j++) datacol[j] -= sum;
+      }
+      /*  this part needs to be reviewed, it needs to move to variance-input
       if (col.hasAttribute("evectors")) {
+         throw(generalRbayzError("Evector input as matrix data temporarily disables\n"));
          double rrankpct;
          data = Rcpp::as<Rcpp::NumericMatrix>(col.attr("evectors"));
          std::vector<std::string> att = data.attributeNames();
@@ -57,22 +78,17 @@ public:
          Rcpp::Rcout << "In ranf with V rrankpct=" << rrankpct << " uses " << nColUsed << " eigenvectors\n";
          getMatrixNames(labels, data);  // can be moved outside if-else when other matrix forms are also coded
       }
-      else {
-         Rcpp::Rcout << "Matrix input not (yet) supported on column xxx\n";
-      }
+      else  {
+       */
    }
 
    ~dataMatrix() {
    }
 
-   Rcpp::NumericMatrix data;
-   Rcpp::NumericVector weights;
+   simpleDblVector V;
+   double *weights;
    std::vector<std::string> labels;
-   size_t nColUsed;  // I want to get rid of this nColUsed, the computing algorithms should
-                     // just get the sizes from vector size() or matrix nrow() ncol(),
-                     // but the Rcpp matrices are difficult to resize ....
-
-   // double * data;  // want to test difference using low-level C arrays for storage
+   
 };
 
 #endif /* dataMatrix_h */

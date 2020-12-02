@@ -9,13 +9,15 @@
 #define dataCovar_h
 
 #include <Rcpp.h>
+#include "simpleVector"
 
-class dataCovar {
-   
+class dataCovar : public simpleDblVector {
+
 public:
    
-   dataCovar(Rcpp::DataFrame &d, size_t col) {
-      data = Rcpp::as<Rcpp::NumericVector>(d[col]);
+   dataCovar(Rcpp::RObject x) : simpleDblVector() {
+      Rcpp::NumericVector temp = Rcpp::as<Rcpp::NumericVector>(x);
+      initWith(temp);
    }
    
    ~dataCovar() {

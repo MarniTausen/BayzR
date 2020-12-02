@@ -86,8 +86,17 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
             }
             else if (fname=="rg" || fname=="freg")
                model.push_back(new modelFreg(modelRHSTerms[term], inputData, residData, resp));
-            else if (fname=="rr")
-               model.push_back(new modelRreg(modelRHSTerms[term], inputData, residData, resp));
+            else if (fname=="rr") {
+               modelBase tempmodel(modelRHSTerms[term], inputData, residData, resp);
+               // For the moment only accept rr model with xxx;<matrix> input, if xxx is factor is checked in Rreg
+               if (tempmodel.varNames.size()==2 && tempmodel.hasIndexVariable && tempmodel.varType[1]==6)
+                  model.push_back(new modelRreg(modelRHSTerms[term], inputData, residData, resp));
+               else {
+                  throw (generalRbayzError("Cannot yet use rr() with something else than id;matrix"));
+               }
+            }
+            else if (fname=="smurf")
+               throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));
             else
                throw (generalRbayzError("Unknow model (function) term: "+fname));
          }
@@ -107,7 +116,15 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
                      parLogged, parLoggedNames, estimNames);
       size_t nEstimates = estimNames.size();
 
-      // Make list of output sample cycle-numbers; this also checks if the chain settings actually make 1 or more output.
+      // Check the chain settings and make list of output sample cycle-numbers.
+      if (chain[1]==0 && chain[2]==0 && chain[3]==0) {  // chain was not set
+         chain[1]=1100; chain[2]=100; chain[3]=10;
+         Rcpp::Rcout << "Warning: chain was not set, running 1100 cycles but it may be too short for many analyses\n";
+      }
+      if (chain.size() != 3) throw (generalRbayzError("The chain settings do not have 3 elements"));
+      if (chain[1] <= 0) throw (generalRbayzError("The chain length is zero or negative"));
+      if (chain[2] < 0 || chain[3]<0 ) throw (generalRbayzError("The chain burnin or skip is negative"));
+      if (chain[3] == 0) chain[3]=1;  // interpret skip zero as outputting all cycles
       Rcpp::IntegerVector outputCycleNumbers;
       for (size_t cycle=1; cycle <= chain[0]; cycle++) {      // exactly the same loop and condition to make
          if ( (cycle > chain[1]) && (cycle % chain[2] == 0))  // output samples below

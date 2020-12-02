@@ -40,32 +40,27 @@ public:
       residPrec = e.data[2*resp+1];
       Nresid = e.nrow;
       parName = getVarNames(modelTerm);
+      size_t pos;
+      // when making real hierarchical models, here the higher model could be isolated
+      // and may be inserted as a new model inside the current model object?
+      if( (pos=parName.find(';')) != std::string::npos) {
+         hasIndexVariable=TRUE;
+         parName[pos]=':';
+      }
       varNames = splitString(parName,':');
-      // Search the varNames in the data-frame (column names) and fill varColIndex.
-      // The searching of names is not efficient now, see comments in findDataColumn().
       for(size_t i=0; i<varNames.size(); i++) {
-         if (varNames[i]=="1" || varNames[i]=="0")
-            varColIndex.push_back(-1);
-         else
-            varColIndex.push_back(findDataColumn(d, varNames[i]));
-      }
-      // Also search the varNames in the R environment and fill varInEnvironment.
-      // Already link it by setting an Robject? It would only be a reference, so
-      // the overhead of having this Robject in every model object is minimal.
-      // But .... needs to be a vector of Robjects?
-      Rcpp::Environment Renv;
-      for(size_t i=0; i<varNames.size(); i++) {
-         if (varNames[i]=="1" || varNames[i]=="0")
-            varInEnvironment.push_back(FALSE);
-         else
-            varInEnvironment.push_back(Renv.exists(varNames[i]));
-      }
-      // Check that every varName is found either in the data frame or in the environment
-      // (Except for names "1" and "0"
-      for(size_t i=0; i<varNames.size(); i++) {
-         if( ! (varNames[i]=="1" || varNames[i]=="0") &&
-                (varColIndex[i] == -1) && (varInEnvironment[i]==FALSE) )
-            throw generalRbayzError("Variable name not found: "+varNames[i]);
+         if (varNames[i]=="1" || varNames[i]=="0") {
+            varObjects.push_back(R_NilValue);
+            varType.push_back(0);
+         }
+         else {
+            varObjects.push_back(getVariableObject(d,varNames[i]);
+            if(varObjects.back() != R_NilValue)
+               varType.push_back(getVariableType(varObjects.back()));
+            else {
+               throw generalRbayzError("Variable name not found: "+varNames[i]);
+            }
+         }
       }
    }
 
@@ -83,8 +78,9 @@ public:
    std::vector<double> par, hpar;
    std::string parName, hparName;
    std::vector<std::string> parLabels, hparLabels, varNames;
-   std::vector<int> varColIndex;
-   std::vector<bool> varInEnvironment;
+   std::vector<Rcpp::RObject> varObjects;
+   std::vector<int> varType;
+   bool hasIndexVariable=FALSE;
    
 protected:
    double *resid, *residPrec;
@@ -92,6 +88,5 @@ protected:
    GenericPrior gprior;
 
 };
-
 
 #endif /* modelBase_h */

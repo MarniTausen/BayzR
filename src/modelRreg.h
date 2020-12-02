@@ -19,8 +19,10 @@ class modelRreg : public modelMatrix {
 public:
 
    modelRreg(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelMatrix(modelTerm, d, e, resp) {
-      // code needs updating, is copied from ranf_cor
+         : modelMatrix(modelTerm, d, e, resp)
+   {
+      // Note: modelMatrix checks and sets up factor and matrix, Rreg is an implementation
+      // of modelMatrix that only needs to add modeling of variances
       hpar.resize(1,1);
       hparName = "var." + parName;
    }

@@ -15,14 +15,14 @@
 #' @useDynLib BayzR, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 bayz <- function(model, data=NULL, chain=NULL, silent=FALSE, ...){
-#    bayz_check_modelterms(model)
-#    model_data <- model.frame(model, data=data)
+	if(!inherits(model,"formula")) {
+		stop("The first argument is not a valid formula")
+	}
     if (is.null(data)){
-        stop("data= is missing")
+        stop("The data= argument is missing")
     }
     if (is.null(chain)){
-        chain=c(1100,100,10)
-        warning("running the default chain of 1100 cycles, this may be too short for many analyses\n")
+        chain=c(0,0,0)
     }
     chain <- as.integer(chain)
     result <- rbayz_cpp(model, data, chain, silent)

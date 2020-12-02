@@ -1,7 +1,14 @@
 context("bayz")
 
+test_that("Invalid formula", {
 
-test_that("Chain warning", {
+    my_data <- data.frame(x=1:20, y=20:1)
+
+    expect_error(bayz("noformula", data=my_data, silent=TRUE))
+
+})
+
+test_that("Chain missing warning", {
 
     my_data <- data.frame(x=1:20, y=20:1)
 
@@ -10,40 +17,54 @@ test_that("Chain warning", {
 
 })
 
-test_that("Missing inputs", {
+test_that("Chain missing settings", {
 
-    my_data <- data.frame(x=1:20, y=20:1)
+    my_data <- data.frame(x=as.factor(1:20), y=20:1)
 
-    expect_error(bayz())
-    #expect_error(bayz(x ~ y, chain=c(10000, 100, 10)))
-
-})
-
-test_that("Error message", {
-
-    my_data <- data.frame(x=1:20, y=20:1)
-
-    expect_error(bayz(y ~ x, data=my_data))
-    #expect_silent(bayz(y ~ x, data=my_data, chain=c(10000, 100, 10)))
+    expect_error(bayz(y ~ fx(x), data=my_data, chain=c(10,2), silent=TRUE))
 
 })
 
-test_that("Wrong input", {
+test_that("Chain wrong settings", {
 
-    my_data <- data.frame(x=1:20, y=20:1)
-    expect_error(bayz(y ~ x, data=my_data, chain=c(10000,100,10)))
+    my_data <- data.frame(x=as.factor(1:20), y=20:1)
 
-    fit <- bayz(y ~ fx(x), data=my_data, chain=c(10000,100,10), silent=TRUE)
-    ## Run print
-    capture.output(print(fit))
+    expect_error(bayz(y ~ fx(x), data=my_data, chain=c(10,-1,-1), silent=TRUE))
+
 })
 
-test_that("Working run", {
+
+test_that("Missing data input", {
+
+    my_data <- data.frame(x=as.factor(1:20), y=20:1)
+
+    expect_error(bayz(y ~ fx(x), chain=c(10000, 100, 10), silent=TRUE))
+
+})
+
+test_that("Missing model-function", {
+
+    my_data <- data.frame(x=1:20, y=20:1)
+
+    expect_error(bayz(y ~ x, data=my_data, chain=c(10000, 100, 10), silent=TRUE))
+
+})
+
+#test_that("Wrong input", {
+#
+#    my_data <- data.frame(x=1:20, y=20:1)
+#    expect_error(bayz(y ~ x, data=my_data, chain=c(10000,100,10)))
+#
+#    fit <- bayz(y ~ fx(x), data=my_data, chain=c(10000,100,10), silent=TRUE)
+#    ## Run print
+#    capture.output(print(fit))
+#})
+
+test_that("Working run with fx()", {
 
     my_data <- data.frame(x=1:20, y=20:1)
 
     expect_equal(bayz(y ~ fx(x), data=my_data, chain=c(10000,100,10), silent=TRUE)$nError, 0)
-    expect_equal(bayz(y ~ rn(x), data=my_data, chain=c(10000,100,10), silent=TRUE)$nError, 0)
 
     capture.output(print(bayz(y ~ fx(x), data=my_data, chain=c(10000,100,10), silent=TRUE)))
 

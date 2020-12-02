@@ -30,13 +30,10 @@ public:
          : modelBase(modelTerm, d, e, resp)
    {
       F = new dataFactor();
-      for(size_t i=0; i<varColIndex.size(); i++) {
-         if(varColIndex[i] >= 0)  { // The factor is in the data frame in column varColIndex[i]
-            F->addVariable(d, varColIndex[i]);
-         }
-         else {  // The factor is in the R environment (all checked in modelBase constructor)
-            F->addVariable(varNames[i]);
-         }
+      for(size_t i=0; i<varNames.size(); i++) {
+         if (varType[i] != 1)
+            throw generalRbayzError("Variable is not a factor: "+varNames[i]);
+         F->addVariable(varObjects[i]);
       }
 
       parLabels = F->labels;            // I think this would make a copy, but actually only
