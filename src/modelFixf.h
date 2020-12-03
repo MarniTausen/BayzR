@@ -28,8 +28,8 @@ public:
    void sample() {
       resid_decorrect();
       collect_lhs_rhs();
-      for(size_t k=1; k<par.size(); k++) {  // in fixf par[0] remains zero!, this runs from k=1
-         if (lhs[k]>0)                      // if lhs (inverse variance) is zero estimate will be set to 0
+      for(size_t k=1; k<par.nelem; k++) {  // in fixf par[0] remains zero!, this runs from k=1
+         if (lhs[k]>0)                     // if lhs is zero estimate will be set to 0
             par[k] = R::rnorm( (rhs[k]/lhs[k]), sqrt(1.0/lhs[k]));
          else
             par[k]=0.0;

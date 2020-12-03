@@ -26,7 +26,7 @@ public:
          : modelResp(modelTerm, d, e, resp) {
       catData = Rcpp::as<Rcpp::IntegerVector>(d[varColIndex[0]]);
       Rcpp::IntegerVector categories = Rcpp::sort_unique(catData);
-      par.resize(categories.size()-1);
+      par.initWith(categories.size()-1, 0.0l);
       parName = "thresh";
       std::string s;  // Make threshold names
       for (size_t cat=0; cat<par.size(); cat++) {

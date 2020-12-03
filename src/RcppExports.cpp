@@ -17,7 +17,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // rbayz_cpp
-Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData, Rcpp::IntegerVector chain, bool silent);
+Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData, Rcpp::IntegerVector chain, int silent);
 RcppExport SEXP _BayzR_rbayz_cpp(SEXP modelFormulaSEXP, SEXP inputDataSEXP, SEXP chainSEXP, SEXP silentSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -25,7 +25,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< Rcpp::Formula >::type modelFormula(modelFormulaSEXP);
     Rcpp::traits::input_parameter< Rcpp::DataFrame >::type inputData(inputDataSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type chain(chainSEXP);
-    Rcpp::traits::input_parameter< bool >::type silent(silentSEXP);
+    Rcpp::traits::input_parameter< int >::type silent(silentSEXP);
     rcpp_result_gen = Rcpp::wrap(rbayz_cpp(modelFormula, inputData, chain, silent));
     return rcpp_result_gen;
 END_RCPP

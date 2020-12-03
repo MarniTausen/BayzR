@@ -26,7 +26,7 @@ public:
       coldata = d[col];
       // need to process the column data, simple character list? Needs index or searching?
       // + need to extract and process pedigree
-      hpar.resize(1,0);
+      hpar.initWith(1,0.0l);
       hparName = "var." + parName;
    }
 

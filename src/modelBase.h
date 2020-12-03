@@ -28,6 +28,7 @@
 #include "priorClasses.h"
 #include "nameTools.h"
 #include "simpleMatrix.h"
+#include "simpleVector.h"
 
 class modelBase {
    
@@ -50,7 +51,7 @@ public:
    // parameters for output, the base class defines an 'empty' version.
    virtual void prepForOutput() { };
    
-   std::vector<double> par, hpar;
+   simpleDblVector par, hpar;
    std::string parName, hparName;
    std::vector<std::string> parLabels, hparLabels, varNames;
    std::vector<Rcpp::RObject> varObjects;

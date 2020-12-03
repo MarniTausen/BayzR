@@ -40,7 +40,7 @@ public:
                                         // a reference is enough. The double storage arises here
                                         // because all model-classes have a parLabels vector, which
                                         // here happens to be equal to the labels of the Factor object.
-      par.resize(parLabels.size(),0);
+      par.initWith(parLabels.size(),0.0l);
       lhs.resize(parLabels.size(),0);
       rhs.resize(parLabels.size(),0);
    }
@@ -63,7 +63,7 @@ protected:
 
    void collect_lhs_rhs() {
       size_t k;
-      for(k=0; k<par.size(); k++) {
+      for(k=0; k<par.nelem; k++) {
          rhs[k] = 0.0;
          lhs[k] = 0.0;
       }

@@ -21,7 +21,7 @@ public:
    modelRanf_cor(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
          : modelMatrix(modelTerm, d, e, resp)
    {
-      hpar.resize(1,1);
+      hpar.initWith(1,1.0l);
       // modified: the parName is still the name(s) of variables, it needs some
       // modifications if multiple objects have the same variables. In old code
       // matrix names were added, but I think it gets too much to keep that system.
@@ -31,7 +31,7 @@ public:
       // effects on the original scale (eigen-vectors x regressions). So the par-vector
       // has size the number of matrix rows, and the prepForOutput() computes the
       // random effects from the regression coefficients when output is needed.
-      par.resize(M->nrow,0);
+      par.initWith(M->nrow,0.0l);
       parLabels = M->labels; // I believe this makes a deep copy, but a shallow copy would be enough
    }
 

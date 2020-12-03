@@ -2,20 +2,21 @@
 
 // standard modelBase constructor
 modelBase::modelBase(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-                 : gprior(modelTerm)
+                 : par(), hpar(), gprior(modelTerm)
    {
       resid = e.data[2*resp];
       residPrec = e.data[2*resp+1];
       Nresid = e.nrow;
       parName = getVarNames(modelTerm);
+      std::string tempnames = parName;
       size_t pos;
       // when making real hierarchical models, here the higher model could be isolated
       // and may be inserted as a new model inside the current model object?
-      if( (pos=parName.find(';')) != std::string::npos) {
+      if( (pos=tempnames.find('/')) != std::string::npos) {
          hasIndexVariable=TRUE;
-         parName[pos]=':';
+         tempnames[pos]=':';
       }
-      varNames = splitString(parName,':');
+      varNames = splitString(tempnames,':');
       for(size_t i=0; i<varNames.size(); i++) {
          if (varNames[i]=="1" || varNames[i]=="0") {
             varObjects.push_back(R_NilValue);

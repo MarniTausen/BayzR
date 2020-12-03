@@ -23,7 +23,9 @@ public:
    {
       // Note: modelMatrix checks and sets up factor and matrix, Rreg is an implementation
       // of modelMatrix that only needs to add modeling of variances
-      hpar.resize(1,1);
+      par = regcoeff;    // it sould be a shallow copy, par.data must point to the
+                         // same memory as regcoeff.data
+      hpar.initWith(1,1.0l);
       hparName = "var." + parName;
    }
 

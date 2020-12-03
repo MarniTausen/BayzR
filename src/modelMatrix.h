@@ -20,6 +20,7 @@
 #include <cmath>
 #include "dataFactor.h"
 #include "dataMatrix.h"
+#include "simpleVector.h"
 #include "modelBase.h"
 #include "nameTools.h"
 
@@ -28,17 +29,17 @@ class modelMatrix : public modelBase {
 public:
    
    modelMatrix(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelBase(modelTerm, d, e, resp)
+         : modelBase(modelTerm, d, e, resp), regcoeff()
    {
       // For now only allowing a matrix input where there is an index variable set (model
       // made with id;matrix). It could be extended to allow for no id, so that matrix needs to
       // be aliged 1:1 with data records, then the 'id' is bascially a 1:1 link too (in algebra
       // use an identity matrix to link the matrix rows to the data rows).
       if( ! (varType[0]==1 && varType[1]==6 && hasIndexVariable) )
-         throw generalRbayzError("rr() model not supported, can now only deal with <factor>;<matrix> input");
+         throw generalRbayzError("rr() model not supported, can now only deal with <factor>/<matrix> input");
       F = new dataFactor(varObjects[0]);
       M = new dataMatrix(varObjects[1]);
-      regcoeff.resize(M->ncol,0);
+      regcoeff.initWith(M->ncol,0.0l);
       // here level-names for the regression coefficients are not filled in parLevelNames,
       // therefore automatically the levels 1,2,3,... are inserted in collectParInfo.
       // It would be nicer to collect the column names (if available), or else fill with "col"+1,2,3...
@@ -114,7 +115,7 @@ public:
    dataFactor *F;
    double lhs, rhs;          // lhs, rhs will be scalar here (per iteration)
    std::vector<double> fit;
-   std::vector<double> regcoeff;
+   simpleDblVector regcoeff;
    std::vector<size_t> obsIndex;
 
 };

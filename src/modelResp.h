@@ -26,7 +26,7 @@ public:
       // rbayz main may need to make a triage for different types of response and then construct
       // appropriate response objects. x
       Ydata = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
-      hpar.resize(1,1.0);
+      hpar.initWith(1,1.0l);
       hparName = "var.resid";
       // initialize resid and residPrec vectors; resid starts as the observed responses
       for (size_t obs=0; obs<Nresid; obs++) {

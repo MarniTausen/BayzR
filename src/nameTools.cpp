@@ -39,7 +39,7 @@ void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat)
       if(dimnames[0]!=R_NilValue) {
          matNames = dimnames[0];
       }
-      else if (dimnames[0]!=R_NilValue) {
+      else if (dimnames[1]!=R_NilValue) {
             matNames = dimnames[1];
       }
       else {
