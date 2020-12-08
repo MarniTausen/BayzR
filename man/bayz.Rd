@@ -2,12 +2,12 @@
 % Please edit documentation in R/bayz.R
 \name{bayz}
 \alias{bayz}
-\title{Bayz function}
+\title{Bayesian mixed linear and shrinkage models}
 \usage{
 bayz(model, data = NULL, chain = NULL, silent = FALSE, ...)
 }
 \arguments{
-\item{model}{A formula describing the model.}
+\item{model}{A formula describing the model to be fit.}
 
 \item{data}{Data frame to collect data from}
 
@@ -21,5 +21,53 @@ bayz(model, data = NULL, chain = NULL, silent = FALSE, ...)
 A fitted bayz model
 }
 \description{
-Fits a model, given as a formula, optionally with data provided through the "..." parameter.
+The bayz function fits various mixed-linear and Bayesian shrinkage models with complex
+covariance structures using an extended R-formula syntax.
+}
+\details{
+The model formula in bayz has the basic syntax of an R formula but with all
+explanatory (right-hand-side) terms wrapped by a function to specify how to fit
+the explanatory variables in the model. This may look like Yield ~ fx(Year) + rn(Variety)
+to fit Yield with Year as a fixed factor and Variety as a random factor. 
+The equivalent lme4 model would
+be Yield ~ factor(Year) + (1|Variety). The model-functions have extensions to specify
+variances, priors, and sometimes fit options. The list of
+model functions currently available is: fx() to fit a fix factor or interaction of factors,
+rn() to fit a random factor or interaction of factors, rg() to fit fixed regressions or
+nested regressions (regressions within each level of a factor), and rr() to fit random
+regressions including random slopes and fit of large sets of covariates by random regression
+or Bayesian shrinkage models. [refer to functions help]. 
+
+Interactions between fators are specified using the colon, for instance by writing for a 
+fixed factor fit with Yield-Location interaction: Yield ~ fx(Year:Location). Bayz does
+NOT support automatic expansion with main effects by using the 'star' (Year*Location) or
+'forward slash' (Year/Location) syntaxes, hence bayz requires to manually add the desired
+main effects in the model. Interactions between factors can be specified to any degree.
+The 'star' syntax, however, can be used to indicate interaction
+between covariates, like Yield ~ rg(TempSum*Precip), where it is simply interpreted as
+multiplication. 
+Interaction between a covariate and a factor is specified using the `pipe' or vertical bar
+as in lme4 models. It can be used to specify fixed nested regressions for instance Yield ~ 
+rg(TempSum|Year:Location) to specify regressions on TempSum within each Year-Location, or
+to speficy random slope models in rr(), for instance Yield ~ rr(TempSum|Variety). 
+Note that bayz uses the 'forward slash' to specify hierarchical models.
+
+The bayz call has a data argument to specify an input data frame. Any variable specified
+in the model will be searched first in the input data-frame 
+and, if not found in the data frame, bayz will search the R environment. Typical use is
+to place response variables, single covariates and factors in the input data frame,
+but large sets of covariates and variance matrices are objects in the R
+environment. Objects outside the data frame must have row-names attached to link
+to a subject/sample ID in the data frame. For random effect with a covariance
+structure, this is used as
+Yield ~ rn(Variety, V=kinmat), where 'kinmat' is a (proportional) variance-covariance
+structure (kinship matrix), which then has row-names to match to Variety levels.
+Fitting of a set of covariates as random regressions or with Bayesian
+shrinkage models, is specified as a hierachical model specification as Yield ~
+rr(Variety/Metabolites), where Metabolites is then a matrix of covariates which must have
+row-names matching Variety levels. 
+
+Variance specifications ...
+
+Bayesian shrinkage models ...
 }
