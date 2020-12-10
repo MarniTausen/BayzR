@@ -80,8 +80,9 @@ public:
       for(size_t k=0; k < M->ncol; k++) {
          resid_decorrect(k);
          collect_lhs_rhs(k);
-         lhs = lhs + (1.0/( M->weights[k]*hpar[0] ));   // lhs with variance added
-         regcoeff[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));  // Note weights still stored as variances, not inverse
+         lhs = lhs + (1.0/( M->weights[k]*hpar[0] ));        // lhs with variance added
+         regcoeff[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));  // Note weights still stored as
+                                                             // variances, not as precisions
          resid_correct(k);
       }
    }

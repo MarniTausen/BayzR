@@ -57,6 +57,7 @@ public:
    std::vector<Rcpp::RObject> varObjects;
    std::vector<int> varType;
    bool hasIndexVariable=FALSE;
+   std::string hierModel;
    
 protected:
    double *resid, *residPrec;

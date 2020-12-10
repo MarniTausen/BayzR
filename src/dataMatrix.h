@@ -33,9 +33,10 @@ public:
       Rcpp::NumericMatrix tempdata = Rcpp::as<Rcpp::NumericMatrix>(col);
       V.initWith(tempdata.ncol(), 1.0l);
       weights = V.data;  // the weights pointer in a dataMatrix object is the 'data' in V
-      if (addMatrixNames(labels, tempdata, 1) >0) {
+      if (addMatrixNames(rownames, tempdata, 1) >0) {
          throw generalRbayzError("No rownames on matrix ... \n");
       }
+      addMatrixNames(colnames, tempdata, 2); // colnames are allowed to be missing
       double * datacol;
       size_t i,j;
       double sum;
@@ -88,7 +89,7 @@ public:
 
    simpleDblVector V;
    double *weights;
-   std::vector<std::string> labels;
+   std::vector<std::string> rownames, colnames;
    
 };
 

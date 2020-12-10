@@ -25,6 +25,8 @@ public:
       // of modelMatrix that only needs to add modeling of variances
       par = regcoeff;    // it sould be a shallow copy, par.data must point to the
                          // same memory as regcoeff.data
+      if (M->colnames.size() >0)    // if there are now colnames in matrix, default ones
+         parLabels = M->colnames;   // will be inserted in the parameter names list
       hpar.initWith(1,1.0l);
       hparName = "var." + parName;
    }

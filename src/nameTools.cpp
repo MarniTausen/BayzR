@@ -79,10 +79,10 @@ void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, dataMatrix *M) 
    int errors=0;
 //   Rcpp::Rcout << "Going to resize obsIndex to " << F->data.size() << "\n";
    obsIndex.resize(F->data.nelem,0);
-   // Build a sorted list of the matrix labels paired with matrix entry-rows
+   // Build a sorted list of the matrix rownames paired with matrix entry-rows
    std::vector< std::pair<std::string, size_t> > matLabelsSorted;
-   for(size_t i=0; i< M->labels.size(); i++)
-      matLabelsSorted.push_back(std::make_pair(M->labels[i], i));
+   for(size_t i=0; i< M->rownames.size(); i++)
+      matLabelsSorted.push_back(std::make_pair(M->rownames[i], i));
    std::sort(matLabelsSorted.begin(),matLabelsSorted.end()); // shoud be enough
    // Make the index that links observations to matrix rows
    std::string s;
