@@ -32,7 +32,7 @@ public:
       // has size the number of matrix rows, and the prepForOutput() computes the
       // random effects from the regression coefficients when output is needed.
       par.initWith(M->nrow,0.0l);
-      parLabels = M->labels; // I believe this makes a deep copy, but a shallow copy would be enough
+      parLabels = M->rownames; // I believe this makes a deep copy, but a shallow copy would be enough
    }
 
    ~modelRanf_cor() {
