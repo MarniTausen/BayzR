@@ -29,30 +29,29 @@ inline bool compString2Pair(const std::pair<std::string, size_t> & p, const std:
     return p.first < s;
 }
 
-// Get rownames from an R NumericMatrix, and return in a C++ vector of strings.
-// Throw errors when dimnames is missing or dimnames[0] (the rownames) is NULL.
+// getMatrixNames: retrieve row or col-names (use dim=1 or 2 as in apply()) from an Rcpp
+//     NumericMatrix, returns NULL vector when dimnames not present or the requested dim is empty.
+// addMatrixNames: fills matrix row or col-names (dim=1 or 2) in an c++ vector<string>,
+//     return value 0 for success, 1 for errors (missing names).
+// Note: addMatrixNames uses push_back, typical use is to pass an empty vector<string> as 'names'
+// argument and it will be filled.
 
-void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat) {
-   Rcpp::CharacterVector matNames;
+Rcpp::CharacterVector getMatrixNames(Rcpp::NumericMatrix & mat, int dim) {
    if (mat.hasAttribute("dimnames")) {
       Rcpp::List dimnames = Rcpp::as<Rcpp::List>(mat.attr("dimnames"));
-      if(dimnames[0]!=R_NilValue) {
-         matNames = dimnames[0];
-      }
-      else if (dimnames[1]!=R_NilValue) {
-            matNames = dimnames[1];
-      }
-      else {
-         throw(generalRbayzError("There are no rownames or colnames on matrix input"));
-      }
+      if(dim==1) return dimnames[0];
+      else return dimnames[1];
    }
+   else return R_NilValue;
+}
+
+int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, int dim) {
+   Rcpp::CharacterVector matNames = getMatrixNames(mat, dim);
+   if(matNames.isNULL()) return 1;
    else {
-      throw(generalRbayzError("There are no col and rownames on matrix input"));
+      CharVec2cpp(names, matNames);
+      return 0;
    }
-   if(mat.nrow() != matNames.size())
-      throw(generalRbayzError("Dimnames corrupted: length does not match matrix row size"));
-   CharVec2cpp(names, matNames);
-   
 }
 
 // Find 'name' in the column-names of a data frame.

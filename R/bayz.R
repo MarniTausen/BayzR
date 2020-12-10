@@ -73,7 +73,7 @@
 #'
 #' @useDynLib BayzR, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
-bayz <- function(model, data=NULL, chain==c(0,0,0), silent=FALSE, ...){
+bayz <- function(model, data=NULL, chain=c(0,0,0), silent=FALSE, ...){
 	if(!inherits(model,"formula")) {
 		stop("The first argument is not a valid formula")
 	}

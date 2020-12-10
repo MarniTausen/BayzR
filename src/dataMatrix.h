@@ -19,11 +19,10 @@
 #include <vector>
 #include "simpleMatrix.h"
 #include "simpleVector.h"
-//#include "nameTools.h"  // including nameTools.h to get the definition of getMatrixNames
-                          // does not work, maybe because the includes make a loop?
-                          // Now I just add an extra declaration of getMatrixNames()...
+//#include "nameTools.h"  // strange, including nameTools.h does not work to make
+                          // addMatrixNames available here ...
 
-void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat);
+int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, int dim);
 
 class dataMatrix : public simpleMatrix {
 
@@ -34,7 +33,9 @@ public:
       Rcpp::NumericMatrix tempdata = Rcpp::as<Rcpp::NumericMatrix>(col);
       V.initWith(tempdata.ncol(), 1.0l);
       weights = V.data;  // the weights pointer in a dataMatrix object is the 'data' in V
-      getMatrixNames(labels, tempdata);
+      if (addMatrixNames(labels, tempdata, 1) >0) {
+         throw generalRbayzError("No rownames on matrix ... \n");
+      }
       double * datacol;
       size_t i,j;
       double sum;

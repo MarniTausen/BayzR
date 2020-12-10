@@ -1,35 +1,31 @@
 //
-//  BayzR --- modelRreg.hpp
-//
-//  Computational class to to model random regressions.
-//  This used all methods from modelMatrix, only some parameter names need to be set.
+//  BayzR --- modelBVS.h
+//  Bayesian Variable Selection model - derives from modelMatrix to be a 'sibling' model
+//  to modelRreg and work on the same data structures as Rreg.
 //
 //  Created by Luc Janss on 03/08/2018.
 //
 
-#ifndef modelRreg_h
-#define modelRreg_h
+#ifndef modelBVS_h
+#define modelBVS_h
 
 #include <Rcpp.h>
 #include "modelMatrix.h"
-#include "dataMatrix.h"
 
-class modelRreg : public modelMatrix {
+class modelBVS : public modelMatrix {
 
 public:
 
-   modelRreg(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelMatrix(modelTerm, d, e, resp)
+   modelBVS(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
+         : modelRreg(modelTerm, d, e, resp)
    {
-      // Note: modelMatrix checks and sets up factor and matrix, Rreg is an implementation
-      // of modelMatrix that only needs to add modeling of variances
-      par = regcoeff;    // it sould be a shallow copy, par.data must point to the
-                         // same memory as regcoeff.data
-      hpar.initWith(1,1.0l);
-      hparName = "var." + parName;
+      par = regcoeff;    // same as in Rreg
+      hpar.initWith(par.nelem+2,1.0l);
+      hparName[0] = "pi0." + parName;
+      hparName[1] = "tau0." + parName;
    }
 
-   ~modelRreg() {
+   ~modelBVS() {
    }
    
    void sample() {
@@ -44,4 +40,4 @@ public:
 
 };
 
-#endif /* modelRreg */
+#endif /* modelBVS */

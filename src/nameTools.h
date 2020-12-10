@@ -15,7 +15,8 @@
 #include "dataFactor.h"
 
 void CharVec2cpp(std::vector<std::string> & labels, Rcpp::CharacterVector templabels);
-void getMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat);
+Rcpp::CharacterVector getMatrixNames(Rcpp::NumericMatrix & mat, int dim);
+int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, int dim);
 int findDataColumn(Rcpp::DataFrame d, std::string name);
 void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, dataMatrix *M);
 
