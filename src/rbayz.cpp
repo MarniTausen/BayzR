@@ -71,37 +71,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       // terms to build a explanatory term for every response.
       for(size_t resp=0; resp<modelLHSTerms.size(); resp++) {
          model.push_back(new modelResp(modelLHSTerms[resp], inputData, residData, resp));
-         for(size_t term=0; term<modelRHSTerms.size(); term++) {
-            std::string fname = modelRHSTerms[term].substr(0, modelRHSTerms[term].find('('));
-            if (fname=="1")
-               model.push_back(new modelMean(modelRHSTerms[term], inputData, residData, resp));
-            else if (fname=="0")
-               continue;
-            else if (fname=="fx" || fname=="fixf")
-               model.push_back(new modelFixf(modelRHSTerms[term], inputData, residData, resp));
-            else if (fname=="rn" || fname=="ranf") {
-               if(modelRHSTerms[term].find("V=") != std::string::npos)
-                  model.push_back(new modelRanf_cor(modelRHSTerms[term], inputData, residData, resp));
-               else
-                  model.push_back(new modelRanf(modelRHSTerms[term], inputData, residData, resp));
-            }
-            else if (fname=="rg" || fname=="freg")
-               model.push_back(new modelFreg(modelRHSTerms[term], inputData, residData, resp));
-            else if (fname=="rr") {
-               modelBase tempmodel(modelRHSTerms[term], inputData, residData, resp);
-               // For the moment only accept rr model with xxx;<matrix> input, if xxx is factor is checked in Rreg
-               if (tempmodel.varNames.size()==2 && tempmodel.hasIndexVariable && tempmodel.varType[1]==6) {
-                  model.push_back(new modelRreg(modelRHSTerms[term], inputData, residData, resp));
-               }
-               else {
-                  throw (generalRbayzError("Cannot yet use rr() with something else than id;matrix"));
-               }
-            }
-            else if (fname=="smurf")
-               throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));
-            else
-               throw (generalRbayzError("Unknow model (function) term: "+fname));
-         }
+         buildModel(modelRHSTerms, inputData, residData, resp);
       }
 
       // Parameter information vectors
@@ -196,9 +166,47 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
 
 }
 
-// arguments for modelobject constructors are now:
-//           modelTerm (string), inputData, residData, response-number
-/* should not be need anymore, code is now in the main function
+// Build all RHS terms for one response.
+// This building can recurse in itself to build hierarchical models.
+void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & modelRHSTerms,
+                Rcpp::DataFrame inputData, simpleMatrix residData, int resp)
+{
+   for(size_t term=0; term<modelRHSTerms.size(); term++) {
+      std::string fname = modelRHSTerms[term].substr(0, modelRHSTerms[term].find('('));
+      if (fname=="1")
+         model.push_back(new modelMean(modelRHSTerms[term], inputData, residData, resp));
+      else if (fname=="0")
+         continue;
+      else if (fname=="fx" || fname=="fixf")
+         model.push_back(new modelFixf(modelRHSTerms[term], inputData, residData, resp));
+      else if (fname=="rn" || fname=="ranf") {
+         if(modelRHSTerms[term].find("V=") != std::string::npos)
+            model.push_back(new modelRanf_cor(modelRHSTerms[term], inputData, residData, resp));
+         else
+            model.push_back(new modelRanf(modelRHSTerms[term], inputData, residData, resp));
+      }
+      else if (fname=="rg" || fname=="freg")
+         model.push_back(new modelFreg(modelRHSTerms[term], inputData, residData, resp));
+      else if (fname=="rr") {
+         modelBase tempmodel(modelRHSTerms[term], inputData, residData, resp);
+         // For the moment only accept rr model with xxx;<matrix> input, if xxx is factor is checked in Rreg
+         if (tempmodel.varNames.size()==2 && tempmodel.hasIndexVariable && tempmodel.varType[1]==6) {
+            model.push_back(new modelRreg(modelRHSTerms[term], inputData, residData, resp));
+         }
+         else {
+            throw (generalRbayzError("Cannot yet use rr() with something else than id;matrix"));
+         }
+      }
+      else if (fname=="smurf")
+         throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));
+      else
+         throw (generalRbayzError("Unknow model (function) term: "+fname));
+   }
+   // Here could inspect the last-built model object and see if it needs to be
+   // a hierarchical model.
+}
+
+/* old model build
 void buildModelTerm(std::vector<modelBase *> & model, std::string modelTerm, Rcpp::DataFrame & data,
                     simpleMatrix & resid, size_t respnr) {
    std::string s = getWrapName(modelFrame, col);
