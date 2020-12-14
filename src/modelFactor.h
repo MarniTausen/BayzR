@@ -26,8 +26,8 @@ class modelFactor : public modelBase {
    
 public:
    
-   modelFactor(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelBase(modelTerm, d, e, resp)
+   modelFactor(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
+         : modelBase(modelTerm, d, rmod)
    {
       F = new dataFactor();
       for(size_t i=0; i<varNames.size(); i++) {

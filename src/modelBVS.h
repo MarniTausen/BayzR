@@ -16,8 +16,8 @@ class modelBVS : public modelMatrix {
 
 public:
 
-   modelBVS(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelRreg(modelTerm, d, e, resp)
+   modelBVS(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
+         : modelRreg(modelTerm, d, rmod)
    {
       par = regcoeff;    // same as in Rreg
       hpar.initWith(par.nelem+2,1.0l);

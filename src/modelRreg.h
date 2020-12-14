@@ -18,8 +18,8 @@ class modelRreg : public modelMatrix {
 
 public:
 
-   modelRreg(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelMatrix(modelTerm, d, e, resp)
+   modelRreg(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
+         : modelMatrix(modelTerm, d, rmod)
    {
       // Note: modelMatrix checks and sets up factor and matrix, Rreg is an implementation
       // of modelMatrix that only needs to add modeling of variances

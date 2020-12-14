@@ -28,8 +28,8 @@ class modelMatrix : public modelBase {
    
 public:
    
-   modelMatrix(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelBase(modelTerm, d, e, resp), regcoeff()
+   modelMatrix(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
+         : modelBase(modelTerm, d, rmod), regcoeff()
    {
       // For now only allowing a matrix input where there is an index variable set (model
       // made with id;matrix). It could be extended to allow for no id, so that matrix needs to

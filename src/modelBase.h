@@ -34,7 +34,7 @@ class modelBase {
    
 public:
 
-   modelBase(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp);
+   modelBase(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod);
 
    virtual ~modelBase() {
    }
@@ -58,6 +58,7 @@ public:
    std::vector<int> varType;
    bool hasIndexVariable=FALSE;
    std::string hierModel;
+   modelBase *respModel;
    
 protected:
    double *resid, *residPrec;

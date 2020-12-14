@@ -21,8 +21,8 @@ class modelPolyg : public modelBase {
 
 public:
 
-   modelPolyg(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelBase(modelTerm, d, e, resp) {
+   modelPolyg(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
+         : modelBase(modelTerm, d, rmod) {
       coldata = d[col];
       // need to process the column data, simple character list? Needs index or searching?
       // + need to extract and process pedigree

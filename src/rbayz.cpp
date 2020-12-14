@@ -19,7 +19,7 @@
 
 // These functions are defined below the main function
 void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & modelRHSTerms,
-                Rcpp::DataFrame inputData, simpleMatrix residData, int resp);
+                Rcpp::DataFrame inputData, modelBase *);
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
@@ -71,8 +71,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       // Build the modelling objects. The RHS terms are nested within the LHS (response)
       // terms to build a explanatory term for every response.
       for(size_t resp=0; resp<modelLHSTerms.size(); resp++) {
-         model.push_back(new modelResp(modelLHSTerms[resp], inputData, residData, resp));
-         buildModel(model, modelRHSTerms, inputData, residData, resp);
+         model.push_back(new modelResp(modelLHSTerms[resp], inputData, NULL));
+         buildModel(model, modelRHSTerms, inputData, model.back());
       }
 
       // Parameter information vectors
@@ -170,29 +170,29 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
 // Build all RHS terms for one response.
 // This building can recurse in itself to build hierarchical models.
 void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & modelRHSTerms,
-                Rcpp::DataFrame inputData, simpleMatrix residData, int resp)
+                Rcpp::DataFrame inputData, modelBase * rmod)
 {
    for(size_t term=0; term<modelRHSTerms.size(); term++) {
       std::string fname = modelRHSTerms[term].substr(0, modelRHSTerms[term].find('('));
       if (fname=="1")
-         model.push_back(new modelMean(modelRHSTerms[term], inputData, residData, resp));
+         model.push_back(new modelMean(modelRHSTerms[term], inputData, rmod));
       else if (fname=="0")
          continue;
       else if (fname=="fx" || fname=="fixf")
-         model.push_back(new modelFixf(modelRHSTerms[term], inputData, residData, resp));
+         model.push_back(new modelFixf(modelRHSTerms[term], inputData, rmod));
       else if (fname=="rn" || fname=="ranf") {
          if(modelRHSTerms[term].find("V=") != std::string::npos)
-            model.push_back(new modelRanf_cor(modelRHSTerms[term], inputData, residData, resp));
+            model.push_back(new modelRanf_cor(modelRHSTerms[term], inputData, rmod));
          else
-            model.push_back(new modelRanf(modelRHSTerms[term], inputData, residData, resp));
+            model.push_back(new modelRanf(modelRHSTerms[term], inputData, rmod));
       }
       else if (fname=="rg" || fname=="freg")
-         model.push_back(new modelFreg(modelRHSTerms[term], inputData, residData, resp));
+         model.push_back(new modelFreg(modelRHSTerms[term], inputData, rmod));
       else if (fname=="rr") {
-         modelBase tempmodel(modelRHSTerms[term], inputData, residData, resp);
+         modelBase tempmodel(modelRHSTerms[term], inputData, rmod);
          // For the moment only accept rr model with xxx;<matrix> input, if xxx is factor is checked in Rreg
          if (tempmodel.varNames.size()==2 && tempmodel.hasIndexVariable && tempmodel.varType[1]==6) {
-            model.push_back(new modelRreg(modelRHSTerms[term], inputData, residData, resp));
+            model.push_back(new modelRreg(modelRHSTerms[term], inputData, rmod));
          }
          else {
             throw (generalRbayzError("Cannot yet use rr() with something else than id;matrix"));

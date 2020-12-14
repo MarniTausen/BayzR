@@ -22,8 +22,8 @@ class modelMean : public modelBase {
    
 public:
 
-   modelMean(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-         : modelBase(modelTerm, d, e, resp) {
+   modelMean(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
+         : modelBase(modelTerm, d, rmod) {
       par.initWith(1,0.0l);
       parName = "mean";
    }

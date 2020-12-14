@@ -1,12 +1,14 @@
 #include "modelBase.h"
 
-// standard modelBase constructor
-modelBase::modelBase(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-                 : par(), hpar(), gprior(modelTerm)
+// modelBase constructor
+modelBase::modelBase(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
+                 : par(), hpar(), respModel(rmod), gprior(modelTerm)
    {
-      resid = e.data[2*resp];
+      respModel = rmod;
+/*    resid = e.data[2*resp];
       residPrec = e.data[2*resp+1];
       Nresid = e.nrow;
+*/
       parName = getVarNames(modelTerm);
       std::string tempnames = parName;
       size_t pos;

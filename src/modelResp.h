@@ -19,12 +19,12 @@ class modelResp : public modelBase {
    
 public:
    
-   modelResp(std::string modelTerm, Rcpp::DataFrame &d, simpleMatrix &e, size_t resp)
-            : modelBase(modelTerm, d, e, resp)
+   modelResp(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
+            : modelBase(modelTerm, d, rmod)
    {
       // For now there is no check on the response vector to be correctly numerical, in future
       // rbayz main may need to make a triage for different types of response and then construct
-      // appropriate response objects. x
+      // appropriate response objects.
       Ydata = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
       hpar.initWith(1,1.0l);
       hparName = "var.resid";
