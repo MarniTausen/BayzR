@@ -30,7 +30,7 @@ public:
       par.initWith(Ydata);
       weights.initWith(Nresid,1.0l);
       resid = par.data;          // resid and residPrec are now alias for the par and weights
-      residPred = weights.data;  // vectors inside a response object
+      residPrec = weights.data;  // vectors inside a response object
       hpar.initWith(1,1.0l);
       // no parNames (labels for residuals) yet!
       hparName = "var.resid";
@@ -54,8 +54,6 @@ public:
    }
 
    simpleDblVector weights;
-   double *resid, *residPrec;
-   size_t Nresid;
 
 protected:
    Rcpp::NumericVector Ydata;

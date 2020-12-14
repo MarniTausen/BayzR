@@ -34,10 +34,10 @@ public:
    void sample() {
       size_t obs;
       double sum=0.0, temp=0.0;
-      for (obs=0; obs < respModel->Nresid; obs++) residModel->resid[obs] += par[0];
+      for (obs=0; obs < respModel->Nresid; obs++) respModel->resid[obs] += par[0];
       for (obs=0; obs< respModel->Nresid; obs++) {
-         sum += residModel->resid[obs]*respModel->residPrec[obs];
-         temp += residModel->residPrec[obs];
+         sum += respModel->resid[obs]*respModel->residPrec[obs];
+         temp += respModel->residPrec[obs];
       }
       par[0] = R::rnorm((sum/temp), sqrt(1.0/temp));
       for (obs=0; obs < respModel->Nresid; obs++) respModel->resid[obs] -= par[0];

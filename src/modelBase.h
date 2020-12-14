@@ -59,7 +59,9 @@ public:
    bool hasIndexVariable=FALSE;
    std::string hierModel;
    modelBase *respModel;
-   
+   double *resid, *residPrec;
+   size_t Nresid;
+
 protected:
    GenericPrior gprior;
 
