@@ -46,19 +46,19 @@ protected:
 
    void resid_correct() {
       for (size_t obs=0; obs < C->nelem; obs++)
-         resid[obs] -= par[0] * C->data[obs];
+        residModel->resid[obs] -= par[0] * C->data[obs];
    }
 
    void resid_decorrect() {
       for (size_t obs=0; obs < C->nelem; obs++)
-         resid[obs] += par[0] * C->data[obs];
+        residModel->resid[obs] += par[0] * C->data[obs];
    }
 
    void collect_lhs_rhs() {
       lhs = 0.0; rhs=0.0;
       for (size_t obs=0; obs < C->nelem; obs++) {
-         rhs += residPrec[obs] * resid[obs] * C->data[obs];
-         lhs += C->data[obs] * residPrec[obs] * C->data[obs];
+         rhs += residModel->residPrec[obs] * residModel->resid[obs] * C->data[obs];
+         lhs += C->data[obs] * residModel->residPrec[obs] * C->data[obs];
       }
    }
 

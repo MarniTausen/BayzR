@@ -53,12 +53,12 @@ protected:
 
    void resid_correct() {
       for (size_t obs=0; obs < F->data.nelem; obs++)
-         resid[obs] -= par[F->data[obs]];
+        residModel->resid[obs] -= par[F->data[obs]];
    }
 
    void resid_decorrect() {
       for (size_t obs=0; obs < F->data.nelem; obs++)
-         resid[obs] += par[F->data[obs]];
+        residModel->resid[obs] += par[F->data[obs]];
    }
 
    void collect_lhs_rhs() {
@@ -69,8 +69,8 @@ protected:
       }
       for (size_t obs=0; obs < F->data.nelem; obs++) {
          k=F->data[obs];
-         rhs[k] += residPrec[obs] * resid[obs];
-         lhs[k] += residPrec[obs];
+         rhs[k] += residModel->residPrec[obs] * residModel->resid[obs];
+         lhs[k] += residModel->residPrec[obs];
       }
    }
 
