@@ -61,8 +61,6 @@ public:
    modelBase *respModel;
    
 protected:
-   double *resid, *residPrec;
-   size_t Nresid;
    GenericPrior gprior;
 
 };

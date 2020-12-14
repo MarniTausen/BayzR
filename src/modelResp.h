@@ -20,19 +20,20 @@ class modelResp : public modelBase {
 public:
    
    modelResp(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
-            : modelBase(modelTerm, d, rmod)
+            : modelBase(modelTerm, d, rmod), weights()
    {
       // For now there is no check on the response vector to be correctly numerical, in future
       // rbayz main may need to make a triage for different types of response and then construct
       // appropriate response objects.
       Ydata = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
+      Nresid = Ydata.size();
+      par.initWith(Ydata);
+      weights.initWith(Nresid,1.0l);
+      resid = par.data;          // resid and residPrec are now alias for the par and weights
+      residPred = weights.data;  // vectors inside a response object
       hpar.initWith(1,1.0l);
+      // no parNames (labels for residuals) yet!
       hparName = "var.resid";
-      // initialize resid and residPrec vectors; resid starts as the observed responses
-      for (size_t obs=0; obs<Nresid; obs++) {
-         resid[obs] = Ydata[obs];
-         residPrec[obs] = 1.0;
-      }
    }
    
    ~modelResp() {
@@ -51,7 +52,11 @@ public:
       for (obs=0; obs<Nresid; obs++)
          residPrec[obs] = temp;
    }
-   
+
+   simpleDblVector weights;
+   double *resid, *residPrec;
+   size_t Nresid;
+
 protected:
    Rcpp::NumericVector Ydata;
 
