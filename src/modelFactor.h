@@ -69,8 +69,8 @@ protected:
       }
       for (size_t obs=0; obs < F->data.nelem; obs++) {
          k=F->data[obs];
-         rhs[k] += residModel->residPrec[obs] * residModel->resid[obs];
-         lhs[k] += residModel->residPrec[obs];
+         rhs[k] += respModel->residPrec[obs] * respModel->resid[obs];
+         lhs[k] += respModel->residPrec[obs];
       }
    }
 

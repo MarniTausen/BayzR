@@ -57,8 +57,8 @@ protected:
    void collect_lhs_rhs() {
       lhs = 0.0; rhs=0.0;
       for (size_t obs=0; obs < C->nelem; obs++) {
-         rhs += residModel->residPrec[obs] * residModel->resid[obs] * C->data[obs];
-         lhs += C->data[obs] * residModel->residPrec[obs] * C->data[obs];
+         rhs += respModel->residPrec[obs] * respModel->resid[obs] * C->data[obs];
+         lhs += C->data[obs] * respModel->residPrec[obs] * C->data[obs];
       }
    }
 

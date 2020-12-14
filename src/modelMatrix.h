@@ -56,13 +56,13 @@ public:
    void resid_correct(size_t col) {
       double * colptr = M->data[col];
       for (size_t obs=0; obs < F->data.nelem; obs++)
-         residModel->resid[obs] -= regcoeff[col] * colptr[obsIndex[obs]];
+         respModel->resid[obs] -= regcoeff[col] * colptr[obsIndex[obs]];
    }
 
    void resid_decorrect(size_t col) {
       double * colptr = M->data[col];
       for (size_t obs=0; obs < F->data.nelem; obs++)
-         residModel->resid[obs] += regcoeff[col] * colptr[obsIndex[obs]];
+         respModel->resid[obs] += regcoeff[col] * colptr[obsIndex[obs]];
    }
 
    void collect_lhs_rhs(size_t col) {
@@ -71,8 +71,8 @@ public:
       double * colptr = M->data[col];
       for (size_t obs=0; obs < F->data.nelem; obs++) {
          matrixrow = obsIndex[obs];
-         rhs += colptr[matrixrow] * residModel->residPrec[obs] * residModel->resid[obs];
-         lhs += colptr[matrixrow] * colptr[matrixrow] * residModel->residPrec[obs];
+         rhs += colptr[matrixrow] * respModel->residPrec[obs] * respModel->resid[obs];
+         lhs += colptr[matrixrow] * colptr[matrixrow] * respModel->residPrec[obs];
       }
    }
 
