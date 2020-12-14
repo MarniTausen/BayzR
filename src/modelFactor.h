@@ -53,12 +53,12 @@ protected:
 
    void resid_correct() {
       for (size_t obs=0; obs < F->data.nelem; obs++)
-        residModel->resid[obs] -= par[F->data[obs]];
+        resid[obs] -= par[F->data[obs]];
    }
 
    void resid_decorrect() {
       for (size_t obs=0; obs < F->data.nelem; obs++)
-        residModel->resid[obs] += par[F->data[obs]];
+        resid[obs] += par[F->data[obs]];
    }
 
    void collect_lhs_rhs() {
