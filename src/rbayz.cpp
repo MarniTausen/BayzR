@@ -18,7 +18,8 @@
 // [[Rcpp::plugins("cpp11")]]
 
 // These functions are defined below the main function
-//void buildModelTerm(Rcpp::DataFrame & modelFrame, size_t col, std::vector<modelBase *> & model, Rcpp::RObject &terms);
+void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & modelRHSTerms,
+                Rcpp::DataFrame inputData, simpleMatrix residData, int resp);
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
@@ -71,7 +72,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       // terms to build a explanatory term for every response.
       for(size_t resp=0; resp<modelLHSTerms.size(); resp++) {
          model.push_back(new modelResp(modelLHSTerms[resp], inputData, residData, resp));
-         buildModel(modelRHSTerms, inputData, residData, resp);
+         buildModel(model, modelRHSTerms, inputData, residData, resp);
       }
 
       // Parameter information vectors
