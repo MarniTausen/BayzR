@@ -5,6 +5,11 @@ modelBase::modelBase(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod
                  : par(), hpar(), respModel(rmod), gprior(modelTerm)
    {
       respModel = rmod;
+      if (respModel != NULL) {
+         resid = respModel->resid;
+         residPrec = respModel->residPrec;
+         Nresid = respModel->Nresid;
+      }
       parName = getVarNames(modelTerm);
       std::string tempnames = parName;
       size_t pos;

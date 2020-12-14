@@ -58,9 +58,9 @@ public:
    std::vector<int> varType;
    bool hasIndexVariable=FALSE;
    std::string hierModel;
-   modelBase *respModel;
-   double *resid, *residPrec;
-   size_t Nresid;
+   modelBase *respModel=NULL;
+   double *resid=NULL, *residPrec=NULL;
+   size_t Nresid=0;
 
 protected:
    GenericPrior gprior;
