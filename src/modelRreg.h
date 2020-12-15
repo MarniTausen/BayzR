@@ -1,7 +1,7 @@
 //
 //  BayzR --- modelRreg.hpp
 //
-//  Computational class to to model random regressions.
+//  Computational class to to model random regressions on a matrix of covariates.
 //  This used all methods from modelMatrix, only some parameter names need to be set.
 //
 //  Created by Luc Janss on 03/08/2018.

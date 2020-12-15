@@ -1,10 +1,9 @@
 //
 //  dataMatrix.h
-//  Class for storage of matrix input data (matrix of covariates).
-//  This is a slightly specialised (derived) version of simpleMatrix: it also has
-//  names for the rows, and weights.
-//  The different types of input are loaded based on attributes found in the column data.
-//  Class modelMatrix has matching computational operations on this 'data'.
+//  Class for storage of matrix input data (matrix of covariates or similarity / kernel matrix).
+//  This is a slightly specialised (derived) version of simpleMatrix with row and column names
+//  added, row-names are mandatory on all these matrices!
+//  Note: now also doing centering of columns, that's not needed for kernels!
 //
 //  Created by Luc Janss on 05/03/2020.
 //
@@ -31,8 +30,6 @@ public:
       // constuctor of simpleMatrix has already done the matrix data, here add
       // weights and labels, and column-center the covariates.
       Rcpp::NumericMatrix tempdata = Rcpp::as<Rcpp::NumericMatrix>(col);
-      V.initWith(tempdata.ncol(), 1.0l);
-      weights = V.data;  // the weights pointer in a dataMatrix object is the 'data' in V
       if (addMatrixNames(rownames, tempdata, 1) >0) {
          throw generalRbayzError("No rownames on matrix ... \n");
       }
@@ -87,8 +84,6 @@ public:
    ~dataMatrix() {
    }
 
-   simpleDblVector V;
-   double *weights;
    std::vector<std::string> rownames, colnames;
    
 };
