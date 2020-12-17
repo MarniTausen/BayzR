@@ -20,6 +20,9 @@ std::vector<std::string> getModelLHSTerms(std::string mf);
 std::vector<std::string> getModelRHSTerms(std::string mf);
 std::vector<std::string> parseColNames(Rcpp::DataFrame & d, size_t col);
 std::string getWrapName(std::string modelTerm);
+std::string getFuncName(std::string modelTerm);
 std::string getVarNames(std::string modelTerm);
+std::string getVarDescr(std::string modelTerm);
+std::string getPriorDescr(std::string modelTerm);
 
 #endif /* parseFunctions_h */

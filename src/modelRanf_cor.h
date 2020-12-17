@@ -39,11 +39,11 @@ public:
    }
    
    void sample() {
-      update_regressions();
+      update_regressions(TRUE, hpar[0]);
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
       for(size_t k=0; k< M->ncol; k++)
-         ssq += regcoeff[k]*regcoeff[k]/M->weights[k];
+         ssq += par[k]*par[k]/weights[k];
       hpar[0] = gprior.samplevar(ssq, M->ncol);
    }
 
@@ -52,7 +52,7 @@ public:
       for(size_t row=0; row< M->nrow; row++) {
          par[row]=0.0l;
          for(size_t col=0; col<M->ncol; col++) {
-            par[row] += M->data[col][row] * regcoeff[col];
+            par[row] += M->data[col][row] * par[col];
          }
       }
    };

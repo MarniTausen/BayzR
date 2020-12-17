@@ -195,7 +195,7 @@ void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & mod
             model.push_back(new modelRreg(modelRHSTerms[term], inputData, rmod));
          }
          else {
-            throw (generalRbayzError("Cannot yet use rr() with something else than id;matrix"));
+            throw (generalRbayzError("Cannot yet use rr() with something else than id/matrix"));
          }
       }
       else if (fname=="smurf")

@@ -164,16 +164,18 @@ std::string getWrapName(std::string modelTerm) {
    return(modelTerm.substr(0,pos1));
 }
 
-// Get the string of 'variable' names from a model-term, this is the column-name(s) put as
-// first argument in the model-term function, optionally with interactions.
-// Syntax-wise it is the first string coming after the first opening parenthesis (until the
-// first comma or closing parenthesis), or if there is no opening parenthesis the whole model-term.
-// Examples:
-//    fx(herd) -> "herd"
-//    rn(herd:year, V...) -> "herd:year"
-//  from response side it includes cases where there is no opening parenthesis:
-//    fat -> "fat"
-//    probit(rustscore) -> "rustscore"
+// Retrieving different parts of a model-term, syntax is:
+//  funcname(varnames,V=...,prior=....,....)
+// Note: spaces are removed from the model-formula, varnames, V=, prior= etc end with
+// comma or closing parenthesis.
+std::string getFuncName(std::string modelTerm) {
+   size_t pos1 = modelTerm.find('(');
+   if (pos1==std::string::npos)
+      return "";
+   else
+      return modelTerm.substr(0, pos1);
+}
+
 std::string getVarNames(std::string modelTerm) {
    size_t pos1,pos2;
    pos1 = modelTerm.find('(');
@@ -185,3 +187,24 @@ std::string getVarNames(std::string modelTerm) {
    return(temp);
 }
 
+std::string getVarDescr(std::string modelTerm) {
+   size_t pos1,pos2;
+   pos1 = modelTerm.find("V=");
+   if(pos1==std::string::npos) {
+      return "";
+   }
+   pos2 = modelTerm.find_first_of("),",pos1);
+   std::string temp = modelTerm.substr(pos1+2,pos2-pos1-1);
+   return temp;
+}
+
+std::string getPriorDescr(std::string modelTerm) {
+   size_t pos1,pos2;
+   pos1 = modelTerm.find("prior=");
+   if(pos1==std::string::npos) {
+      return "";
+   }
+   pos2 = modelTerm.find_first_of("),",pos1);
+   std::string temp = modelTerm.substr(pos1+6,pos2-pos1-1);
+   return temp;
+}

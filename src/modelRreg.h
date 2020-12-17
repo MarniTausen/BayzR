@@ -21,12 +21,9 @@ public:
    modelRreg(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
          : modelMatrix(modelTerm, d, rmod)
    {
-      // Note: modelMatrix checks and sets up factor and matrix, Rreg is an implementation
-      // of modelMatrix that only needs to add modeling of variances
-      par = regcoeff;    // it sould be a shallow copy, par.data must point to the
-                         // same memory as regcoeff.data
-      if (M->colnames.size() >0)    // if there are now colnames in matrix, default ones
+      if (M->colnames.size() >0)    // if there are no colnames in matrix, default ones
          parLabels = M->colnames;   // will be inserted in the parameter names list
+      
       hpar.initWith(1,1.0l);
       hparName = "var." + parName;
    }
@@ -35,11 +32,11 @@ public:
    }
    
    void sample() {
-      update_regressions();
+      update_regressions(TRUE, hpar[0]);
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
       for(size_t k=0; k< M->ncol; k++)
-         ssq += par[k]*par[k]/M->weights[k];
+         ssq += par[k]*par[k]/weights[k];
       hpar[0] = gprior.samplevar(ssq, M->ncol);
    }
 
