@@ -14,8 +14,11 @@
 #include "rbayzExceptions.h"
 #include "simpleMatrix.h"
 #include "simpleVector.h"
+#include "indepVarStr.h"
 
 // [[Rcpp::plugins("cpp11")]]
+
+
 
 // These functions are defined below the main function
 void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & modelRHSTerms,
@@ -167,6 +170,30 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
 
 }
 
+// A function to create one of the indepVarStr classes
+indepVarStr * makeIndepVarStr(std::string varDescr) {
+   std::string varname;
+   indepVarStr * newVarObject;
+   size_t pos = varDescr.find('(');
+   // some variance descriptions have a part in parenthesis, then the triage for
+   // which object to create is based on the piece up to the opening parenthesis,
+   // but the object is created using the whole original varDescr.
+   if(pos != std::string::npos)
+      varname = varDescr.substr(0,pos);
+   else
+      varname = varDescr;
+   if (varname=="IDEN") {
+      newVarObject = new idenVarStr(varDescr);
+   }
+   else if (varname=="MIXT") {
+      newVarObject = new mixtVarStr(varDescr);
+   }
+   else {
+      // how to handle error for unknown variance specification, throw here?
+   }
+   return newVarObject;
+}
+
 // Build all RHS terms for one response.
 // This building can recurse in itself to build hierarchical models.
 void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & modelRHSTerms,
@@ -190,13 +217,14 @@ void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & mod
          model.push_back(new modelFreg(modelRHSTerms[term], inputData, rmod));
       else if (fname=="rr") {
          modelBase tempmodel(modelRHSTerms[term], inputData, rmod);
-         // For the moment only accept rr model with xxx;<matrix> input, if xxx is factor is checked in Rreg
+         // For the moment only accept rr model with xxx/<matrix>, if xxx is factor is checked in Rreg
          if (tempmodel.varNames.size()==2 && tempmodel.hasIndexVariable && tempmodel.varType[1]==6) {
             model.push_back(new modelRreg(modelRHSTerms[term], inputData, rmod));
          }
          else {
             throw (generalRbayzError("Cannot yet use rr() with something else than id/matrix"));
          }
+         // Here should create an indepVarStr object with pointer in the Rreg (last model) object
       }
       else if (fname=="smurf")
          throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));
