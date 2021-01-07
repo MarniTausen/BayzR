@@ -204,9 +204,9 @@ void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & mod
 {
    for(size_t term=0; term<modelRHSTerms.size(); term++) {
       dcModelTerm modeldescr(modelRHSTerms[term], inputData);
-      if (modeldescr.funcName=="1")
+      if (modeldescr.variableNames[0]=="1")
          model.push_back(new modelMean(modeldescr, rmod));
-      else if (modeldescr.funcName=="0")
+      else if (modeldescr.variableNames[0]=="0")
          continue;
       else if (modeldescr.funcName=="fx" || modeldescr.funcName=="fixf")
          model.push_back(new modelFixf(modeldescr, rmod));
