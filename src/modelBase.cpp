@@ -1,38 +1,23 @@
 #include "modelBase.h"
 
 // modelBase constructor
-modelBase::modelBase(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
-                 : par(), hpar(), respModel(rmod), gprior(modelTerm)
-   {
+modelBase::modelBase(dcModelTerm & modeldescr, modelBase * rmod)
+                 : gprior(modeldescr.priorModel) {
+   if (modeldescr.hierarchType == 0 || modeldescr.hierarchType == 1) {
       respModel = rmod;
       if (respModel != NULL) {
          resid = respModel->resid;
          residPrec = respModel->residPrec;
          Nresid = respModel->Nresid;
       }
-      parName = getVarNames(modelTerm);
-      std::string tempnames = parName;
-      size_t pos;
-      // when making real hierarchical models, here the higher model could be isolated
-      // and may be inserted as a new model inside the current model object?
-      if( (pos=tempnames.find('/')) != std::string::npos) {
-         hasIndexVariable=TRUE;
-         tempnames[pos]=':';
-      }
-      varNames = splitString(tempnames,':');
-      for(size_t i=0; i<varNames.size(); i++) {
-         if (varNames[i]=="1" || varNames[i]=="0") {
-            varObjects.push_back(R_NilValue);
-            varType.push_back(0);
-         }
-         else {
-            varObjects.push_back(getVariableObject(d,varNames[i]));
-            if(varObjects.back() != R_NilValue)
-               varType.push_back(getVariableType(varObjects.back()));
-            else {
-               throw generalRbayzError("Variable name not found: "+varNames[i]);
-            }
-         }
-      }
+   } else { // Hierarchical model:
+            // don't know yet how to do here, there can be different cases,
+            // but the rmod may not have a resid and residPrec vector
+      respModel = rmod;
    }
-
+   hierType = modeldescr.hierarchType;
+   parName = modeldescr.allVariableNames;
+   varNames = modeldescr.variableNames;
+   varObjects = modeldescr.variableObjects;
+   varType = modeldescr.variableTypes;
+}

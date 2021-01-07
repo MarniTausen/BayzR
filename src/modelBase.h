@@ -29,12 +29,13 @@
 #include "nameTools.h"
 #include "simpleMatrix.h"
 #include "simpleVector.h"
+#include "dcModelTerm.h"
 
 class modelBase {
    
 public:
 
-   modelBase(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod);
+   modelBase(dcModelTerm & modeldescr, modelBase * rmod);
 
    virtual ~modelBase() {
    }
@@ -56,8 +57,7 @@ public:
    std::vector<std::string> parLabels, hparLabels, varNames;
    std::vector<Rcpp::RObject> varObjects;
    std::vector<int> varType;
-   bool hasIndexVariable=FALSE;
-   std::string hierModel;
+   int hierType;
    modelBase *respModel=NULL;
    double *resid=NULL, *residPrec=NULL;
    size_t Nresid=0;

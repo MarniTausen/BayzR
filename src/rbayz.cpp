@@ -3,6 +3,7 @@
 #include <Rcpp.h>
 #include <cmath>
 #include "parseFunctions.h"
+#include "dcModelTerm.h"
 #include "modelBase.h"
 #include "modelResp.h"
 #include "modelMean.h"
@@ -66,7 +67,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       std::vector<std::string> modelRHSTerms = getModelRHSTerms(formulaAsCppstring);
 
       // Create a 'data frame' (as simpleMatrix) to hold residual data and precisions
-      simpleMatrix residData(inputData.nrow(),2*modelLHSTerms.size());
+//      simpleMatrix residData(inputData.nrow(),2*modelLHSTerms.size());
       
       // A vector of pointers to modelBase objects
       std::vector<modelBase *> model;
@@ -74,7 +75,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       // Build the modelling objects. The RHS terms are nested within the LHS (response)
       // terms to build a explanatory term for every response.
       for(size_t resp=0; resp<modelLHSTerms.size(); resp++) {
-         model.push_back(new modelResp(modelLHSTerms[resp], inputData, NULL));
+         dcModelTerm parsedResponseModelDescr(modelLHSTerms[resp], inputData);
+         model.push_back(new modelResp(parsedResponseModelDescr, NULL));
          buildModel(model, modelRHSTerms, inputData, model.back());
       }
 
@@ -190,6 +192,7 @@ indepVarStr * makeIndepVarStr(std::string varDescr) {
    }
    else {
       // how to handle error for unknown variance specification, throw here?
+      newVarObject=NULL;
    }
    return newVarObject;
 }
@@ -200,36 +203,35 @@ void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & mod
                 Rcpp::DataFrame inputData, modelBase * rmod)
 {
    for(size_t term=0; term<modelRHSTerms.size(); term++) {
-      std::string fname = modelRHSTerms[term].substr(0, modelRHSTerms[term].find('('));
-      if (fname=="1")
-         model.push_back(new modelMean(modelRHSTerms[term], inputData, rmod));
-      else if (fname=="0")
+      dcModelTerm modeldescr(modelRHSTerms[term], inputData);
+      if (modeldescr.funcName=="1")
+         model.push_back(new modelMean(modeldescr, rmod));
+      else if (modeldescr.funcName=="0")
          continue;
-      else if (fname=="fx" || fname=="fixf")
-         model.push_back(new modelFixf(modelRHSTerms[term], inputData, rmod));
-      else if (fname=="rn" || fname=="ranf") {
+      else if (modeldescr.funcName=="fx" || modeldescr.funcName=="fixf")
+         model.push_back(new modelFixf(modeldescr, rmod));
+      else if (modeldescr.funcName=="rn" || modeldescr.funcName=="ranf") {
          if(modelRHSTerms[term].find("V=") != std::string::npos)
-            model.push_back(new modelRanf_cor(modelRHSTerms[term], inputData, rmod));
+            model.push_back(new modelRanf_cor(modeldescr, rmod));
          else
-            model.push_back(new modelRanf(modelRHSTerms[term], inputData, rmod));
+            model.push_back(new modelRanf(modeldescr, rmod));
       }
-      else if (fname=="rg" || fname=="freg")
-         model.push_back(new modelFreg(modelRHSTerms[term], inputData, rmod));
-      else if (fname=="rr") {
-         modelBase tempmodel(modelRHSTerms[term], inputData, rmod);
-         // For the moment only accept rr model with xxx/<matrix>, if xxx is factor is checked in Rreg
-         if (tempmodel.varNames.size()==2 && tempmodel.hasIndexVariable && tempmodel.varType[1]==6) {
-            model.push_back(new modelRreg(modelRHSTerms[term], inputData, rmod));
+      else if (modeldescr.funcName=="rg" || modeldescr.funcName=="freg")
+         model.push_back(new modelFreg(modeldescr, rmod));
+      else if (modeldescr.funcName=="rr") {
+         // For the moment only accept rr model with xxx/<matrix>
+         if (modeldescr.variableNames.size()==2 && modeldescr.hierarchType==1 && modeldescr.variableTypes[1]==6) {
+            model.push_back(new modelRreg(modeldescr, rmod));
          }
          else {
             throw (generalRbayzError("Cannot yet use rr() with something else than id/matrix"));
          }
          // Here should create an indepVarStr object with pointer in the Rreg (last model) object
       }
-      else if (fname=="smurf")
+      else if (modeldescr.funcName=="smurf")
          throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));
       else
-         throw (generalRbayzError("Unknow model (function) term: "+fname));
+         throw (generalRbayzError("Unknown model (function) term: "+modeldescr.funcName));
    }
    // Here could inspect the last-built model object and see if it needs to be
    // a hierarchical model.

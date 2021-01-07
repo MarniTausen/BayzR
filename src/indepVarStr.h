@@ -14,7 +14,9 @@
 
 class indepVarStr {
 public:
-   indepVarStr(std::string modelTerm);
+   indepVarStr(std::string modelTerm) {
+        // add constructor
+   }
    virtual ~indepVarStr() {}
    virtual void sample()=0;
    simpleDblVector weights, par;
@@ -24,11 +26,23 @@ public:
 
 class idenVarStr : public indepVarStr {
 public:
-   
-}
+    idenVarStr(std::string modelTerm) : indepVarStr(modelTerm) {
+        // add constructor
+    }
+    void sample() {
+        // add sample implementation
+    }
+};
+
 class mixtVarStr : public indepVarStr {
 public:
-   
-}
+    mixtVarStr(std::string modelTerm) : indepVarStr(modelTerm) {
+        // add constructor
+    }
+    void sample() {
+        // add sample implementation
+    }
+};
+
 
 #endif /* indepVarStr_h */

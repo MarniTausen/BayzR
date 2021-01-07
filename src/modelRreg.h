@@ -18,8 +18,8 @@ class modelRreg : public modelMatrix {
 
 public:
 
-   modelRreg(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
-         : modelMatrix(modelTerm, d, rmod)
+   modelRreg(dcModelTerm & modeldescr, modelBase * rmod)
+         : modelMatrix(modeldescr, rmod)
    {
       if (M->colnames.size() >0)    // if there are no colnames in matrix, default ones
          parLabels = M->colnames;   // will be inserted in the parameter names list

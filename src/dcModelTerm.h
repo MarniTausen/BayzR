@@ -16,13 +16,14 @@ class dcModelTerm {
 public:
    dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d);
    ~dcModelTerm() { }
+   std::string funcName, allVariableNames;
    std::vector<std::string> variableNames;
    std::vector<Rcpp::RObject> variableObjects;
    std::vector<int> variableTypes;
-   enum varianceType {notgiven, matrices, linmod};
-   enum hierarchType {nohierarch, index, genuine};
-   std::vector<std::string> varianceNames;
-   std::string varianceModel;
+   int varianceType; // 0=not given, 1=with matrices, 2=with linear model
+   int hierarchType; // 0=no, 1=simplified form with index variable, 2=genuine
+   std::vector<std::string> varianceNames;  // list of matrices (names) for varianceType 1
+   std::string varianceModel;  // the variance linear model description (varianceType 2)
    std::string priorModel;
    std::string hierarchModel;
 };

@@ -13,7 +13,7 @@
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
 
-/* GenericPrior object: to hold prior information in a generic way, bascically
+/* GenericPrior object: to hold prior information in a generic way, basically
    a map of (parameter, value) pairs and a "dist" string for the distribution.
    However, the construction has moved from R to inside bayz, so that
    it needs a check that the `dist` is compatible with the specified parameters.
@@ -24,23 +24,23 @@ class GenericPrior {
    
 public:
    
-   // initialisation from a model term, a string like "rf(A:B, V=..., prior=ichi(...))"
-   GenericPrior(std::string modelTerm) {
+   // initialisation from the string after prior=, or empty
+   GenericPrior(std::string priordescr) {
       size_t pos1, pos2, pos3;
-      if ( (pos1=modelTerm.find("prior=")) != std::string::npos) {
+      if ( priordescr != "") {
          // Note: if prior= is not found, nothing happens here and a default will be used.
          useDefault=FALSE;
-         pos1 += 6;   // now pos1 has moved where there should be the distribution name
-         pos2 = modelTerm.find('(',pos1);
-         pos3 = modelTerm.find(')',pos2);
-         dist = modelTerm.substr(pos1,(pos2-pos1));
-         std::vector<std::string> parlist = splitString(modelTerm.substr(pos2+1,(pos3-pos2-1)),',');
+         pos2 = priordescr.find('(');         // syntax is like ichi(par1=val1, par=val2, etc),
+         pos3 = priordescr.find(')',pos2);    // here want to get the part before first parenthesis
+         dist = priordescr.substr(0,pos2);    // as the dist name, and split part inside parenthesis
+         std::vector<std::string> parlist     // in a list of par=value strings
+                 = splitString(priordescr.substr(pos2+1,(pos3-pos2-1)),',');
          std::string parname;
          double parvalue;
          for(size_t i=0; i<parlist.size(); i++) {
             if((pos1 = parlist[i].find('=')) == std::string::npos) {
                throw(generalRbayzError("Error in parameter specification <"
-                                       +parlist[i]+"> in "+modelTerm));
+                                       +parlist[i]+"> in "+priordescr));
             }
             else {
                parname = parlist[i].substr(0,pos1);
@@ -49,20 +49,20 @@ public:
                }
                catch (std::exception& e) {
                   throw(generalRbayzError("Error to get value from parameter <"
-                                          +parlist[i]+"> in "+modelTerm));
+                                          +parlist[i]+"> in "+priordescr));
                }
                param.insert(std::make_pair(parname,parvalue));
             }
          }
          if(dist=="ichi") {
             if(param.find("scale") == param.end())
-               throw(generalRbayzError("Error ichi prior is missing scale parameter in "+modelTerm));
+               throw(generalRbayzError("Error ichi prior is missing scale parameter in "+priordescr));
             if(param.find("df") == param.end())
-               throw(generalRbayzError("Error ichi prior is missing df parameter in "+modelTerm));
+               throw(generalRbayzError("Error ichi prior is missing df parameter in "+priordescr));
          }
          // else if(dist==...)  // add checks for other distributions
          else {
-            throw(generalRbayzError("Unknown prior distribution in "+modelTerm));
+            throw(generalRbayzError("Unknown prior distribution in "+priordescr));
          }
       }
    }

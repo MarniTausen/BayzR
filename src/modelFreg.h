@@ -22,8 +22,8 @@ class modelFreg : public modelBase {
    
 public:
    
-   modelFreg(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
-         : modelBase(modelTerm, d, rmod)
+   modelFreg(dcModelTerm & modeldescr, modelBase * rmod)
+         : modelBase(modeldescr, rmod)
    {
       if(varType[0] != 2)
          throw generalRbayzError("Not a numeric vector input: "+varNames[0]);

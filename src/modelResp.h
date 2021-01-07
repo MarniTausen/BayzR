@@ -19,8 +19,8 @@ class modelResp : public modelBase {
    
 public:
    
-   modelResp(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
-            : modelBase(modelTerm, d, rmod), weights()
+   modelResp(dcModelTerm & modeldescr, modelBase * rmod)
+            : modelBase(modeldescr, rmod), weights()
    {
       // For now there is no check on the response vector to be correctly numerical, in future
       // rbayz main may need to make a triage for different types of response and then construct

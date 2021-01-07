@@ -18,8 +18,8 @@ class modelRanf_cor : public modelMatrix {
 
 public:
 
-   modelRanf_cor(std::string modelTerm, Rcpp::DataFrame &d, modelBase * rmod)
-         : modelMatrix(modelTerm, d, rmod)
+   modelRanf_cor(dcModelTerm & modeldescr, modelBase * rmod)
+         : modelMatrix(modeldescr, rmod)
    {
       hpar.initWith(1,1.0l);
       // modified: the parName is still the name(s) of variables, it needs some
