@@ -32,8 +32,9 @@ public:
       resid = par.data;          // resid and residPrec are now alias for the par and weights
       residPrec = weights.data;  // vectors inside a response object
       hpar.initWith(1,1.0l);
-      // no parNames (labels for residuals) yet!
+      parName = "resid";
       hparName = "var.resid";
+      // no labels for residuals yet!
    }
    
    ~modelResp() {
