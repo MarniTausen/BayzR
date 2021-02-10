@@ -18,7 +18,7 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
       funcName = modelTerm.substr(0, pos);
    // Variables name(s) need some pre-treatment to handle hierarchy specifications
    std::string tempnames = getVarNames(modelTerm);
-   pos = tempnames.find('/');      // search '/' for hierarchical models
+   pos = tempnames.find('/');             // search '/' for hierarchical models
    if( pos != std::string::npos) {
       size_t pos2 = tempnames.find('(');  // proper hierarchy needs parentheses somewhere,
       if (pos2 == std::string::npos) {    // without any parenthesis it is evaluated as

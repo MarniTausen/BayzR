@@ -1,4 +1,4 @@
-#' Summary statistics of a bayz object
+#' Summary bayz model fit
 #'
 #' Produced summary statistics of the bayz object and returns a summarybayz object.
 #'

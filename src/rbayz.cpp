@@ -36,11 +36,6 @@ void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & po
 void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector & parModelNr,
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples, size_t save);
 
-// The interface defines to pass modelFrame by value, this is a quite 'light' copy (a bunch
-// of pointers); also modelFrame is modified within the main function, but these modifications
-// don't need to persist. For sub-functions, the modelFrame is passed around by reference.
-// The return value is a List, to check if program terminated normally or with errors check $nError.
-
 // [[Rcpp::export]]
 Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
                      Rcpp::IntegerVector chain, int silent) {
@@ -86,12 +81,13 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       Rcpp::IntegerVector parSizes;                 // size (number of levels) in each hpar and par vector
       Rcpp::IntegerVector parEstFirst,parEstLast;   // First and last number in estimates vector (R coding from 1)
       Rcpp::IntegerVector parModelNr;               // which model-number the parameter vector comes from
+      Rcpp::CharacterVector parModelFunc;           // The model-function name (fx, rn, rr, ...) the parameter vector comes from
       Rcpp::IntegerVector parLogged;                // If the parameter will be logged
       Rcpp::CharacterVector parLoggedNames;         // Shortened list of names of logged parameters
       Rcpp::CharacterVector estimNames;             // Names of all 'estimates' (individual levels)
       
       collectParInfo(model, parNames, parHyper, parSizes, parEstFirst, parEstLast, parModelNr,
-                     parLogged, parLoggedNames, estimNames);
+                     parModelFunc, parLogged, parLoggedNames, estimNames);
       size_t nEstimates = estimNames.size();
 
       // Check the chain settings and make list of output sample cycle-numbers.
@@ -134,7 +130,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       // Build result list for normal termination
       Rcpp::List result = Rcpp::List::create();
       Rcpp::DataFrame parInfo = Rcpp::DataFrame::create
-               (Rcpp::Named("ModelNr")=parModelNr, Rcpp::Named("Hyper")=parHyper,
+               (Rcpp::Named("ModelNr")=parModelNr, Rcpp::Named("ModelTerm")=parModelFunc, 
+                Rcpp::Named("Hyper")=parHyper,
                 Rcpp::Named("Size")=parSizes, Rcpp::Named("EstStart")=parEstFirst,
                 Rcpp::Named("EstEnd")=parEstLast, Rcpp::Named("Logged")=parLogged);
       parInfo.attr("row.names") = parNames;
@@ -291,7 +288,7 @@ void buildModelTerm(std::vector<modelBase *> & model, std::string modelTerm, Rcp
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
-                    Rcpp::IntegerVector & parModelNr, Rcpp::IntegerVector & parLogged,
+                    Rcpp::IntegerVector & parModelNr, Rcpp::CharacterVector parModelFunc, Rcpp::IntegerVector & parLogged,
                     Rcpp::CharacterVector & parLoggedNames, Rcpp::CharacterVector & estimNames) {
 
    // First collect list of used hpar and par vectors, and set what model(-term) they belong to.
@@ -299,6 +296,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
       if ( model[mt]->hpar.nelem > 0 ) {        // first, then all par vectors
          parHyper.push_back(TRUE);
          parModelNr.push_back(mt);
+         parModelFunc.push_back(model[mt]->fname);
          parSizes.push_back(model[mt]->hpar.nelem);
          parNames.push_back(model[mt]->hparName);
          if (model[mt]->hpar.nelem==1) {        // log all hyper-parameters with 1 level
@@ -313,6 +311,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
       if (model[mt]->par.nelem > 0 ) {
          parHyper.push_back(FALSE);
          parModelNr.push_back(mt);
+         parModelFunc.push_back(model[mt]->fname);
          parSizes.push_back(model[mt]->par.nelem);
          parNames.push_back(model[mt]->parName);
          if (model[mt]->par.nelem==1) {       // log all parameters with 1 level. Could also consider to log

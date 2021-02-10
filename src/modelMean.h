@@ -24,6 +24,7 @@ public:
 
    modelMean(dcModelTerm & modeldescr, modelBase * rmod)
          : modelBase(modeldescr, rmod) {
+      fname = "mn";
       par.initWith(1,0.0l);
       parName = "mean";
    }

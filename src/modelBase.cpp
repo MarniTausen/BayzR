@@ -15,6 +15,7 @@ modelBase::modelBase(dcModelTerm & modeldescr, modelBase * rmod)
             // but the rmod may not have a resid and residPrec vector
       respModel = rmod;
    }
+   fname = modeldescr.funcName;
    hierType = modeldescr.hierarchType;
    parName = modeldescr.allVariableNames;
    varNames = modeldescr.variableNames;

@@ -51,7 +51,8 @@ public:
    // prepForOutput is for model classes that need to make a transform of
    // parameters for output, the base class defines an 'empty' version.
    virtual void prepForOutput() { };
-   
+
+   std::string fname;
    simpleDblVector par, hpar;
    std::string parName, hparName;
    std::vector<std::string> parLabels, hparLabels, varNames;
