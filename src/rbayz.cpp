@@ -27,7 +27,7 @@ void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & mod
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
-                    Rcpp::IntegerVector & parModelNr, Rcpp::IntegerVector & parLogged,
+                    Rcpp::IntegerVector & parModelNr, Rcpp::CharacterVector & parModelFunc, Rcpp::IntegerVector & parLogged,
                     Rcpp::CharacterVector & parLoggedNames, Rcpp::CharacterVector & estimNames);
 void writeLoggedSamples(size_t & cycle, std::vector<modelBase *> & model, Rcpp::IntegerVector & parLogged,
                         Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr, bool silent);
@@ -110,6 +110,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       Rcpp::NumericVector postMean(nEstimates,0);
       Rcpp::NumericVector postSD(nEstimates,0);
       Rcpp::colnames(loggedSamples) = parLoggedNames;
+      Rcpp::rownames(loggedSamples) = Rcpp::as<Rcpp::CharacterVector>(outputCycleNumbers); 
       int nShow = chain[0]/5;
       lastDone="Preparing to run MCMC";
 
@@ -149,6 +150,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       result.push_back(parInfo,"Parameters");
       result.push_back(loggedSamples,"Samples");
       result.push_back(estimates,"Estimates");
+      result.push_back(chain,"Chain");
       lastDone="Filling return list";
       return(result);   // normal termination
 
@@ -288,7 +290,7 @@ void buildModelTerm(std::vector<modelBase *> & model, std::string modelTerm, Rcp
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
-                    Rcpp::IntegerVector & parModelNr, Rcpp::CharacterVector parModelFunc, Rcpp::IntegerVector & parLogged,
+                    Rcpp::IntegerVector & parModelNr, Rcpp::CharacterVector & parModelFunc, Rcpp::IntegerVector & parLogged,
                     Rcpp::CharacterVector & parLoggedNames, Rcpp::CharacterVector & estimNames) {
 
    // First collect list of used hpar and par vectors, and set what model(-term) they belong to.
