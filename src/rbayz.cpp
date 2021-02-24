@@ -22,8 +22,7 @@
 
 
 // These functions are defined below the main function
-void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & modelRHSTerms,
-                Rcpp::DataFrame inputData, modelBase *);
+modelBase* buildModel(dcModelTerm & modeldescr, modelBase *);
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
@@ -72,7 +71,13 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       for(size_t resp=0; resp<modelLHSTerms.size(); resp++) {
          dcModelTerm parsedResponseModelDescr(modelLHSTerms[resp], inputData);
          model.push_back(new modelResp(parsedResponseModelDescr, NULL));
-         buildModel(model, modelRHSTerms, inputData, model.back());
+         modelBase* responseModel = model.back();
+         for(size_t term=0; term<modelRHSTerms.size(); term++) {
+            dcModelTerm modeldescr(modelRHSTerms[term], inputData);
+            model.push_back(buildModel(modeldescr, responseModel));
+   // Here could inspect the last-built model object and see if it needs to be
+   // a hierarchical model.
+         }
       }
 
       // Parameter information vectors
@@ -82,6 +87,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       Rcpp::IntegerVector parEstFirst,parEstLast;   // First and last number in estimates vector (R coding from 1)
       Rcpp::IntegerVector parModelNr;               // which model-number the parameter vector comes from
       Rcpp::CharacterVector parModelFunc;           // The model-function name (fx, rn, rr, ...) the parameter vector comes from
+      // idea to also add type, e.g. var, coeff, prob, to make easy selections in summary()
       Rcpp::IntegerVector parLogged;                // If the parameter will be logged
       Rcpp::CharacterVector parLoggedNames;         // Shortened list of names of logged parameters
       Rcpp::CharacterVector estimNames;             // Names of all 'estimates' (individual levels)
@@ -198,42 +204,38 @@ indepVarStr * makeIndepVarStr(std::string varDescr) {
 
 // Build all RHS terms for one response.
 // This building can recurse in itself to build hierarchical models.
-void buildModel(std::vector<modelBase *> & model, std::vector<std::string> & modelRHSTerms,
-                Rcpp::DataFrame inputData, modelBase * rmod)
+modelBase* buildModel(dcModelTerm & modeldescr, modelBase * rmod)
 {
-   for(size_t term=0; term<modelRHSTerms.size(); term++) {
-      dcModelTerm modeldescr(modelRHSTerms[term], inputData);
-      if (modeldescr.variableNames[0]=="1")
-         model.push_back(new modelMean(modeldescr, rmod));
-      else if (modeldescr.variableNames[0]=="0")
-         continue;
-      else if (modeldescr.funcName=="fx" || modeldescr.funcName=="fixf")
-         model.push_back(new modelFixf(modeldescr, rmod));
-      else if (modeldescr.funcName=="rn" || modeldescr.funcName=="ranf") {
-         if(modelRHSTerms[term].find("V=") != std::string::npos)
-            model.push_back(new modelRanf_cor(modeldescr, rmod));
-         else
-            model.push_back(new modelRanf(modeldescr, rmod));
-      }
-      else if (modeldescr.funcName=="rg" || modeldescr.funcName=="freg")
-         model.push_back(new modelFreg(modeldescr, rmod));
-      else if (modeldescr.funcName=="rr") {
-         // For the moment only accept rr model with xxx/<matrix>
-         if (modeldescr.variableNames.size()==2 && modeldescr.hierarchType==1 && modeldescr.variableTypes[1]==6) {
-            model.push_back(new modelRreg(modeldescr, rmod));
-         }
-         else {
-            throw (generalRbayzError("Cannot yet use rr() with something else than id/matrix"));
-         }
-         // Here should create an indepVarStr object with pointer in the Rreg (last model) object
-      }
-      else if (modeldescr.funcName=="smurf")
-         throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));
+   modelBase* newModelObject;            // actually a pointer to it
+   if (modeldescr.variableNames[0]=="1")
+      newModelObject = new modelMean(modeldescr, rmod);
+   else if (modeldescr.variableNames[0]=="0")
+      continue;
+   else if (modeldescr.funcName=="fx" || modeldescr.funcName=="fixf")
+      newModelObject = new modelFixf(modeldescr, rmod);
+   else if (modeldescr.funcName=="rn" || modeldescr.funcName=="ranf") {
+      if(modelRHSTerms[term].find("V=") != std::string::npos)
+         newModelObject = new modelRanf_cor(modeldescr, rmod);
       else
-         throw (generalRbayzError("Unknown model (function) term: "+modeldescr.funcName));
+         newModelObject = new modelRanf(modeldescr, rmod);
    }
-   // Here could inspect the last-built model object and see if it needs to be
-   // a hierarchical model.
+   else if (modeldescr.funcName=="rg" || modeldescr.funcName=="freg")
+      newModelObject = new modelFreg(modeldescr, rmod);
+   else if (modeldescr.funcName=="rr") {
+      // For the moment only accept rr model with xxx/<matrix>
+      if (modeldescr.variableNames.size()==2 && modeldescr.hierarchType==1 && modeldescr.variableTypes[1]==6) {
+         newModelObject = new modelRreg(modeldescr, rmod);
+      }
+      else {
+         throw (generalRbayzError("Cannot yet use rr() with something else than id/matrix"));
+      }
+      // Here should create an indepVarStr object with pointer in the Rreg (last model) object
+   }
+   else if (modeldescr.funcName=="smurf")
+      throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));
+   else
+      throw (generalRbayzError("Unknown model (function) term: "+modeldescr.funcName));
+   return newModelObject;
 }
 
 /* old model build
