@@ -57,13 +57,15 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
    // otherwise, the description must be a set of matrices and it is split on '*' and goes
    // in the vector of varianceNames.
    std::string tempvariance = getVarDescr(modelTerm);
-   if (tempvariance[0]=='~') {
-      varianceType=2;
-      varianceModel=tempvariance.substr(1,std::string::npos);
-   }
-   else {
-      varianceType=1;
-      varianceNames = splitString(tempvariance,'*');
+   if (tempvariance != "") {
+      if (tempvariance[0]=='~') {
+         varianceType=2;
+         varianceModel=tempvariance.substr(1,std::string::npos);
+      }
+      else {
+         varianceType=1;
+         varianceNames = splitString(tempvariance,'*');
+      }
    }
    // Get prior description
    priorModel = getPriorDescr(modelTerm);

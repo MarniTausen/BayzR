@@ -43,6 +43,7 @@ print.summarybayz <- function(x, ...){
         cat("\n")
 
         cat("Estimates for explained variances (variances as proportions of total):\n")
-        print(object$variance_table)
+        if (nrow(object$variance_table) > 0) print(object$variance_table)
+        else cat("*** This table is not printed because there is only one variance in the model\n")
     }
 }

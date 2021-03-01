@@ -19,6 +19,7 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
     new_object[['terms']] <- object[['terms']]
     new_object[['nError']] <- object[['nError']]
     new_object[['Errors']] <- object[['Errors']]
+    new_object[['Chain']] <- object[['Chain']]
     if(new_object$nError>0){
         return(new_object)
     }
@@ -61,15 +62,18 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
     new_object[['Convergence']] = convergence_table
     new_object[['ConvergenceStatus']] = convergence_status
 
-    # Proportions of variances 
-    var_samples = object$Samples[,substr(colnames(object$Samples),0,3)=="var"]
-    var_proportions = t(apply(var_samples,1,function(x){x/sum(x)}))
-    postMeans =  apply(var_proportions,2,mean)
-    postSDs  = apply(var_proportions,2,sd)
-    HPDs = HPDbayz(var_proportions,prob=HPDprob, bound="prob")
-    variance_table = data.frame(postMeans,postSDs,HPDs)
-    colnames(variance_table) = c("postMean","postSD","HPDleft","HPDright")
-
+    # Proportions of variances.
+    varnames = ( substr(colnames(object$Samples),0,3)=="var" )
+    variance_table = data.frame()
+    if (sum(varnames)>1) {   # if <= 1 variances the variance_table remains an empty data frame
+       var_samples = as.matrix(object$Samples[,varnames])
+       var_proportions = t(apply(var_samples,1,function(x){x/sum(x)}))
+       postMeans =  apply(var_proportions,2,mean)
+       postSDs  = apply(var_proportions,2,sd)
+       HPDs = HPDbayz(var_proportions,prob=HPDprob, bound="prob")
+       variance_table = data.frame(postMeans,postSDs,HPDs)
+       colnames(variance_table) = c("postMean","postSD","HPDleft","HPDright")
+    }
     new_object[['variance_table']] = variance_table
 
     new_object[['HPDprob']] = HPDprob
