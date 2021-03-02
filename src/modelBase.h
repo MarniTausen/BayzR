@@ -1,4 +1,3 @@
-//
 //  modelBase.h
 //
 //  Base class for model (computational) classes.

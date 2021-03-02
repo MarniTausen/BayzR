@@ -59,12 +59,16 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
    std::string tempvariance = getVarDescr(modelTerm);
    if (tempvariance != "") {
       if (tempvariance[0]=='~') {
-         varianceType=2;
+         varianceType=3;
          varianceModel=tempvariance.substr(1,std::string::npos);
       }
       else {
-         varianceType=1;
          varianceNames = splitString(tempvariance,'*');
+         varianceType=1;
+         for(size_t i=0; i<varianceNames.size(); i++) {
+            if( !(varianceNames[i]=="IDEN" || varianceNames[i]=="WEI" || varianceNames[i]=="MIXT") )
+               varianceType=2; // if any variance-term is not IDEN, WEI, MIXT it is a correlated structure
+         }
       }
    }
    // Get prior description

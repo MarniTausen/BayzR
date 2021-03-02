@@ -8,11 +8,12 @@
 #define indepVarStr_h
 
 #include <Rcpp.h>
+#include "modelBase.h"
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
 #include "simpleVector.h"
 
-class indepVarStr {
+class indepVarStr : public modelBase {
 public:
    indepVarStr(std::string modelTerm) {
         // add constructor
