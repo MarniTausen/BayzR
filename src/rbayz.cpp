@@ -22,7 +22,7 @@
 
 
 // These functions are defined below the main function
-modelBase* buildModel(dcModelTerm & modeldescr, modelBase *);
+void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, modelBase *);
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
@@ -72,17 +72,10 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
          dcModelTerm parsedResponseModelDescr(modelLHSTerms[resp], inputData);
          model.push_back(new modelResp(parsedResponseModelDescr, NULL));
          modelBase* responseModel = model.back();
-         modelBase* tempModelptr;
          for(size_t term=0; term<modelRHSTerms.size(); term++) {
             dcModelTerm modeldescr(modelRHSTerms[term], inputData);
-            // There is now one case where the returned pointer for the new built model object can be NULL,
-            // so need to test that, and only include the new pointer if not NULL ... but it doesn't look nice
-            Rcpp::Rcout << "Building model for " << modelRHSTerms[term] << "\n";
-            if ( (tempModelptr=buildModel(modeldescr, responseModel)) != NULL)
-               model.push_back(tempModelptr);
-   // Now can insert here the variance model objects ...
-   //    something like: buildVarModel(modeldescr, model.back())
-   //    but some variance models may need two objects?
+            buildModel(model, modeldescr, responseModel);
+            //    something like: buildVarModel(model, modeldescr, model.back())
    // Same for hierarchical models ...
          }
       }
@@ -211,33 +204,26 @@ indepVarStr * makeIndepVarStr(std::string varDescr) {
 
 // Build all RHS terms for one response.
 // This building can recurse in itself to build hierarchical models.
-modelBase* buildModel(dcModelTerm & modeldescr, modelBase * rmod)
+void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, modelBase * rmod)
 {
-   modelBase* newModelObject=NULL;            // actually a pointer to the new model object
-   Rcpp::Rcout << "Inside buildModel with a funcname: " << modeldescr.funcName << "\n";
+   modelBase* newModelObject=NULL;
    if (modeldescr.variableNames[0]=="1")
       newModelObject = new modelMean(modeldescr, rmod);
    else if (modeldescr.variableNames[0]=="0")
-      return NULL;
+      newModelObject=NULL;
    else if (modeldescr.funcName=="fx" || modeldescr.funcName=="fixf")
       newModelObject = new modelFixf(modeldescr, rmod);
    else if (modeldescr.funcName=="rn" || modeldescr.funcName=="ranf") {
-       Rcpp::Rcout << "buildModel is in the else if funcname is rn or ranf\n";
-       Rcpp::Rcout << "varianceType is: " << modeldescr.varianceType << "\n";
-       Rcpp::Rcout << "varianceModel is: " << modeldescr.varianceModel << "\n";
       if(modeldescr.varianceType==0) {
-          Rcpp::Rcout << "buildModel is ready to make a modelRanf object\n";
          newModelObject = new modelRanf(modeldescr, rmod);
       }
       else {
-          Rcpp::Rcout << "buildModel is ready to make a modelRanf_cor object\n";
          newModelObject = new modelRanf_cor(modeldescr, rmod);
       }
    }
    else if (modeldescr.funcName=="rg" || modeldescr.funcName=="freg")
       newModelObject = new modelFreg(modeldescr, rmod);
    else if (modeldescr.funcName=="rr") {
-       Rcpp::Rcout << "buildModel is in the else if funcname is rr\n";
       // For the moment only accept rr model with xxx/<matrix>
       if (modeldescr.variableNames.size()==2 && modeldescr.hierarchType==1 && modeldescr.variableTypes[1]==6) {
          newModelObject = new modelRreg(modeldescr, rmod);
@@ -251,7 +237,8 @@ modelBase* buildModel(dcModelTerm & modeldescr, modelBase * rmod)
       throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));
    else
       throw (generalRbayzError("Unknown model (function) term: "+modeldescr.funcName));
-   return newModelObject;
+   if ( newModelObject != NULL)  // note in some cases there is no newModelObject made
+               model.push_back(newModelObject);
 }
 
 /* old model build
