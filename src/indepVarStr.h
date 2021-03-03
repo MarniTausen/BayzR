@@ -8,26 +8,23 @@
 #define indepVarStr_h
 
 #include <Rcpp.h>
-#include "modelBase.h"
+#include "modelVar.h"
+#include "dcModelTerm.h"
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
 #include "simpleVector.h"
 
-class indepVarStr : public modelBase {
+class indepVarStr : public modelVar {
 public:
-   indepVarStr(std::string modelTerm) {
+   indepVarStr(dcModelTerm & modeldescr) : modelVar(modeldescr) {
         // add constructor
    }
-   virtual ~indepVarStr() {}
-   virtual void sample()=0;
-   simpleDblVector weights, par;
-   std::string parName;
-   std::vector<std::string> parLabels;
+   simpleDblVector weights;
 };
 
 class idenVarStr : public indepVarStr {
 public:
-    idenVarStr(std::string modelTerm) : indepVarStr(modelTerm) {
+    idenVarStr(dcModelTerm & modeldescr) : indepVarStr((modeldescr) {
         // add constructor
     }
     void sample() {
@@ -37,7 +34,7 @@ public:
 
 class mixtVarStr : public indepVarStr {
 public:
-    mixtVarStr(std::string modelTerm) : indepVarStr(modelTerm) {
+    mixtVarStr(dcModelTerm & modeldescr) : indepVarStr((modeldescr) {
         // add constructor
     }
     void sample() {
