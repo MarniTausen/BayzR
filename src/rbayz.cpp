@@ -8,7 +8,7 @@
 #include "modelResp.h"
 #include "modelMean.h"
 #include "modelFixf.h"
-#include "modelRanf.h"
+#include "modelRanfi.h"
 #include "modelFreg.h"
 #include "modelRreg.h"
 #include "modelRanf_cor.h"
@@ -214,11 +214,11 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
    else if (modeldescr.funcName=="fx" || modeldescr.funcName=="fixf")
       newModelObject = new modelFixf(modeldescr, rmod);
    else if (modeldescr.funcName=="rn" || modeldescr.funcName=="ranf") {
-      if(modeldescr.varianceType==0) {
-         newModelObject = new modelRanf(modeldescr, rmod);
+      if(modeldescr.varianceType==2) {
+         newModelObject = new modelRanf_cor(modeldescr, rmod);
       }
       else {
-         newModelObject = new modelRanf_cor(modeldescr, rmod);
+         newModelObject = new modelRanfi(modeldescr, rmod);
       }
    }
    else if (modeldescr.funcName=="rg" || modeldescr.funcName=="freg")

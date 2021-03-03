@@ -1,6 +1,6 @@
 //
-//  BayzR -- modelRanf.h
-//  model class for random factor fit without correlation, derives from modelFactor.
+//  BayzR -- modelRanfi.h
+//  model class for RAndom Factor fit with Indep variance structures, derives from modelFactor.
 //   - implements sample() method (see modelClasses.cpp for code)
 //   - hpar is set as "var..." of size 1
 //   - sample() also includes updating variance
@@ -9,23 +9,23 @@
 //  Created by Luc Janss on 03/08/2018.
 //
 
-#ifndef modelRanf_h
-#define modelRanf_h
+#ifndef modelRanfi_h
+#define modelRanfi_h
 
 #include <Rcpp.h>
 #include "modelFactor.h"
 
-class modelRanf : public modelFactor {
+class modelRanfi : public modelFactor {
 
 public:
 
-   modelRanf(dcModelTerm & modeldescr, modelBase * rmod)
+   modelRanfi(dcModelTerm & modeldescr, modelBase * rmod)
          : modelFactor(modeldescr, rmod) {
       hpar.initWith(1,1.0l);
       hparName = "var." + parName;
    }
 
-   ~modelRanf() {
+   ~modelRanfi() {
    }
 
    void sample() {
@@ -45,4 +45,4 @@ public:
 
 };
 
-#endif /* modelRanf_h */
+#endif /* modelRanfi_h */
