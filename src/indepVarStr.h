@@ -9,32 +9,41 @@
 
 #include <Rcpp.h>
 #include "modelVar.h"
+#include "modelBase.h"
 #include "dcModelTerm.h"
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
 #include "simpleVector.h"
 
-class indepVarStr : public modelVar {
+class indepVarStr : public modelBase {
 public:
-   indepVarStr(dcModelTerm & modeldescr) : modelVar(modeldescr) {
-        // add constructor
+   indepVarStr(dcModelTerm & modeldescr, modelBase* cm) : modelBase(modeldescr, cm) {
+       coefmodel = cm;
+       weights.initWith(cm->par.nelem, 1.0l);
    }
    simpleDblVector weights;
+   modelBase* coefmodel;
 };
 
 class idenVarStr : public indepVarStr {
 public:
-    idenVarStr(dcModelTerm & modeldescr) : indepVarStr((modeldescr) {
-        // add constructor
+    idenVarStr(dcModelTerm & modeldescr, modelBase* cm) : indepVarStr(modeldescr, cm) {
+      par.initWith(1,1.0l);
+      parName = "var." + parName;
     }
     void sample() {
-        // add sample implementation
+      double ssq=0.0;
+      for(size_t k=0; k < coefmodel->par.nelem; k++)
+         ssq += coefmodel->par[k]*coefmodel->par[k];
+      par[0] = gprior.samplevar(ssq,coefmodel->par.nelem);
+      double invvar = 1.0l/par[0];
+      for(size_t k=0; k < weights.nelem; k++) weights[k] = invvar;
     }
 };
 
 class mixtVarStr : public indepVarStr {
 public:
-    mixtVarStr(dcModelTerm & modeldescr) : indepVarStr((modeldescr) {
+    mixtVarStr(dcModelTerm & modeldescr, modelBase* cm) : indepVarStr(modeldescr, cm) {
         // add constructor
     }
     void sample() {

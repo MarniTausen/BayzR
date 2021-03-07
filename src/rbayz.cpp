@@ -15,14 +15,14 @@
 #include "rbayzExceptions.h"
 #include "simpleMatrix.h"
 #include "simpleVector.h"
+#include "modelVar.h"
 #include "indepVarStr.h"
 
 // [[Rcpp::plugins("cpp11")]]
 
-
-
 // These functions are defined below the main function
-void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, modelBase *);
+void buildModel(std::vector<modelBase *> &, dcModelTerm &, modelBase *);
+void buildVarModel(std::vector<modelBase *> &, dcModelTerm &, modelBase *);
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
@@ -32,7 +32,7 @@ void writeLoggedSamples(size_t & cycle, std::vector<modelBase *> & model, Rcpp::
                         Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr, bool silent);
 void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & postMean,
                       Rcpp::NumericVector & postSD);
-void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector & parModelNr,
+void collectLoggedSamples(std::vector<modelBase *> & model, Rcpp::IntegerVector & parModelNr,
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples, size_t save);
 
 // [[Rcpp::export]]
@@ -60,11 +60,9 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       std::vector<std::string> modelLHSTerms = getModelLHSTerms(formulaAsCppstring);
       std::vector<std::string> modelRHSTerms = getModelRHSTerms(formulaAsCppstring);
 
-      // Create a 'data frame' (as simpleMatrix) to hold residual data and precisions
-//      simpleMatrix residData(inputData.nrow(),2*modelLHSTerms.size());
-      
-      // A vector of pointers to modelBase objects
-      std::vector<modelBase *> model;
+      // Vectors to hold pointers to the modelling objects
+      std::vector<modelBase *> model;        // objects modelling coefficients (fix/ran/reg coeff)
+      std::vector<modelBase *> vmodel;        // objects modelling variances
 
       // Build the modelling objects. The RHS terms are nested within the LHS (response)
       // terms to build a explanatory term for every response.
@@ -75,8 +73,11 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
          for(size_t term=0; term<modelRHSTerms.size(); term++) {
             dcModelTerm modeldescr(modelRHSTerms[term], inputData);
             buildModel(model, modeldescr, responseModel);
-            //    something like: buildVarModel(model, modeldescr, model.back())
-   // Same for hierarchical models ...
+            if (modeldescr.funcName == "rn" ||  modeldescr.funcName == "ranf" || modeldescr.funcName == "rr") {
+               buildVarModel(vmodel, modeldescr, model.back());
+               model.back()->vmodel = vmodel.back();
+            }
+            // Same for hierarchical models ...
          }
       }
 
@@ -178,6 +179,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
 }
 
 // A function to create one of the indepVarStr classes
+/*
 indepVarStr * makeIndepVarStr(std::string varDescr) {
    std::string varname;
    indepVarStr * newVarObject;
@@ -201,6 +203,7 @@ indepVarStr * makeIndepVarStr(std::string varDescr) {
    }
    return newVarObject;
 }
+*/
 
 // Build all RHS terms for one response.
 // This building can recurse in itself to build hierarchical models.
@@ -239,6 +242,10 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
       throw (generalRbayzError("Unknown model (function) term: "+modeldescr.funcName));
    if ( newModelObject != NULL)  // note in some cases there is no newModelObject made
                model.push_back(newModelObject);
+}
+
+void buildVarModel(std::vector<modelBase *> &, dcModelTerm &, modelBase *) {
+   return;
 }
 
 /* old model build

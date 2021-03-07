@@ -23,7 +23,7 @@ public:
 
    simpleDblVector par, hpar;
    std::string parName, hparName;
-   std::vector<std::string> parLabels, hparLabels, varNames;
+   std::vector<std::string> parLabels, hparLabels;
 
 protected:
    GenericPrior gprior;

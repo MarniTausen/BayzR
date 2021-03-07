@@ -39,7 +39,13 @@ public:
    int& operator[](size_t i) {
       return(data[i]);
    }
-   
+
+/*   void operator=(int v) {
+      for(size_t i=0; i<nelem; i++)
+         data[i] = v;
+   }
+*/
+
    void initWith(Rcpp::IntegerVector v) {
       doalloc(v.size());
       for(size_t i=0; i<nelem; i++)
@@ -89,6 +95,12 @@ public:
    double& operator[](size_t i) {
       return(data[i]);
    }
+
+/*   void operator=(double v) {
+      for(size_t i=0; i<nelem; i++)
+         data[i] = v;
+   }
+*/
    
    void initWith(Rcpp::NumericVector v) {
       doalloc(v.size());

@@ -59,6 +59,7 @@ public:
    std::vector<int> varType;
    int hierType;
    modelBase *respModel=NULL;
+   modelBase *vmodel=NULL;
    double *resid=NULL, *residPrec=NULL;
    size_t Nresid=0;
 
