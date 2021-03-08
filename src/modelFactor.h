@@ -17,17 +17,17 @@
 
 #include <Rcpp.h>
 #include <cmath>
-#include "modelBase.h"
+#include "modelCoeff.h"
 #include "dataFactor.h"
 
 void CharVec2cpp(std::vector<std::string> & labels, Rcpp::CharacterVector templabels);
 
-class modelFactor : public modelBase {
+class modelFactor : public modelCoeff {
    
 public:
    
    modelFactor(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelBase(modeldescr, rmod)
+         : modelCoeff(modeldescr, rmod)
    {
       F = new dataFactor();
       for(size_t i=0; i<varNames.size(); i++) {

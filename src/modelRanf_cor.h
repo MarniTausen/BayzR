@@ -14,6 +14,9 @@
 #include "modelMatrix.h"
 #include "dataMatrix.h"
 
+// update: ranfcor now also derive from modelFactor?
+// the matrix data here was eigenvector data, it needs to come from a variance model now.
+
 class modelRanf_cor : public modelMatrix {
 
 public:
@@ -39,12 +42,14 @@ public:
    }
    
    void sample() {
+/*    has to be revised completely, needs to get matrix part from a variance model
       update_regressions(TRUE, hpar[0]);
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
       for(size_t k=0; k< M->ncol; k++)
          ssq += par[k]*par[k]/weights[k];
       hpar[0] = gprior.samplevar(ssq, M->ncol);
+*/
    }
 
    // prepForOutput puts the transform to breeding values in the par-vector

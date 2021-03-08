@@ -7,23 +7,22 @@
 #include <Rcpp.h>
 #include <vector>
 #include "modelBase.h"
+#include "priorClasses.h"
 #include "simpleVector.h"
 #include "dcModelTerm.h"
 
-class modelVar {
+class modelVar : public modelBase {
    
 public:
 
-   modelVar(dcModelTerm & modeldescr, modelBase * rmod);
+   modelVar(dcModelTerm & modeldescr, modelBase * rmod)
+      : modelBase(modeldescr, rmod), gprior(modeldescr.priorModel) { }
 
-   virtual ~modelVar() {
-   }
+   virtual ~modelVar() { }
    
-   virtual void sample()=0;
-
-   simpleDblVector par, hpar;
-   std::string parName, hparName;
-   std::vector<std::string> parLabels, hparLabels;
+//   simpleDblVector par, hpar;
+//   std::string parName, hparName;
+//   std::vector<std::string> parLabels, hparLabels;
 
 protected:
    GenericPrior gprior;

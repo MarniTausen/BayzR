@@ -15,9 +15,9 @@
 #include "rbayzExceptions.h"
 #include "simpleVector.h"
 
-class indepVarStr : public modelBase {
+class indepVarStr : public modelVar {
 public:
-   indepVarStr(dcModelTerm & modeldescr, modelBase* cm) : modelBase(modeldescr, cm) {
+   indepVarStr(dcModelTerm & modeldescr, modelBase* cm) : modelVar(modeldescr, cm) {
        coefmodel = cm;
        weights.initWith(cm->par.nelem, 1.0l);
    }
@@ -51,5 +51,9 @@ public:
     }
 };
 
+/* for weighted variance the SSQ statistic will be multiplied by weight
+      for(size_t k=0; k< M->ncol; k++)
+         ssq += par[k]*par[k]*weights[k];
+*/
 
 #endif /* indepVarStr_h */

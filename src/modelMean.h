@@ -16,14 +16,14 @@
 #define modelMean_h
 
 #include <Rcpp.h>
-#include "modelBase.h"
+#include "modelCoeff.h"
 
-class modelMean : public modelBase {
+class modelMean : public modelCoeff {
    
 public:
 
    modelMean(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelBase(modeldescr, rmod) {
+         : modelCoeff(modeldescr, rmod) {
       fname = "mn";
       par.initWith(1,0.0l);
       parName = "mean";

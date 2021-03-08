@@ -15,15 +15,15 @@
 
 #include <Rcpp.h>
 #include <cmath>
-#include "modelBase.h"
+#include "modelCoeff.h"
 #include "dataCovar.h"
 
-class modelFreg : public modelBase {
+class modelFreg : public modelCoeff {
    
 public:
    
    modelFreg(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelBase(modeldescr, rmod)
+         : modelCoeff(modeldescr, rmod)
    {
       if(varType[0] != 2)
          throw generalRbayzError("Not a numeric vector input: "+varNames[0]);

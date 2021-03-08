@@ -21,15 +21,15 @@
 #include "dataFactor.h"
 #include "dataMatrix.h"
 #include "simpleVector.h"
-#include "modelBase.h"
+#include "modelCoeff.h"
 #include "nameTools.h"
 
-class modelMatrix : public modelBase {
+class modelMatrix : public modelCoeff {
    
 public:
    
    modelMatrix(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelBase(modeldescr, rmod)
+         : modelCoeff(modeldescr, rmod)
    {
       // For now only allowing a matrix input where there is an index variable (model
       // made with id/matrix). It could be extended to allow for no id, so that matrix needs to
@@ -76,42 +76,6 @@ public:
       }
    }
 
-// Update regressions for three different variance models/specifications
-   void update_regressions(bool useWeights, double var) {
-      //  - only use weights (var is set <0)
-      if (useWeights && var <= 0) {
-         for(size_t k=0; k < M->ncol; k++) {
-            resid_decorrect(k);
-            collect_lhs_rhs(k);
-            lhs = lhs + (1.0/( weights[k] ));
-            par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));  // Note weights are not precisions here
-            resid_correct(k);
-         }
-      }
-      //  - using weights and an extra variance scaling as weights*var
-      else if (useWeights && var >0) {
-         for(size_t k=0; k < M->ncol; k++) {
-            resid_decorrect(k);
-            collect_lhs_rhs(k);
-            lhs = lhs + (1.0/( weights[k]*var ));
-            par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));  // Note weights are not precisions here
-            resid_correct(k);
-         }
-      }
-      //  - not using weights
-      else if (!useWeights && var> 0) {
-         for(size_t k=0; k < M->ncol; k++) {
-            resid_decorrect(k);
-            collect_lhs_rhs(k);
-            lhs = lhs + (1.0/( var ));
-            par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));  // Note weights are not precisions here
-            resid_correct(k);
-         }
-      }
-      else
-         throw generalRbayzError("Invalid useWeights and var settings in modelMatrix::update_regressions");
-   }
-   
    // Here no sample() yet, modelMatrix remains virtual. The derived classes implement sample()
    // by combining update_regressions() with update of hyper-paramters for that derived class.
 

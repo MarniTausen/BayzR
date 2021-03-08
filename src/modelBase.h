@@ -24,7 +24,6 @@
 #include <Rcpp.h>
 #include <vector>
 #include "parseFunctions.h"
-#include "priorClasses.h"
 #include "nameTools.h"
 #include "simpleMatrix.h"
 #include "simpleVector.h"
@@ -58,13 +57,8 @@ public:
    std::vector<Rcpp::RObject> varObjects;
    std::vector<int> varType;
    int hierType;
-   modelBase *respModel=NULL;
    modelBase *vmodel=NULL;
-   double *resid=NULL, *residPrec=NULL;
    size_t Nresid=0;
-
-protected:
-   GenericPrior gprior;
 
 };
 

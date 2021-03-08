@@ -14,13 +14,14 @@
 
 #include <Rcpp.h>
 #include "modelBase.h"
+#include "indepVarStr.h"
 
 class modelResp : public modelBase {
    
 public:
    
    modelResp(dcModelTerm & modeldescr, modelBase * rmod)
-            : modelBase(modeldescr, rmod), weights()
+            : modelBase(modeldescr, rmod)
    {
       // For now there is no check on the response vector to be correctly numerical, in future
       // rbayz main may need to make a triage for different types of response and then construct
@@ -28,13 +29,8 @@ public:
       Ydata = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
       Nresid = Ydata.size();
       par.initWith(Ydata);
-      weights.initWith(Nresid,1.0l);
-      resid = par.data;          // resid and residPrec are now alias for the par and weights
-      residPrec = weights.data;  // vectors inside a response object
-      hpar.initWith(1,1.0l);
       fname = "rp";
       parName = "resid";
-      hparName = "var.resid";
       // no labels for residuals yet!
    }
    
@@ -42,6 +38,7 @@ public:
    }
 
    void sample() {
+/*    all this should now be done in indepVar objects
       // Continuous data: sample() is only updating residual variance
       size_t obs;
       double sum=0.0;
@@ -53,9 +50,10 @@ public:
       double temp = 1.0/hpar[0];
       for (obs=0; obs<Nresid; obs++)
          residPrec[obs] = temp;
+*/
    }
 
-   simpleDblVector weights;
+   indepVarStr* varModel;
 
 protected:
    Rcpp::NumericVector Ydata;

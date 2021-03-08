@@ -12,6 +12,7 @@
 
 #include <Rcpp.h>
 #include "modelMatrix.h"
+#include "indepVarStr.h"
 #include "dataMatrix.h"
 
 class modelRreg : public modelMatrix {
@@ -23,23 +24,22 @@ public:
    {
       if (M->colnames.size() >0)    // if there are no colnames in matrix, default ones
          parLabels = M->colnames;   // will be inserted in the parameter names list
-      
-      hpar.initWith(1,1.0l);
-      hparName = "var." + parName;
    }
 
    ~modelRreg() {
    }
    
    void sample() {
-      update_regressions(TRUE, hpar[0]);
-      // update hyper-par (variance) using SSQ of random effects
-      double ssq=0.0;
-      for(size_t k=0; k< M->ncol; k++)
-         ssq += par[k]*par[k]/weights[k];
-      hpar[0] = gprior.samplevar(ssq, M->ncol);
+      for(size_t k=0; k < M->ncol; k++) {
+         resid_decorrect(k);
+         collect_lhs_rhs(k);   // update lhs and rhs variables
+         lhs += varmodel->weights[k];
+         par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
+         resid_correct(k);
+      }
    }
 
+   indepVarStr* varmodel;
 
 };
 
