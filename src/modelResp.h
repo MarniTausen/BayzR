@@ -27,7 +27,6 @@ public:
       // rbayz main may need to make a triage for different types of response and then construct
       // appropriate response objects.
       Ydata = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
-      Nresid = Ydata.size();
       par.initWith(Ydata);
       fname = "rp";
       parName = "resid";

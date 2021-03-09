@@ -57,8 +57,6 @@ public:
    std::vector<Rcpp::RObject> varObjects;
    std::vector<int> varType;
    int hierType;
-   modelBase *vmodel=NULL;
-   size_t Nresid=0;
 
 };
 

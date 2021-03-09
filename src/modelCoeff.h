@@ -20,7 +20,7 @@ public:
          if (respModel != NULL) {
             resid = respModel->par.data;
             residPrec = respModel->varModel->weights.data;
-            Nresid = respModel->Nresid;
+            Nresid = respModel->par.nelem;
          }
       } else { // Hierarchical model:
                // don't know yet how to do here, there can be different cases,

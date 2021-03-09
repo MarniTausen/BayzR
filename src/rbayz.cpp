@@ -21,8 +21,9 @@
 // [[Rcpp::plugins("cpp11")]]
 
 // These functions are defined below the main function
-void buildModel(std::vector<modelBase *> &, dcModelTerm &, modelBase *);
-void buildVarModel(std::vector<modelBase *> &, dcModelTerm &, modelBase *);
+void buildModel(std::vector<modelBase *> &, dcModelTerm &, modelBase*);
+void buildVarModel(std::vector<modelBase *> &, dcModelTerm &, modelBase*);
+void insertIndepVar(std::vector<modelBase *> &, dcModelTerm &, modelBase*);
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
@@ -61,22 +62,20 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       std::vector<std::string> modelRHSTerms = getModelRHSTerms(formulaAsCppstring);
 
       // Vectors to hold pointers to the modelling objects
-      std::vector<modelBase *> model;        // objects modelling coefficients (fix/ran/reg coeff)
-      std::vector<modelBase *> vmodel;        // objects modelling variances
+      std::vector<modelBase *> model;
 
       // Build the modelling objects. The RHS terms are nested within the LHS (response)
       // terms to build a explanatory term for every response.
       for(size_t resp=0; resp<modelLHSTerms.size(); resp++) {
          dcModelTerm parsedResponseModelDescr(modelLHSTerms[resp], inputData);
-         model.push_back(new modelResp(parsedResponseModelDescr, NULL));
-         modelBase* responseModel = model.back();
+         modelResp* tempptr = new modelResp(parsedResponseModelDescr, NULL);
+         modelBase* responseModel = dynamic_cast<modelBase *>(tempptr);
+         model.push_back(responseModel);
+         insertIndepVar(model, parsedResponseModelDescr, model.back());
+         tempptr->varModel = dynamic_cast<indepVarStr *>(model.back());
          for(size_t term=0; term<modelRHSTerms.size(); term++) {
             dcModelTerm modeldescr(modelRHSTerms[term], inputData);
             buildModel(model, modeldescr, responseModel);
-            if (modeldescr.funcName == "rn" ||  modeldescr.funcName == "ranf" || modeldescr.funcName == "rr") {
-               buildVarModel(vmodel, modeldescr, model.back());
-               model.back()->vmodel = vmodel.back();
-            }
             // Same for hierarchical models ...
          }
       }
@@ -178,11 +177,11 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
 
 }
 
-// A function to create one of the indepVarStr classes
-/*
-indepVarStr * makeIndepVarStr(std::string varDescr) {
+// A function to insert one of the indepVarStr classes in the model vector.
+// Note: for MIXT it inserts two objects! But the actual variance object is the last one.
+void insertIndepVar(std::vector<modelBase *> & model, dcModelTerm & modeldescr, modelBase * coeffmod) {
+   std::string varDescr = modeldescr.varianceModel;
    std::string varname;
-   indepVarStr * newVarObject;
    size_t pos = varDescr.find('(');
    // some variance descriptions have a part in parenthesis, then the triage for
    // which object to create is based on the piece up to the opening parenthesis,
@@ -192,18 +191,17 @@ indepVarStr * makeIndepVarStr(std::string varDescr) {
    else
       varname = varDescr;
    if (varname=="IDEN") {
-      newVarObject = new idenVarStr(varDescr);
+      model.push_back(new idenVarStr(modeldescr, coeffmod));
    }
    else if (varname=="MIXT") {
-      newVarObject = new mixtVarStr(varDescr);
+      // first insert mixture indicator class
+      model.push_back(new mixtVarStr(modeldescr, coeffmod));
    }
    else {
-      // how to handle error for unknown variance specification, throw here?
-      newVarObject=NULL;
+      throw (generalRbayzError("Unknown variance term: "+varname));
    }
-   return newVarObject;
+
 }
-*/
 
 // Build all RHS terms for one response.
 // This building can recurse in itself to build hierarchical models.
@@ -211,25 +209,32 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
 {
    modelBase* newModelObject=NULL;
    if (modeldescr.variableNames[0]=="1")
-      newModelObject = new modelMean(modeldescr, rmod);
+      model.push_back(new modelMean(modeldescr, rmod));
    else if (modeldescr.variableNames[0]=="0")
-      newModelObject=NULL;
+      return;
    else if (modeldescr.funcName=="fx" || modeldescr.funcName=="fixf")
-      newModelObject = new modelFixf(modeldescr, rmod);
+      model.push_back(new modelFixf(modeldescr, rmod));
    else if (modeldescr.funcName=="rn" || modeldescr.funcName=="ranf") {
       if(modeldescr.varianceType==2) {
-         newModelObject = new modelRanf_cor(modeldescr, rmod);
+         // here need to add like for ranfi below
+         model.push_back(new modelRanf_cor(modeldescr, rmod));
       }
       else {
-         newModelObject = new modelRanfi(modeldescr, rmod);
+         modelRanfi* tempptr = new modelRanfi(modeldescr, rmod);
+         model.push_back(dynamic_cast<modelBase *>(tempptr));
+         insertIndepVar(model, modeldescr, model.back());
+         tempptr->varmodel = dynamic_cast<indepVarStr *>(model.back());
       }
    }
    else if (modeldescr.funcName=="rg" || modeldescr.funcName=="freg")
-      newModelObject = new modelFreg(modeldescr, rmod);
+      model.push_back(new modelFreg(modeldescr, rmod));
    else if (modeldescr.funcName=="rr") {
       // For the moment only accept rr model with xxx/<matrix>
       if (modeldescr.variableNames.size()==2 && modeldescr.hierarchType==1 && modeldescr.variableTypes[1]==6) {
-         newModelObject = new modelRreg(modeldescr, rmod);
+         modelRreg* tempptr = new modelRreg(modeldescr, rmod);
+         model.push_back(dynamic_cast<modelBase *>(tempptr));
+         insertIndepVar(model, modeldescr, model.back());
+         tempptr->varmodel = dynamic_cast<indepVarStr *>(model.back());
       }
       else {
          throw (generalRbayzError("Cannot yet use rr() with something else than id/matrix"));
@@ -240,12 +245,6 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
       throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));
    else
       throw (generalRbayzError("Unknown model (function) term: "+modeldescr.funcName));
-   if ( newModelObject != NULL)  // note in some cases there is no newModelObject made
-               model.push_back(newModelObject);
-}
-
-void buildVarModel(std::vector<modelBase *> &, dcModelTerm &, modelBase *) {
-   return;
 }
 
 /* old model build
