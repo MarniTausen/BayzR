@@ -178,36 +178,34 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
 }
 
 // A function to insert one of the indepVarStr classes in the model vector.
-// Note: for MIXT it inserts two objects! But the actual variance object is the last one.
+// Note1: for MIXT it inserts two objects! But the actual variance object is the last one.
+// Note2: if there is not varianceType set (0, no V= was found), the default IDEN is inserted;
+// this part of code is only supposed to be called when a variance model is needed.
 void insertIndepVar(std::vector<modelBase *> & model, dcModelTerm & modeldescr, modelBase * coeffmod) {
-   std::string varDescr = modeldescr.varianceModel;
-   std::string varname;
-   size_t pos = varDescr.find('(');
-   // some variance descriptions have a part in parenthesis, then the triage for
-   // which object to create is based on the piece up to the opening parenthesis,
-   // but the object is created using the whole original varDescr.
-   if(pos != std::string::npos)
-      varname = varDescr.substr(0,pos);
-   else
-      varname = varDescr;
-   if (varname=="IDEN") {
-      model.push_back(new idenVarStr(modeldescr, coeffmod));
+   if (modeldescr.varianceType==0 || modeldescr.varianceType==1) {
+      // for now assume there are no multiple varianceNames and there are no parentheses with
+      // parameters in the variance specifications
+      if (modeldescr.varianceType==0 || modeldescr.varianceNames[0]=="IDEN") {
+         model.push_back(new idenVarStr(modeldescr, coeffmod));
+      }
+      else if (modeldescr.varianceNames[0]=="MIXT") {
+         // first insert mixture indicator class
+         model.push_back(new mixtVarStr(modeldescr, coeffmod));
+      }
+      else {
+         throw (generalRbayzError("Unknown variance term in model term "+modeldescr.funcName+": "+modeldescr.varianceNames[0]));
+      }
    }
-   else if (varname=="MIXT") {
-      // first insert mixture indicator class
-      model.push_back(new mixtVarStr(modeldescr, coeffmod));
+   else if (modeldescr.varianceType==2) {
+      throw (generalRbayzError("Cannot use correlated variance structures for model term: "+modeldescr.funcName));
    }
-   else {
-      throw (generalRbayzError("Unknown variance term: "+varname));
+   else {  // varianceType must be 3
+      throw (generalRbayzError("Not yet ready to insert variance linear model for model term: "+modeldescr.funcName));
    }
-
 }
 
-// Build all RHS terms for one response.
-// This building can recurse in itself to build hierarchical models.
 void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, modelBase * rmod)
 {
-   modelBase* newModelObject=NULL;
    if (modeldescr.variableNames[0]=="1")
       model.push_back(new modelMean(modeldescr, rmod));
    else if (modeldescr.variableNames[0]=="0")

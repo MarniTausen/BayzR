@@ -194,7 +194,7 @@ std::string getVarDescr(std::string modelTerm) {
       return "";
    }
    pos2 = modelTerm.find_first_of("),",pos1);
-   std::string temp = modelTerm.substr(pos1+2,pos2-pos1-1);
+   std::string temp = modelTerm.substr(pos1+2,pos2-pos1-2);
    return temp;
 }
 

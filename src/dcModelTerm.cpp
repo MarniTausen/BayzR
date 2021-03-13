@@ -63,6 +63,9 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
          varianceModel=tempvariance.substr(1,std::string::npos);
       }
       else {
+         // this may need reviewing or extension later:
+         // 1) not sure how to handle or to accept variance with multiple indep structures, e.g. WEI*MIXT etc.
+         // 2) WEI and maybe also MIXT may get extra parameters or variables
          varianceNames = splitString(tempvariance,'*');
          varianceType=1;
          for(size_t i=0; i<varianceNames.size(); i++) {
