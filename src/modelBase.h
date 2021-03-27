@@ -38,13 +38,7 @@ public:
    virtual ~modelBase() {
    }
    
-   // First sample() was pure virtual (no implementation in this base class), but it does not
-   // allow to make modelBase objects, and I do that now sometimes to inspect variables before
-   // making the definite model object. As an alternative to pure virtual, now modelBase has
-   // a sampling implementation, but it throws an error :-).
-   virtual void sample() {
-      throw generalRbayzError("Inappropriate model built with a base class sample() method");
-   }
+   virtual void sample() = 0; 
 
    // prepForOutput is for model classes that need to make a transform of
    // parameters for output, the base class defines an 'empty' version.
