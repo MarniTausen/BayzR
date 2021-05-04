@@ -11,18 +11,18 @@
 #define modelRanf_cor_h
 
 #include <Rcpp.h>
-#include "modelMatrix.h"
+#include "modelFactor.h"
 #include "dataMatrix.h"
 
 // update: ranfcor now also derive from modelFactor?
 // the matrix data here was eigenvector data, it needs to come from a variance model now.
 
-class modelRanf_cor : public modelMatrix {
+class modelRanf_cor : public modelFactor {
 
 public:
 
    modelRanf_cor(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelMatrix(modeldescr, rmod)
+         : modelFactor(modeldescr, rmod)
    {
       hpar.initWith(1,1.0l);
       // modified: the parName is still the name(s) of variables, it needs some
@@ -61,7 +61,9 @@ public:
          }
       }
    };
-   
+
+   correlVarStr* varmodel;
+
 };
 
 #endif /* modelRanf_cor_h */
