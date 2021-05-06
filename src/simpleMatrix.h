@@ -41,19 +41,28 @@ public:
       
    }
    
-   void initWith(Rcpp::NumericMatrix M) {
-      // initWith cannot be used on already allocated matrix
-      if (nrow> 0 || ncol>0 ) {
+   // initialise (allocate and fill) matrix from existing Rcpp matrix,
+   // useCol sets the number of columns to use/copy.
+   // There is also an initWith without useCol to copy the whole Rcpp matrix.
+   void initWith(Rcpp::NumericMatrix M, size_t useCol) {
+      if (nrow> 0 || ncol>0 ) {    // oops this matrix is already allocated
          throw(generalRbayzError("Cannot resize matrix in simpleMatrix"));
       }
-      doalloc(M.nrow(), M.ncol());
+      if (useCol > M.ncol()) {
+         throw(generalRbayzError("useCol is larger than actual ncol in simpleMatrix"));
+      }
+      doalloc(M.nrow(), useCol);
       double *col;  // temporary column pointer
-      for(size_t icol=0; icol<M.ncol(); icol++) {
+      for(size_t icol=0; icol<useCol; icol++) {
          col=data[icol];
          for(size_t irow=0; irow<M.nrow(); irow++) {
             col[irow] = M(irow,icol);
          }
       }
+   }
+
+   void initWith(Rcpp::NumericMatrix M) {
+      initWith(M, M.ncol());
    }
 
    ~simpleMatrix() {
