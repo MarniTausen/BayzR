@@ -102,10 +102,17 @@ public:
    }
 */
    
-   void initWith(Rcpp::NumericVector v) {
-      doalloc(v.size());
+   void initWith(Rcpp::NumericVector v, size_t useElem) {
+      if (useElem > v.size()) {
+         throw(generalRbayzError("useElem is larger than actual nelem in simpleDblVector"));
+      }
+      doalloc(useElem);
       for(size_t i=0; i<nelem; i++)
          data[i] = v[i];
+   }
+
+   void initWith(Rcpp::NumericVector v) {
+      initWith(v, v.size());
    }
 
    void initWith(size_t n, double initvalue) {
