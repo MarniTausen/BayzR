@@ -48,7 +48,7 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
          if(variableObjects.back() != R_NilValue)
             variableTypes.push_back(getVariableType(variableObjects.back()));
          else {
-            throw generalRbayzError("Variable name not found: "+variableNames[i]);
+            throw generalRbayzError("Variable object not found: "+variableNames[i]);
          }
       }
    }
@@ -69,8 +69,16 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
          varianceNames = splitString(tempvariance,'*');
          varianceType=1;
          for(size_t i=0; i<varianceNames.size(); i++) {
-            if( !(varianceNames[i]=="IDEN" || varianceNames[i]=="WEI" || varianceNames[i]=="MIXT") )
-               varianceType=2; // if any variance-term is not IDEN, WEI, MIXT it is a correlated structure
+            if( varianceNames[i]=="IDEN" || varianceNames[i]=="WEI" || varianceNames[i]=="MIXT" ) {
+               varianceObjects.push_back(R_NilValue);
+            }
+            else {
+               varianceObjects.push_back(getVariableObject(d,varianceNames[i]));
+               if(varianceObjects.back() == R_NilValue)
+                  throw generalRbayzError("Kernel object not found: "+varianceNames[i]);
+               } 
+               varianceType=2; // flag variance type 2 if some matrices are not IDEN, WEI, MIXT
+            }
          }
       }
    }

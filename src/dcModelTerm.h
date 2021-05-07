@@ -23,7 +23,8 @@ public:
    int varianceType; // 0=not given, 1=with Indep matrices, 2=with some non-Indep matrix/ces, 3=linear model
    int hierarchType; // 0=no, 1=simplified form index/matrix, 2=genuine
    std::vector<std::string> varianceNames;  // list of matrices (names) for varianceType 1 and 2
-   std::string varianceModel;  // the variance linear model description (varianceType 2)
+   std::vector<Rcpp::RObject> varianceObjects;
+   std::string varianceModel;  // the variance linear model description (varianceType 3)
    std::string priorModel;
    std::string hierarchModel;
 };
