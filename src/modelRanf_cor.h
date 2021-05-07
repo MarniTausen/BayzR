@@ -12,7 +12,7 @@
 
 #include <Rcpp.h>
 #include "modelFactor.h"
-#include "dataMatrix.h"
+#include "kernelMatrix.h"
 
 // update: ranfcor now also derive from modelFactor?
 // the matrix data here was eigenvector data, it needs to come from a variance model now.
@@ -25,10 +25,24 @@ public:
          : modelFactor(modeldescr, rmod)
    {
       hpar.initWith(1,1.0l);
-      // modified: the parName is still the name(s) of variables, it needs some
-      // modifications if multiple objects have the same variables. In old code
-      // matrix names were added, but I think it gets too much to keep that system.
       hparName = "var." + parName;
+      // For the moment all variance objects must be kernels
+      for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
+         if (modeldescr.varianceObjects[i]==R_NilValue) {
+            throw(generalRbayzError("Mixing kernels with IDEN or other indep structures not yet possible"));
+         }
+      }
+      // Get the first kernel
+      K = new kernelMatrix(modeldescr.varianceObjects[0], modeldescr.varianceNames[0]);
+      if (modeldescr.varianceNames.size()==2) {  // combine with a second kernel if present
+         kernelMatrix* K2 = new kernelMatrix(modeldescr.varianceObjects[1], modeldescr.varianceNames[1]);
+         K.addKernel(K2);
+         delete K2;
+      }
+      if (modeldescr.varianceNames.size()>2) {  // need to think if I can keep combining kernels with addKernel()
+         throw(generalRbayzError("Not yet ready to combine more than 2 kernels for interaction"));
+      }
+
       // note: modelMatrix has set-up the parameter vector to hold regressions on
       // the eigenvectors, but the output of this model class should be the random
       // effects on the original scale (eigen-vectors x regressions). So the par-vector
@@ -62,7 +76,8 @@ public:
       }
    };
 
-   correlVarStr* varmodel;
+//   correlVarStr* varmodel;
+    kernelMatrix* K;
 
 };
 
