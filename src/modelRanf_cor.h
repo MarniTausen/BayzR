@@ -1,8 +1,9 @@
-//
 //  BayzR --- modelRanf_cor.hpp
-//
-//  Computational class to to model ranf with correlation matrix (with V=K setting).
-//  This used all methods from modelMatrix, only some parameter names need to be set.
+//  Computational class to to model random effect with correlation matrix (from using rn(..., V=K)).
+//  Now also works with interactions and multiple kernels, but code now accepting ony max two kernels. 
+//  Derives from modelFactor which sets-up the (interacting) factor data, the computational methods
+//  though are more like modelMatrix and therefore parts of code are now same between modelMatrix and
+//  ranf_cor. It would need multiple and virtual inheritance to re-use the modelMatrix methods here too.
 //
 //  Created by Luc Janss on 03/08/2018.
 //
@@ -22,7 +23,7 @@ class modelRanf_cor : public modelFactor {
 public:
 
    modelRanf_cor(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelFactor(modeldescr, rmod)
+         : modelFactor(modeldescr, rmod), regcoeff()
    {
       hpar.initWith(1,1.0l);
       hparName = "var." + parName;
@@ -32,7 +33,7 @@ public:
             throw(generalRbayzError("Mixing kernels with IDEN or other indep structures not yet possible"));
          }
       }
-      // Get the first kernel
+      // Get the first kernel and then add (making kronecker products) with second etc., if available
       K = new kernelMatrix(modeldescr.varianceObjects[0], modeldescr.varianceNames[0]);
       if (modeldescr.varianceNames.size()==2) {  // combine with a second kernel if present
          kernelMatrix* K2 = new kernelMatrix(modeldescr.varianceObjects[1], modeldescr.varianceNames[1]);
@@ -42,14 +43,13 @@ public:
       if (modeldescr.varianceNames.size()>2) {  // need to think if I can keep combining kernels with addKernel()
          throw(generalRbayzError("Not yet ready to combine more than 2 kernels for interaction"));
       }
-
-      // note: modelMatrix has set-up the parameter vector to hold regressions on
-      // the eigenvectors, but the output of this model class should be the random
-      // effects on the original scale (eigen-vectors x regressions). So the par-vector
-      // has size the number of matrix rows, and the prepForOutput() computes the
-      // random effects from the regression coefficients when output is needed.
-      par.initWith(M->nrow,0.0l);
-      parLabels = M->rownames; // I believe this makes a deep copy, but a shallow copy would be enough
+      // note: modelled parameters are regressions on the eigenvectors and are stored in separate
+      // vector regcoeff (size K->ncol). The par-vector has backtransfor to random effects
+      // (eigen-vectors x regressions, size K->nrow).
+      par.initWith(K->nrow,0.0l);
+      parLabels = K->rownames; // I believe this makes a deep copy, but a shallow copy would be enough
+      regcoeff.initWith(K->ncol, 0.0l);
+      builObsIndex(obsIndex,F,K);
    }
 
    ~modelRanf_cor() {
@@ -77,7 +77,9 @@ public:
    };
 
 //   correlVarStr* varmodel;
-    kernelMatrix* K;
+   kernelMatrix* K;
+   simpleDblVector regcoeff;
+   std::vector<size_t> obsIndex;
 
 };
 
