@@ -65,13 +65,30 @@ public:
       initWith(M, M.ncol());
    }
 
+   // Swap contents of two matrices: the contents of this-> (object itself) are
+   // swapped with content of matrix pointer to by other->. 
+   void swap(simpleMatrix* other) {
+      double** olddata = this->data;
+      double* olddata0 = this->data0;
+      size_t oldnrow   = this->nrow;
+      size_t oldncol   = this->ncol;
+      this->data  = other->data;
+      this->data0 = other->data0;
+      this->nrow  = other->nrow;
+      this->ncol  = other->ncol;
+      other->data = olddata;
+      other->data0 = olddata0;
+      other->nrow  = oldnrow;
+      other->ncol  = oldcol;
+   }
+
    ~simpleMatrix() {
       delete[] data;
       delete[] data0;
    }
 
-   double *data0;
-   double **data;
+   double* data0;
+   double** data;
    size_t nrow=0,ncol=0;
 
 private:
