@@ -16,16 +16,12 @@
 #include <vector>
 #include "simpleMatrix.h"
 #include "simpleVector.h"
-//#include "nameTools.h"  // strange, including nameTools.h does not work to make
-                          // addMatrixNames available here ...
-
-int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, int dim);
 
 class kernelMatrix : public simpleMatrix {
 
 public:
 
-   kernelMatrix(Rcpp::RObject col, std::string & name) : simpleMatrix(), weights() {
+   kernelMatrix(Rcpp::RObject col, std::string & name) : labeledMatrix(), weights() {
       kerneldata = Rcpp::as<Rcpp::NumericMatrix>(col);
    	Rcpp::Function eig("eigen");
 	   Rcpp::List eigdecomp;
@@ -50,9 +46,6 @@ public:
                   << nColUsed << " eigenvectors\n";
       this->initWith(eigvectors, nColUsed);
       weights.initWith(eigvalues, nColUsed);
-      addMatrixNames(rownames, kerneldata, 1);
-      // if want to add colnames, it can be evec1, evec2, etc. The original colnames
-      // on the kernel (if present) have become meaningless after the eigen-decomp.
    }
 
    ~kernelMatrix() {
