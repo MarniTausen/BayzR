@@ -56,22 +56,43 @@ public:
    }
    
    void sample() {
-/*    has to be revised completely, needs to get matrix part from a variance model
-      update_regressions(TRUE, hpar[0]);
+
+      // Update regressions on the eigenvectors
+      double lhs, rhs;
+      size_t matrixrow;
+      double* colptr;
+      for(size_t col=0; col < K->ncol; col++) {
+         colptr = K->data[col];
+         // residual de-correction for this evec column
+         for (size_t obs=0; obs < F->data.nelem; obs++)
+            resid[obs] += regcoeff[col] * colptr[obsIndex[obs]];
+         // Make the lhs and rhs and update this column regression
+         lhs = 0.0l; rhs=0.0l;
+         for (size_t obs=0; obs < F->data.nelem; obs++) {
+            matrixrow = obsIndex[obs];
+            rhs += colptr[matrixrow] * residPrec[obs] * resid[obs];
+            lhs += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
+         }
+         lhs += (1.0l / K->weights[col]) ;
+         regcoeff[col] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
+         // residual correction for this column with updated regression
+         for (size_t obs=0; obs < F->data.nelem; obs++)
+            resid[obs] -= regcoeff[col] * colptr[obsIndex[obs]];
+      }
+
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
-      for(size_t k=0; k< M->ncol; k++)
-         ssq += par[k]*par[k]/weights[k];
-      hpar[0] = gprior.samplevar(ssq, M->ncol);
-*/
+      for(size_t col=0; col< K->ncol; col++)
+         ssq += regcoeff[col]*regcoeff[col]/K->weights[k];
+      hpar[0] = gprior.samplevar(ssq, K->ncol);
    }
 
-   // prepForOutput puts the transform to breeding values in the par-vector
+   // prepForOutput puts the transform to random effects in the par-vector
    void prepForOutput() {
-      for(size_t row=0; row< M->nrow; row++) {
+      for(size_t row=0; row< K->nrow; row++) {
          par[row]=0.0l;
-         for(size_t col=0; col<M->ncol; col++) {
-            par[row] += M->data[col][row] * par[col];
+         for(size_t col=0; col<K->ncol; col++) {
+            par[row] += K->data[col][row] * par[col];
          }
       }
    };
