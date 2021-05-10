@@ -1,9 +1,7 @@
-//
 //  dataMatrix.h
 //  Class for storage of matrix of covariates (e.g. input in rr() model).
-//  Derives from simpleMatrix and using simpleMatrix(Robject) constructor so that the
-//  input is already stored in parent class constructor.
-//  Here add row and optionally column names and center the input data.
+//  Derives from labeledMatrix so it has rownames (and optionally colnames), and
+//  makes column centering of the input data.
 //
 //  Created by Luc Janss on 05/03/2020.
 //
@@ -16,22 +14,12 @@
 #include <string>
 #include "rbayzExceptions.h"
 #include "simpleMatrix.h"
-//#include "nameTools.h"  // strange, including nameTools.h does not work to make
-                          // addMatrixNames available here ...
 
-int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, int dim);
-
-class dataMatrix : public simpleMatrix {
+class dataMatrix : public labeledMatrix {
 
 public:
-   dataMatrix(Rcpp::RObject col, std::string & name) : simpleMatrix(col) {
-      // I need to temporarily redo the conversion of the input Robject to
-      // Rcpp::NumericMatrix to retrieve row and col names.
-      Rcpp::NumericMatrix tempdata = Rcpp::as<Rcpp::NumericMatrix>(col);
-      if (addMatrixNames(rownames, tempdata, 1) >0) {
-         throw generalRbayzError("No rownames on matrix " + name + "\n");
-      }
-      addMatrixNames(colnames, tempdata, 2); // no throw here, colnames are optional
+   dataMatrix(Rcpp::RObject col, std::string & name) : labeledMatrix(col) {
+      // column-center the matrix data
       double * datacol;
       size_t i,j;
       double sum;
@@ -47,8 +35,6 @@ public:
    ~dataMatrix() {
    }
 
-   std::vector<std::string> rownames, colnames;
-   
 };
 
 #endif /* dataMatrix_h */

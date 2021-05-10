@@ -21,6 +21,9 @@ int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, 
 class labeledMatrix : public simpleMatrix {
 
 public:
+
+   labeledMatrix() : simpleMatrix() {  }
+
    labeledMatrix(Rcpp::RObject col, std::string & name) : simpleMatrix(col) {
       // I need to temporarily redo the conversion of the input Robject to
       // Rcpp::NumericMatrix to retrieve row and col names.
@@ -29,6 +32,15 @@ public:
          throw generalRbayzError("No rownames on matrix " + name + "\n");
       }
       addMatrixNames(colnames, tempdata, 2); // no throw here, colnames are optional
+   }
+
+   initWith(Rcpp::NumericMatrix M, size_t useCol) {
+      simpleMatrix::initWith(M, usecol);
+      if (addMatrixNames(rownames, M, 1) >0) {
+         throw generalRbayzError("No rownames on matrix xxx\n");  // no name available here!
+      }
+      addMatrixNames(colnames, M, 2); // no throw here, colnames are optional
+
    }
 
    ~labeledMatrix() {
