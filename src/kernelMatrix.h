@@ -14,10 +14,10 @@
 #include "rbayzExceptions.h"
 #include <string>
 #include <vector>
-#include "simpleMatrix.h"
+#include "labeledMatrix.h"
 #include "simpleVector.h"
 
-class kernelMatrix : public simpleMatrix {
+class kernelMatrix : public labeledMatrix {
 
 public:
 
