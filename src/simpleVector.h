@@ -121,6 +121,15 @@ public:
          data[i] = initvalue;
    }
 
+   void swap(simpleDblVector* other) {
+      double* olddata = this->data;
+      size_t oldnelem   = this->nelem;
+      this->data  = other->data;
+      this->nelem  = other->nrow;
+      other->data = olddata;
+      other->nelem  = oldnelem;
+   }
+
    double *data;
    size_t nelem;
 
