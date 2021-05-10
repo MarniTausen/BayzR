@@ -75,7 +75,7 @@ int findDataColumn(Rcpp::DataFrame d, std::string name) {
       return col;
 }
 
-void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, dataMatrix *M) {
+void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, labeledMatrix *M) {
    int errors=0;
 //   Rcpp::Rcout << "Going to resize obsIndex to " << F->data.size() << "\n";
    obsIndex.resize(F->data.nelem,0);

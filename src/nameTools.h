@@ -11,13 +11,13 @@
 #include <vector>
 #include <string>
 #include <Rcpp.h>
-#include "dataMatrix.h"
+#include "labeledMatrix.h"
 #include "dataFactor.h"
 
 void CharVec2cpp(std::vector<std::string> & labels, Rcpp::CharacterVector templabels);
 Rcpp::CharacterVector getMatrixNames(Rcpp::NumericMatrix & mat, int dim);
 int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, int dim);
 int findDataColumn(Rcpp::DataFrame d, std::string name);
-void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, dataMatrix *M);
+void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, labeledMatrix *M);
 
 #endif /* nameTools_h */
