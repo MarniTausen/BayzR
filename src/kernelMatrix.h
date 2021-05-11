@@ -22,14 +22,14 @@ class kernelMatrix : public labeledMatrix {
 public:
 
    kernelMatrix(Rcpp::RObject col, std::string & name) : labeledMatrix(), weights() {
-      kerneldata = Rcpp::as<Rcpp::NumericMatrix>(col);
+      Rcpp::NumericMatrix kerneldata = Rcpp::as<Rcpp::NumericMatrix>(col);
    	Rcpp::Function eig("eigen");
 	   Rcpp::List eigdecomp;
    	try {
 	   	eigdecomp = eig(kerneldata);
    	}
    	catch(std::exception &err) {
-         throw(generalRbayzError("An error occurred running eigen(): "+err.what()));
+         throw(generalRbayzError("An error occurred running eigen(): "+std::string(err.what())));
    	}
    	Rcpp::NumericVector eigvalues = eigdecomp["values"];
 	   Rcpp::NumericMatrix eigvectors = eigdecomp["vectors"];
@@ -81,10 +81,10 @@ public:
       for(size_t i=0; i<this->ncol; i++) {
          for(size_t j=0; j<K2->ncol; j++) {
             if ( this->weights[i]*K2->weights[j] >= eval_min_cutoff ) {
-               tempEvals[k] = this->weights[i] * K2->weights[j];
+               tempEvals.data[k] = this->weights[i] * K2->weights[j];
                for(size_t rowi=0; rowi<nLevel1; rowi++) {
                   for(size_t rowj=0; rowj<nLevel2; rowj++) {
-                     tempEvecs[i*nLevel2+j,k] = this->data(rowi,i) * M2->data(rowj,j);
+                     tempEvecs.data[k][i*nLevel2+j] = this->data[i][rowi] * K2->data[j][rowj];
                   }
                }
                k++;
@@ -101,8 +101,8 @@ public:
       }
       // Swap the old data with the new data.
       // Note the old data is removed when tempEvecs, tempEvals and tempLabels here go out of scope.
-      this->swap(tempEvecs);
-      weights->swap(tempEvals);
+      this->swap(&tempEvecs);
+      weights.swap(&tempEvals);
       std::swap(rownames,tempLabels);
    }
 

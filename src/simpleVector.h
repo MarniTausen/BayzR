@@ -125,7 +125,7 @@ public:
       double* olddata = this->data;
       size_t oldnelem   = this->nelem;
       this->data  = other->data;
-      this->nelem  = other->nrow;
+      this->nelem  = other->nelem;
       other->data = olddata;
       other->nelem  = oldnelem;
    }

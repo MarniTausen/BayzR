@@ -34,8 +34,8 @@ public:
       addMatrixNames(colnames, tempdata, 2); // no throw here, colnames are optional
    }
 
-   initWith(Rcpp::NumericMatrix M, size_t useCol) {
-      simpleMatrix::initWith(M, usecol);
+   void initWith(Rcpp::NumericMatrix M, size_t useCol) {
+      simpleMatrix::initWith(M, useCol);
       if (addMatrixNames(rownames, M, 1) >0) {
          throw generalRbayzError("No rownames on matrix xxx\n");  // no name available here!
       }

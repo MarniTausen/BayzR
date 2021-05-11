@@ -18,7 +18,7 @@
 class dataMatrix : public labeledMatrix {
 
 public:
-   dataMatrix(Rcpp::RObject col, std::string & name) : labeledMatrix(col) {
+   dataMatrix(Rcpp::RObject col, std::string & name) : labeledMatrix(col, name) {
       // column-center the matrix data
       double * datacol;
       size_t i,j;
@@ -27,7 +27,7 @@ public:
          datacol = data[i];
          sum=0.0l;
          for(j=0; j<nrow; j++) sum+=datacol[j];
-         sum =/ double(nrow);
+         sum /= double(nrow);
          for(j=0; j<nrow; j++) datacol[j] -= sum;
       }
    }

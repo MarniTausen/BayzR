@@ -14,6 +14,7 @@
 #include <Rcpp.h>
 #include "modelFactor.h"
 #include "kernelMatrix.h"
+#include "priorClasses.h"
 
 // update: ranfcor now also derive from modelFactor?
 // the matrix data here was eigenvector data, it needs to come from a variance model now.
@@ -23,7 +24,7 @@ class modelRanf_cor : public modelFactor {
 public:
 
    modelRanf_cor(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelFactor(modeldescr, rmod), regcoeff()
+         : modelFactor(modeldescr, rmod), regcoeff(), gprior(modeldescr.priorModel)
    {
       hpar.initWith(1,1.0l);
       hparName = "var." + parName;
@@ -37,7 +38,7 @@ public:
       K = new kernelMatrix(modeldescr.varianceObjects[0], modeldescr.varianceNames[0]);
       if (modeldescr.varianceNames.size()==2) {  // combine with a second kernel if present
          kernelMatrix* K2 = new kernelMatrix(modeldescr.varianceObjects[1], modeldescr.varianceNames[1]);
-         K.addKernel(K2);
+         K->addKernel(K2);
          delete K2;
       }
       if (modeldescr.varianceNames.size()>2) {  // need to think if I can keep combining kernels with addKernel()
@@ -83,7 +84,7 @@ public:
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
       for(size_t col=0; col< K->ncol; col++)
-         ssq += regcoeff[col]*regcoeff[col]/K->weights[k];
+         ssq += regcoeff[col]*regcoeff[col]/K->weights[col];
       hpar[0] = gprior.samplevar(ssq, K->ncol);
    }
 
@@ -101,6 +102,7 @@ public:
    kernelMatrix* K;
    simpleDblVector regcoeff;
    std::vector<size_t> obsIndex;
+   GenericPrior gprior;
 
 };
 

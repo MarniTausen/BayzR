@@ -79,7 +79,7 @@ public:
       other->data = olddata;
       other->data0 = olddata0;
       other->nrow  = oldnrow;
-      other->ncol  = oldcol;
+      other->ncol  = oldncol;
    }
 
    ~simpleMatrix() {
