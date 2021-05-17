@@ -36,16 +36,11 @@ public:
       }
       // Get the first kernel and then add (making kronecker products) with second etc., if available
       K = new kernelMatrix(modeldescr.varianceObjects[0], modeldescr.varianceNames[0]);
-      Rcpp::Rcout << "1\n";
       if (modeldescr.varianceNames.size()==2) {  // combine with a second kernel if present
-         Rcpp::Rcout << "2\n";
          kernelMatrix* K2 = new kernelMatrix(modeldescr.varianceObjects[1], modeldescr.varianceNames[1]);
-         Rcpp::Rcout << "3\n";
          K->addKernel(K2);
-         Rcpp::Rcout << "4\n";
          delete K2;
       }
-      Rcpp::Rcout << "5\n";
       if (modeldescr.varianceNames.size()>2) {  // need to think if I can keep combining kernels with addKernel()
          throw(generalRbayzError("Not yet ready to combine more than 2 kernels for interaction"));
       }

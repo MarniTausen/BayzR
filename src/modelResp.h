@@ -28,6 +28,9 @@ public:
       // appropriate response objects.
       Ydata = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
       par.initWith(Ydata);
+      missing = Rcpp::is_na(Ydata);
+      for(size_t row=0; row<par.nelem; row++)
+         if(missing[row]) par.data[row] = 0.0l;
       fname = "rp";
       parName = "resid";
       // no labels for residuals yet!
@@ -37,7 +40,12 @@ public:
    }
 
    void sample() {
-/*    all this should now be done in indepVar objects
+      // re-sample the residuals for missing data
+      for(size_t row=0; row<par.nelem; row++) {
+         if(missing[row]) par.data[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
+      }
+
+/*    variance update is now moded to indepVar objects
       // Continuous data: sample() is only updating residual variance
       size_t obs;
       double sum=0.0;
@@ -53,6 +61,7 @@ public:
    }
 
    indepVarStr* varModel;
+   Rcpp::LogicalVector missing;
 
 protected:
    Rcpp::NumericVector Ydata;
