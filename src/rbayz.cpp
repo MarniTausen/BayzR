@@ -38,8 +38,8 @@ void collectLoggedSamples(std::vector<modelBase *> & model, Rcpp::IntegerVector 
 
 // [[Rcpp::export]]
 Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
-                     Rcpp::IntegerVector chain, int silent) {
-
+                     Rcpp::IntegerVector chain, int silent)
+{
    // Some check of chain settings is needed. Also the rbayz wrapper function now
    // handles chain being NULL, but it can be done here, so that warning message
    // can come in output.
@@ -97,8 +97,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       size_t nEstimates = estimNames.size();
 
       // Check the chain settings and make list of output sample cycle-numbers.
-      if (chain[1]==0 && chain[2]==0 && chain[3]==0) {  // chain was not set
-         chain[1]=1100; chain[2]=100; chain[3]=10;
+      if (chain[0]==0 && chain[1]==0 && chain[2]==0) {  // chain was not set
+         chain[0]=1100; chain[1]=100; chain[2]=10;
          Rcpp::Rcout << "Warning: chain was not set, running 1100 cycles but it may be too short for many analyses\n";
       }
       if (chain.size() != 3) throw (generalRbayzError("The chain settings do not have 3 elements"));

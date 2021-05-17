@@ -22,7 +22,8 @@ class labeledMatrix : public simpleMatrix {
 
 public:
 
-   labeledMatrix() : simpleMatrix() {  }
+   labeledMatrix() : simpleMatrix() {  
+   }
 
    labeledMatrix(Rcpp::RObject col, std::string & name) : simpleMatrix(col) {
       // I need to temporarily redo the conversion of the input Robject to
@@ -34,13 +35,12 @@ public:
       addMatrixNames(colnames, tempdata, 2); // no throw here, colnames are optional
    }
 
-   void initWith(Rcpp::NumericMatrix M, size_t useCol) {
+   void initWith(Rcpp::NumericMatrix & M, std::string & name, size_t useCol) {
       simpleMatrix::initWith(M, useCol);
       if (addMatrixNames(rownames, M, 1) >0) {
-         throw generalRbayzError("No rownames on matrix xxx\n");  // no name available here!
+         throw generalRbayzError("No rownames on matrix "+name);
       }
       addMatrixNames(colnames, M, 2); // no throw here, colnames are optional
-
    }
 
    ~labeledMatrix() {

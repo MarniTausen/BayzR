@@ -29,28 +29,30 @@ inline bool compString2Pair(const std::pair<std::string, size_t> & p, const std:
     return p.first < s;
 }
 
-// getMatrixNames: retrieve row or col-names (use dim=1 or 2 as in apply()) from an Rcpp
-//     NumericMatrix, returns NULL vector when dimnames not present or the requested dim is empty.
 // addMatrixNames: fills matrix row or col-names (dim=1 or 2) in an c++ vector<string>,
 //     return value 0 for success, 1 for errors (missing names).
 // Note: addMatrixNames uses push_back, typical use is to pass an empty vector<string> as 'names'
-// argument and it will be filled.
-
-Rcpp::CharacterVector getMatrixNames(Rcpp::NumericMatrix & mat, int dim) {
-   if (mat.hasAttribute("dimnames")) {
-      Rcpp::List dimnames = Rcpp::as<Rcpp::List>(mat.attr("dimnames"));
-      if(dim==1) return dimnames[0];
-      else return dimnames[1];
-   }
-   else return R_NilValue;
-}
+// argument and it will be filled. 
 
 int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, int dim) {
-   Rcpp::CharacterVector matNames = getMatrixNames(mat, dim);
-   if(matNames.isNULL()) return 1;
+   if (mat.hasAttribute("dimnames")) {
+      Rcpp::List dimnames = Rcpp::as<Rcpp::List>(mat.attr("dimnames"));
+      if(dim==1 && dimnames[0] != R_NilValue) {
+         Rcpp::CharacterVector matNames = Rcpp::as<Rcpp::CharacterVector>(dimnames[0]);
+         CharVec2cpp(names, matNames);
+         return 0;  // sucess
+      }
+      else if (dim==2 && dimnames[1] != R_NilValue) {
+         Rcpp::CharacterVector matNames = Rcpp::as<Rcpp::CharacterVector>(dimnames[1]);
+         CharVec2cpp(names, matNames);
+         return 0;  // sucess
+      }
+      else {
+         return 1;  // the dimnames for the requested dim must have been empty
+      }
+   }
    else {
-      CharVec2cpp(names, matNames);
-      return 0;
+      return 1;    // no dimnames attributes
    }
 }
 

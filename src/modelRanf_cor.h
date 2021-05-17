@@ -36,19 +36,21 @@ public:
       }
       // Get the first kernel and then add (making kronecker products) with second etc., if available
       K = new kernelMatrix(modeldescr.varianceObjects[0], modeldescr.varianceNames[0]);
+      Rcpp::Rcout << "1\n";
       if (modeldescr.varianceNames.size()==2) {  // combine with a second kernel if present
+         Rcpp::Rcout << "2\n";
          kernelMatrix* K2 = new kernelMatrix(modeldescr.varianceObjects[1], modeldescr.varianceNames[1]);
+         Rcpp::Rcout << "3\n";
          K->addKernel(K2);
+         Rcpp::Rcout << "4\n";
          delete K2;
       }
+      Rcpp::Rcout << "5\n";
       if (modeldescr.varianceNames.size()>2) {  // need to think if I can keep combining kernels with addKernel()
          throw(generalRbayzError("Not yet ready to combine more than 2 kernels for interaction"));
       }
-      // note: modelled parameters are regressions on the eigenvectors and are stored in separate
-      // vector regcoeff (size K->ncol). The par-vector has backtransfor to random effects
-      // (eigen-vectors x regressions, size K->nrow).
-      par.initWith(K->nrow,0.0l);
-      parLabels = K->rownames; // I believe this makes a deep copy, but a shallow copy would be enough
+      // note: par-vector and names are set-up in modelFactor and follow levels of the data factor.
+      // Here add a vector regcoeff (size K->ncol) to hold the regresssion on eigenvectors.
       regcoeff.initWith(K->ncol, 0.0l);
       builObsIndex(obsIndex,F,K);
    }

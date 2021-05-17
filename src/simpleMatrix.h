@@ -23,7 +23,8 @@ class simpleMatrix {
 
 public:
    
-   simpleMatrix() { }
+   simpleMatrix() { 
+   }
    
    simpleMatrix(size_t nr, size_t nc) {
       doalloc(nr, nc);

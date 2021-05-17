@@ -33,6 +33,11 @@ public:
    	}
    	Rcpp::NumericVector eigvalues = eigdecomp["values"];
 	   Rcpp::NumericMatrix eigvectors = eigdecomp["vectors"];
+      // re-attach the dimnames again to the eigvectors matrix for correct further processing
+      if (kerneldata.hasAttribute("dimnames")) {
+         Rcpp::List dimnames = Rcpp::as<Rcpp::List>(kerneldata.attr("dimnames"));
+         eigvectors.attr("dimnames") = dimnames;
+      }
       // Determine how many evectors to keep
       double rrankpct=90;          // rrankpct not coming correctly from the modelterm now
       size_t nColUsed = 0;
@@ -41,10 +46,9 @@ public:
       double eval_cutoff = rrankpct * sumeval / 100.0l;
       sumeval = 0.0l;
       while (sumeval < eval_cutoff) sumeval += eigvalues[nColUsed++];
-      // this message can be moved to the modelTerm routine; and it must be different for ran2f_2cor.
       Rcpp::Rcout << "For kernel " << name << " with rrankpct=" << rrankpct << " using "
                   << nColUsed << " eigenvectors\n";
-      this->initWith(eigvectors, nColUsed);
+      this->initWith(eigvectors, name, nColUsed);
       weights.initWith(eigvalues, nColUsed);
    }
 
@@ -99,6 +103,7 @@ public:
             tempLabels.push_back(this->rownames[rowi]+"%"+K2->rownames[rowj]);
          }
       }
+      Rcpp::Rcout << "Interaction kernel retains " << nEvalUsed << " eigenvalues\n";
       // Swap the old data with the new data.
       // Note the old data is removed when tempEvecs, tempEvals and tempLabels here go out of scope.
       this->swap(&tempEvecs);
@@ -106,7 +111,6 @@ public:
       std::swap(rownames,tempLabels);
    }
 
-   std::vector<std::string> rownames, colnames;
    simpleDblVector weights;
    
 };

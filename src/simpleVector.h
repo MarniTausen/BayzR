@@ -79,7 +79,7 @@ class simpleDblVector {
 
 public:
    
-   simpleDblVector() : nelem(0) { }
+   simpleDblVector() { }
    
    simpleDblVector(size_t n) {
       doalloc(n);
@@ -107,7 +107,7 @@ public:
          throw(generalRbayzError("useElem is larger than actual nelem in simpleDblVector"));
       }
       doalloc(useElem);
-      for(size_t i=0; i<nelem; i++)
+      for(size_t i=0; i<useElem; i++)
          data[i] = v[i];
    }
 
@@ -131,7 +131,7 @@ public:
    }
 
    double *data;
-   size_t nelem;
+   size_t nelem=0;
 
 private:
    void doalloc(size_t n) {

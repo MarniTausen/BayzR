@@ -74,8 +74,9 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
             }
             else {
                varianceObjects.push_back(getVariableObject(d,varianceNames[i]));
-               if(varianceObjects.back() == R_NilValue)
+               if(varianceObjects.back() == R_NilValue) {
                   throw generalRbayzError("Kernel object not found: "+varianceNames[i]);
+               }
                varianceType=2; // flag variance type 2 if some matrices are not IDEN, WEI, MIXT
             }
          }
