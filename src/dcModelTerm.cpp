@@ -84,5 +84,12 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
    }
    // Get prior description
    priorModel = getPriorDescr(modelTerm);
+   // Check / get a logging option
+   std::string s = getOptionText(modelTerm, "log=");
+   if (s == "")    // if s is empty, set logging to "def" (default)
+      logging = "def"
+   else
+      logging=s;
+   // can add checks that the logging setting is from an allowed set of settings
 }
 

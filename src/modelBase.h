@@ -51,6 +51,7 @@ public:
    std::vector<Rcpp::RObject> varObjects;
    std::vector<int> varType;
    int hierType;
+   std::string logPars; 
 
 };
 

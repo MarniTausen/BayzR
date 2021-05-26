@@ -208,3 +208,17 @@ std::string getPriorDescr(std::string modelTerm) {
    std::string temp = modelTerm.substr(pos1+6,pos2-pos1-1);
    return temp;
 }
+
+// Generic version to find any option in the model term, for instance
+// use text "prior=", and this will return what follows after prior=,
+// or empty string if "prior=" is not in the modelTerm.
+std::string getOptionText(std::string modelTerm, std::string text) {
+   size_t pos1,pos2;
+   pos1 = modelTerm.find(text);
+   if(pos1==std::string::npos) {
+      return "";
+   }
+   pos2 = modelTerm.find_first_of("),",pos1);
+   std::string temp = modelTerm.substr(pos1+text.length(),pos2-pos1-1);
+   return temp;
+}

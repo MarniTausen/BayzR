@@ -10,4 +10,5 @@ modelBase::modelBase(dcModelTerm & modeldescr, modelBase * rmod)
    varObjects = modeldescr.variableObjects;
    varType = modeldescr.variableTypes;
    parName = modeldescr.allVariableNames;
+   logPars = modeldescr.logging;
 }

@@ -27,6 +27,7 @@ public:
    std::string varianceModel;  // the variance linear model description (varianceType 3)
    std::string priorModel;
    std::string hierarchModel;
+   std::string logging;
 };
 
 #endif /* dcModelTerm */

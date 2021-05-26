@@ -43,7 +43,7 @@ HPDbayz <- function(x, prob=0.95, bound="none") {
         tailprob = 0
         leftbinprob = 0.5*(densestim$y[hpdleft]+densestim$y[hpdleft+1])
         rightbinprob = 0.5*(densestim$y[hpdright]+densestim$y[hpdright-1])
-        while ( (tailprob - min(leftbinprob,rightbinprob) < (1-prob) ) ) {
+        while ( (tailprob + min(leftbinprob,rightbinprob) < (1-prob) ) ) {
             if (leftbinprob < rightbinprob) {
                 tailprob = tailprob + leftbinprob
                 hpdleft = hpdleft + 1

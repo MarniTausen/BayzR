@@ -304,17 +304,25 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
 
    // First collect list of used hpar and par vectors, and set what model(-term) they belong to.
    for(size_t mt=0; mt<model.size(); mt++) {     // Done in two loops over model-terms, all hpar will come
-      if ( model[mt]->hpar.nelem > 0 ) {        // first, then all par vectors
+      if ( model[mt]->hpar.nelem > 0 ) {         // first, then all par vectors
          parHyper.push_back(TRUE);
          parModelNr.push_back(mt);
          parModelFunc.push_back(model[mt]->fname);
          parSizes.push_back(model[mt]->hpar.nelem);
          parNames.push_back(model[mt]->hparName);
-         if (model[mt]->hpar.nelem==1) {        // log all hyper-parameters with 1 level
+         if (model[mt].logPars=="def") {           // default logging for hpar:
+            if (model[mt]->hpar.nelem==1) {        // log hyper-parameter with 1 level
+               parLogged.push_back(1);
+               parLoggedNames.push_back(model[mt]->hparName);
+            }
+            else
+               parLogged.push_back(0);
+         }
+         else if (model[mt].logPars=="all") {
             parLogged.push_back(1);
             parLoggedNames.push_back(model[mt]->hparName);
          }
-         else
+         else  // anything else than "def" and "all" is ignored and gives no logging of the parameter!
             parLogged.push_back(0);
       }
    }
@@ -325,11 +333,19 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
          parModelFunc.push_back(model[mt]->fname);
          parSizes.push_back(model[mt]->par.nelem);
          parNames.push_back(model[mt]->parName);
-         if (model[mt]->par.nelem==1) {       // log all parameters with 1 level. Could also consider to log
-            parLogged.push_back(2);            // 2nd level of 2-level fixf parameters (code 3 ) ...
+         if (model[mt].logPars=="def") {          // default logging for regular par:
+            if (model[mt]->par.nelem==1) {        // log all parameters with 1 level. Could also consider to log
+               parLogged.push_back(2);            // 2nd level of 2-level fixf parameters (code 3 ) ...
+               parLoggedNames.push_back(model[mt]->parName);
+            }
+            else
+               parLogged.push_back(0);
+         }
+         else if (model[mt].logPars=="all") {
+            parLogged.push_back(2);
             parLoggedNames.push_back(model[mt]->parName);
          }
-         else
+         else  // anything else than "def" and "all" is ignored and gives no logging of the parameter!
             parLogged.push_back(0);
       }
    }

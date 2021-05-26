@@ -24,5 +24,6 @@ std::string getFuncName(std::string modelTerm);
 std::string getVarNames(std::string modelTerm);
 std::string getVarDescr(std::string modelTerm);
 std::string getPriorDescr(std::string modelTerm);
+std::string getOptionText(std::string modelTerm, std::string text);
 
 #endif /* parseFunctions_h */
