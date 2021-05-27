@@ -310,7 +310,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
          parModelFunc.push_back(model[mt]->fname);
          parSizes.push_back(model[mt]->hpar.nelem);
          parNames.push_back(model[mt]->hparName);
-         if (model[mt].logPars=="def") {           // default logging for hpar:
+         if (model[mt]->logPars=="def") {           // default logging for hpar:
             if (model[mt]->hpar.nelem==1) {        // log hyper-parameter with 1 level
                parLogged.push_back(1);
                parLoggedNames.push_back(model[mt]->hparName);
@@ -318,7 +318,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
             else
                parLogged.push_back(0);
          }
-         else if (model[mt].logPars=="all") {
+         else if (model[mt]->logPars=="all") {
             parLogged.push_back(1);
             parLoggedNames.push_back(model[mt]->hparName);
          }
@@ -333,7 +333,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
          parModelFunc.push_back(model[mt]->fname);
          parSizes.push_back(model[mt]->par.nelem);
          parNames.push_back(model[mt]->parName);
-         if (model[mt].logPars=="def") {          // default logging for regular par:
+         if (model[mt]->logPars=="def") {          // default logging for regular par:
             if (model[mt]->par.nelem==1) {        // log all parameters with 1 level. Could also consider to log
                parLogged.push_back(2);            // 2nd level of 2-level fixf parameters (code 3 ) ...
                parLoggedNames.push_back(model[mt]->parName);
@@ -341,7 +341,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
             else
                parLogged.push_back(0);
          }
-         else if (model[mt].logPars=="all") {
+         else if (model[mt]->logPars=="all") {
             parLogged.push_back(2);
             parLoggedNames.push_back(model[mt]->parName);
          }
