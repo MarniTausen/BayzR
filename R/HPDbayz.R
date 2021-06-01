@@ -39,7 +39,7 @@ HPDbayz <- function(x, prob=0.95, bound="none") {
            stop("In HPDbayz bound-type is not 'none','var' or 'prob'")
         }
         n = length(densestim$x)
-        if ( is.null(n) | length(densestim$x != length(densestim$y)) | n<5 ) {
+        if ( is.null(n) | length(densestim$x) != length(densestim$y) | n<5 ) {
            # this seems not to occur, density() looks quite robust and always makes a nice grid of
            # 512 points, but it is possible that the grid has all identical values if the input is
            # all identical values.

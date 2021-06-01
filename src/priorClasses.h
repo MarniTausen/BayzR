@@ -28,7 +28,7 @@ public:
    GenericPrior(std::string priordescr) {
       size_t pos1, pos2, pos3;
       if ( priordescr != "") {
-         // Note: if prior= is not found, nothing happens here and a default will be used.
+         // Note: if priordescr is empty nothing happens here and a default will be used.
          useDefault=FALSE;
          pos2 = priordescr.find('(');         // syntax is like ichi(par1=val1, par=val2, etc),
          pos3 = priordescr.find(')',pos2);    // here want to get the part before first parenthesis

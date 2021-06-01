@@ -44,9 +44,10 @@ public:
       if (modeldescr.varianceNames.size()>2) {  // need to think if I can keep combining kernels with addKernel()
          throw(generalRbayzError("Not yet ready to combine more than 2 kernels for interaction"));
       }
-      // note: par-vector and names are set-up in modelFactor and follow levels of the data factor.
       // Here add a vector regcoeff (size K->ncol) to hold the regresssion on eigenvectors.
       regcoeff.initWith(K->ncol, 0.0l);
+      // obsIndex makes new level codes matching F->labels from every row in data to K->labels, it could
+      // in principle replace the F->data and no need for the obsIndex vector.
       builObsIndex(obsIndex,F,K);
    }
 
@@ -71,7 +72,7 @@ public:
             rhs += colptr[matrixrow] * residPrec[obs] * resid[obs];
             lhs += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
          }
-         lhs += (1.0l / K->weights[col]) ;
+         lhs += (1.0l / ( K->weights[col] * hpar[0]) ) ;
          regcoeff[col] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
          // residual correction for this column with updated regression
          for (size_t obs=0; obs < F->data.nelem; obs++)

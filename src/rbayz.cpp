@@ -60,6 +60,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       removeSpaces(formulaAsCppstring);
       std::vector<std::string> modelLHSTerms = getModelLHSTerms(formulaAsCppstring);
       std::vector<std::string> modelRHSTerms = getModelRHSTerms(formulaAsCppstring);
+      lastDone="Parsing model";
+      if (silent==9) Rcpp::Rcout << "Parsing model done\n";
 
       // Vectors to hold pointers to the modelling objects
       std::vector<modelBase *> model;
@@ -79,6 +81,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
             // Same for hierarchical models ...
          }
       }
+      lastDone="Model building";
+      if (silent==9) Rcpp::Rcout << "Model building done\n";
 
       // Parameter information vectors
       Rcpp::CharacterVector parNames;               // collected names of used hpar and par vectors (where size>0)
@@ -119,6 +123,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       Rcpp::rownames(loggedSamples) = Rcpp::as<Rcpp::CharacterVector>(outputCycleNumbers); 
       int nShow = chain[0]/5;
       lastDone="Preparing to run MCMC";
+      if (silent==9) Rcpp::Rcout << "Preparing to run MCMC done\n";
 
       // Run the model by calling the sample() method for each modelTerm
       for (size_t cycle=1, save=0; cycle <= chain[0]; cycle++) {
@@ -133,6 +138,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
          }
       }
       lastDone="Finished running MCMC";
+      if (silent==9) Rcpp::Rcout << "Finished running MCMC\n";
 
       // Build result list for normal termination
       Rcpp::List result = Rcpp::List::create();
@@ -158,10 +164,16 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       result.push_back(estimates,"Estimates");
       result.push_back(chain,"Chain");
       lastDone="Filling return list";
+      if (silent==9) Rcpp::Rcout << "Ready filling return list\n";
       return(result);   // normal termination
 
-   } catch (std::exception &err) {  // this includes generalRbayzErrors
+   } 
+   catch (generalRbayzError &err) {
       errorMessages.push_back(err.what());
+   }
+   catch (std::exception &err) {
+      std::string s = std::string(err.what()) + " after " + lastDone;
+      errorMessages.push_back(s);
    }
    catch (...) {
       errorMessages.push_back("An unknown error occured in bayz after: "+lastDone);
