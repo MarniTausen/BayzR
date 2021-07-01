@@ -24,7 +24,7 @@ class modelRanf_cor : public modelFactor {
 public:
 
    modelRanf_cor(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelFactor(modeldescr, rmod), regcoeff(), gprior(modeldescr.priorModel)
+         : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.priorModel)
    {
       hpar.initWith(1,1.0l);
       hparName = "var." + parName;
@@ -49,6 +49,7 @@ public:
       // obsIndex makes new level codes matching F->labels from every row in data to K->labels, it could
       // in principle replace the F->data and no need for the obsIndex vector.
       builObsIndex(obsIndex,F,K);
+      fitval.initWith(F->data.nelem, 0.0l);
    }
 
    ~modelRanf_cor() {
@@ -60,6 +61,8 @@ public:
       double lhs, rhs;
       size_t matrixrow;
       double* colptr;
+      for (size_t obs=0; obs < F->data.nelem; obs++)
+         fitval[obs] = 0.0l;
       for(size_t col=0; col < K->ncol; col++) {
          colptr = K->data[col];
          // residual de-correction for this evec column
@@ -69,15 +72,17 @@ public:
          lhs = 0.0l; rhs=0.0l;
          for (size_t obs=0; obs < F->data.nelem; obs++) {
             matrixrow = obsIndex[obs];
-            rhs += colptr[matrixrow] * residPrec[obs] * resid[obs];
+            rhs += colptr[matrixrow] * residPrec[obs] * (resid[obs]-fitval[obs]);
             lhs += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
          }
          lhs += (1.0l / ( K->weights[col] * hpar[0]) ) ;
          regcoeff[col] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
          // residual correction for this column with updated regression
          for (size_t obs=0; obs < F->data.nelem; obs++)
-            resid[obs] -= regcoeff[col] * colptr[obsIndex[obs]];
+            fitval[obs] += regcoeff[col] * colptr[obsIndex[obs]];
       }
+      for (size_t obs=0; obs < F->data.nelem; obs++)
+         resid[obs] -= fitval[obs];
 
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
@@ -99,6 +104,7 @@ public:
 //   correlVarStr* varmodel;
    kernelMatrix* K;
    simpleDblVector regcoeff;
+   simpleDblVector fitval;
    std::vector<size_t> obsIndex;
    GenericPrior gprior;
 
