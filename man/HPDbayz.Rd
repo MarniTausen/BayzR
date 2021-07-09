@@ -14,8 +14,10 @@ an HPD interval is computed for every column}
 is discrete, HPDbayz will obtain the interval that includes just more than the given 'prob'}
 
 \item{bound}{a single character string or vector of character strings giving the types of bounds on the parameters,
-which must be any of "none", "var" (parameter is restricted to (0,INF)), or "prob" (parameter is
-restricted to (0,1)).}
+which must be either "none", "var" (parameter is restricted to (0,INF)), or "prob" (parameter is
+restricted to (0,1)). When x has multiple columns, a single character string can be given as bound and
+that bound is applied to all columns, or a vector of character strings can be given to indicate the
+bound to be applied to each colunm.}
 }
 \value{
 A matrix with 2 columns for the lower and upper values of the HPD interval, and a row for every input column.
