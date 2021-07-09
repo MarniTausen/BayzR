@@ -30,10 +30,10 @@ devtools::install_github("MarniTausen/BayzR")
 Functions and models associated with BayZ
 =========================================
 
--   fixf (Fixed effect as factor)
--   ranf (Random effect factor)
--   ran2f (Random effect interaction term)
--   freg (Fixed continuous variables)
+-   fx (Fixed effect as factor)
+-   rn (Random effect factor)
+-   rg (Fixed continuous variables)
+-   rr (random regression on covariate table/matrix)
 
 Examples
 ========
