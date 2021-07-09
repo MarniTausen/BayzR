@@ -46,13 +46,13 @@ be changed to modify standard mixed model in Bayesian shrinkage models.
 
 Interactions between fators are specified using the colon, for instance by writing for a 
 fixed Year-Location interaction fx(Year:Location). Bayz does
-NOT support automatic expansion with main effects by using the 'star' (Year*Location) or
+NOT support automatic expansion with main effects by using the 'star' (Year\*Location) or
 'forward slash' (Year/Location) syntaxes, hence bayz requires to manually add the desired
 main effects in the model (but 
 note that bayz uses the 'forward slash' to specify hierarchical models).
 Interactions between factors can be specified to any degree.
 The 'star' syntax can be used to indicate interaction
-between covariates, like rg(TempSum*Precip), where it is simply interpreted as
+between covariates, like rg(TempSum\*Precip), where it is simply interpreted as
 multiplication. 
 Interaction between a covariate and a factor is specified using the 'pipe'
 character as in lme4 models. It can be used to specify fixed nested regressions as 
