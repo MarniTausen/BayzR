@@ -26,8 +26,8 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
 
     # Main estimates table
     par <- object$Parameters
-    par_select = ( par$Hyper==FALSE & par$ModelTerm!="rp" & par$Size <= maxLevel )
-    par_not_shown = ( par$Hyper==FALSE & par$ModelTerm!="rp" & par$Size > maxLevel )
+    par_select = ( par$Hyper==FALSE & par$ModelTerm!="rp" & par$Size <= maxLevel & substr(rownames(par),0,3)!="var")
+    par_not_shown = ( par$Hyper==FALSE & par$ModelTerm!="rp" & par$Size > maxLevel & substr(rownames(par),0,3)!="var")
     estim_select = c()
     for(i in 1:nrow(par)) {
         if(par_select[i]) estim_select = c(estim_select,par$EstStart[i]:par$EstEnd[i])
@@ -47,12 +47,13 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
         postMeans =  apply(object$Samples,2,mean)
         postSDs  = apply(object$Samples,2,sd)
         MCSEs = postSDs / sqrt(effSizes)
-        MCCVpct = 100 * MCSEs / postMeans
+        MCCVpct = 100 * MCSEs / abs(postMeans)
         HPDbounds = rep("none",ncol(object$Samples))
         HPDbounds[substr(colnames(object$Samples),0,3)=="var"] = "var"
         HPDs = HPDbayz(object$Samples,prob=HPDprob, bound=HPDbounds)
-        convergence_table = data.frame(postMeans,postSDs,effSizes,MCSEs,MCCVpct,HPDs)
-        colnames(convergence_table) = c("postMean","postSD","effSize","MCSE","MCCV%","HPDleft","HPDright")
+        GewekeZ = abs(geweke.diag(object$Samples)$z)
+        convergence_table = data.frame(postMeans,postSDs,effSizes,GewekeZ,MCSEs,MCCVpct,HPDs)
+        colnames(convergence_table) = c("postMean","postSD","effSize","GewekeZ","MCSE","MCCV%","HPDleft","HPDright")
         rownames(convergence_table) = colnames(object$Samples)
         convergence_status = 0                                # success
     }

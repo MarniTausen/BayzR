@@ -49,21 +49,21 @@ std::string convertFormula(Rcpp::Formula f) {
 
 // Return R object type (type of variable):
 // 1: Factor, 2: IntegerVector, 3: NumericVector, 4: CharacterVector, 5: LogicalVector
-// 6: (Numeric/double) Matrix, 7: DataFrame, 8: List, 9: all other
+// 6: (Numeric/double or integer) Matrix, 7: DataFrame, 8: List, 9: all other
 int getVariableType(Rcpp::RObject x) {
-   if(Rcpp::is<Rcpp::NumericVector>(x)){
-      if(Rf_isMatrix(x)) return(6);
-      else return(3);
-   }
-   else if(Rcpp::is<Rcpp::IntegerVector>(x)){
+   if( (Rcpp::is<Rcpp::NumericVector>(x) || Rcpp::is<Rcpp::IntegerVector>(x)) && Rf_isMatrix(x))
+      return(6);
+   if(Rcpp::is<Rcpp::NumericVector>(x) && !Rf_isMatrix(x))
+      return(3);
+   if(Rcpp::is<Rcpp::IntegerVector>(x)){
       if(Rf_isFactor(x)) return(1);
       else return(2);
    }
-   else if(Rcpp::is<Rcpp::CharacterVector>(x)) return(4);
-   else if(Rcpp::is<Rcpp::LogicalVector>(x)) return(5);
-   else if(Rcpp::is<Rcpp::DataFrame>(x)) return(7);
-   else if(Rcpp::is<Rcpp::List>(x)) return(8);
-   else return(9);
+   if(Rcpp::is<Rcpp::CharacterVector>(x)) return(4);
+   if(Rcpp::is<Rcpp::LogicalVector>(x)) return(5);
+   if(Rcpp::is<Rcpp::DataFrame>(x)) return(7);
+   if(Rcpp::is<Rcpp::List>(x)) return(8);
+   return(9);
 }
 
 // Search and retrieve a variable 'name' by searching in the dataframe 'd' or in the R

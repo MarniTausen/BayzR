@@ -30,15 +30,21 @@ print.summarybayz <- function(x, ...){
         }
         cat("\n")
 
-        cat("Estimates for hyper-parameters and other 'logged' parameters:\n")
+        cat("Estimates and HPD intervals for hyper-parameters and other 'logged' parameters:\n")
         if(x$ConvergenceStatus == 1) {
             cat("*** This table is not printed because there are fewer than 10 output samples ***\n")
         }
-        else if (x$ConvergenceStatus == 1) {
+        else if (x$ConvergenceStatus == 0) {
+            print(object$Convergence[,c("postMean","postSD","HPDleft","HPDright")])
+        }
+        cat("\n")
+
+        cat("Convergence diagnostics on 'logged' parameters:\n")
+        if (x$ConvergenceStatus == 2) {
             cat("*** This table is not printed because the coda package is not installed ***\n")
         }
         else if (x$ConvergenceStatus == 0) {
-            print(object$Convergence)
+            print(object$Convergence[,c("effSize","GewekeZ","MCSE","MCCV%")])
         }
         cat("\n")
 

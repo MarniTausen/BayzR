@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <Rcpp.h>
 #include <string>
+#include <math.h>
 #include "rbayzExceptions.h"
 #include "simpleMatrix.h"
 
@@ -19,16 +20,27 @@ class dataMatrix : public labeledMatrix {
 
 public:
    dataMatrix(Rcpp::RObject col, std::string & name) : labeledMatrix(col, name) {
-      // column-center the matrix data
+      // column-center the matrix data and fill missings with column mean.
+      // (and after centering the column means are zero for all columns).
       double * datacol;
-      size_t i,j;
+      size_t i,j, nobs;
       double sum;
       for(i=0; i<ncol; i++) {
          datacol = data[i];
-         sum=0.0l;
-         for(j=0; j<nrow; j++) sum+=datacol[j];
-         sum /= double(nrow);
-         for(j=0; j<nrow; j++) datacol[j] -= sum;
+         sum=0.0l; nobs=0;
+         for(j=0; j<nrow; j++) {
+            if (! isnan(datacol[j]) ) { // cannot catch it as NA_REAL after is has been copied
+               sum+=datacol[j];         // in the simpleMatrix structure ... maybe can be improved?
+               nobs++;
+            }
+         }
+         sum /= double(nobs);
+         for(j=0; j<nrow; j++) {
+            if (isnan(datacol[j]))
+               datacol[j] = 0.0l;
+            else 
+               datacol[j] -= sum;
+         }
       }
    }
 
