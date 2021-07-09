@@ -59,7 +59,6 @@
 #' Alternatively, the variance structure can be specified as a linear model using V=~, 
 #' which is interpreted as a use of a log-linear model for the variances. 
 #'
-#' Bayesian shrinkage models ...
 #'
 #' @param model   A formula describing the model to be fit. 
 #' @param data    Data frame to collect data from
