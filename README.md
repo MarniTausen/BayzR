@@ -97,40 +97,41 @@ library(BayzR)
 testdat1 = read.table("./tests/testdat1.txt", header=TRUE)
 fit1 <- bayz(y~fx(YR)+fx(LC)+rn(YR:LC),data=testdat1,chain=c(5000,100,10))
 summary(fit1)
+# > produces output
+#  Summary of bayz model fit
+#  
+#  model formula: y ~ fx(YR) + fx(LC) + rn(YR:LC) 
+#  
+#  Estimates for model coefficients(*):
+#            postMean    postSD
+#  mean     2.9314963 0.5929937
+#  YR%yr1   0.0000000 0.0000000
+#  YR%yr2  -1.9824071 0.6473416
+#  YR%yr3  -0.4097616 0.5978790
+#  YR%yr4  -1.1269487 0.5850317
+#  YR%yr5  -2.2186498 0.5925470
+#  YR%yr6  -2.7432130 0.5683635
+#  LC%loc1  0.0000000 0.0000000
+#  LC%loc2 -2.8570509 0.4706350
+#  LC%loc3 -2.3987149 0.5011672
+#  LC%loc4 -0.4855762 0.5704899
+#  * Some estimates are not shown because they have more than maxLevel levels:
+#    YR:LC
+#  
+#  Estimates and HPD intervals for hyper-parameters and other 'logged' parameters:
+#             postMean     postSD   HPDleft HPDright
+#  var.y     0.9390555 0.05569042 0.8333453 1.055571
+#  mean      2.9314963 0.59359969 1.8454898 4.003390
+#  var.YR:LC 0.6584807 0.31621030 0.1525434 1.317420
+#  
+#  Convergence diagnostics on 'logged' parameters:
+#              effSize   GewekeZ        MCSE     MCCV%
+#  var.y     448.30317 0.2232456 0.002630235 0.2800937
+#  mean       14.95606 0.4236064 0.153491780 5.2359534
+#  var.YR:LC 117.84447 2.2537794 0.029128721 4.4236258
+#  
+#  Estimates for explained variances (variances as proportions of total):
+#             postMean    postSD   HPDleft  HPDright
+#  var.y     0.6065921 0.1016172 0.3992172 0.8023483
+#  var.YR:LC 0.3934079 0.1016172 0.1976517 0.6007828
 ```
-Summary of bayz model fit
-
-model formula: y ~ fx(YR) + fx(LC) + rn(YR:LC) 
-
-Estimates for model coefficients(*):
-          postMean    postSD
-mean     2.9314963 0.5929937
-YR%yr1   0.0000000 0.0000000
-YR%yr2  -1.9824071 0.6473416
-YR%yr3  -0.4097616 0.5978790
-YR%yr4  -1.1269487 0.5850317
-YR%yr5  -2.2186498 0.5925470
-YR%yr6  -2.7432130 0.5683635
-LC%loc1  0.0000000 0.0000000
-LC%loc2 -2.8570509 0.4706350
-LC%loc3 -2.3987149 0.5011672
-LC%loc4 -0.4855762 0.5704899
-* Some estimates are not shown because they have more than maxLevel levels:
-  YR:LC
-
-Estimates and HPD intervals for hyper-parameters and other 'logged' parameters:
-           postMean     postSD   HPDleft HPDright
-var.y     0.9390555 0.05569042 0.8333453 1.055571
-mean      2.9314963 0.59359969 1.8454898 4.003390
-var.YR:LC 0.6584807 0.31621030 0.1525434 1.317420
-
-Convergence diagnostics on 'logged' parameters:
-            effSize   GewekeZ        MCSE     MCCV%
-var.y     448.30317 0.2232456 0.002630235 0.2800937
-mean       14.95606 0.4236064 0.153491780 5.2359534
-var.YR:LC 117.84447 2.2537794 0.029128721 4.4236258
-
-Estimates for explained variances (variances as proportions of total):
-           postMean    postSD   HPDleft  HPDright
-var.y     0.6065921 0.1016172 0.3992172 0.8023483
-var.YR:LC 0.3934079 0.1016172 0.1976517 0.6007828
