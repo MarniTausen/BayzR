@@ -67,7 +67,7 @@ variance-covariance / correlation / kernel / similarity matrices used in varianc
 as well as data for hierarchical models, are not in the main data.
 Matrices / kernels should be prepared with row-names to match a variable
 in the data. For matrices / kernels used in variance models, the link is straightforward, 
-for instance in rn(Variety:Location, V=KG*KE), KG and KE can be a genetic and environmental
+for instance in rn(Variety:Location, V=KG\*KE), KG and KE can be a genetic and environmental
 kinship / kernel matrix, respectively, and KG should have row-names matching Variety levels,
 while KE should have row-names matching Location levels. 
 To fit a large set of covariates, the match is specified using a hierachical specification
