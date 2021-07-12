@@ -29,14 +29,14 @@ public:
          datacol = data[i];
          sum=0.0l; nobs=0;
          for(j=0; j<nrow; j++) {
-            if (! isnan(datacol[j]) ) { // cannot catch it as NA_REAL after is has been copied
+            if (! std::isnan(datacol[j]) ) { // cannot catch it as NA_REAL after is has been copied
                sum+=datacol[j];         // in the simpleMatrix structure ... maybe can be improved?
                nobs++;
             }
          }
          sum /= double(nobs);
          for(j=0; j<nrow; j++) {
-            if (isnan(datacol[j]))
+            if ( std::isnan(datacol[j]))
                datacol[j] = 0.0l;
             else 
                datacol[j] -= sum;
