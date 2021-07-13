@@ -29,12 +29,13 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
                     Rcpp::IntegerVector & parModelNr, Rcpp::CharacterVector & parModelFunc, Rcpp::IntegerVector & parLogged,
                     Rcpp::CharacterVector & parLoggedNames, Rcpp::CharacterVector & estimNames);
-void writeLoggedSamples(size_t & cycle, std::vector<modelBase *> & model, Rcpp::IntegerVector & parLogged,
-                        Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr, bool silent);
+void writeLoggedSamples(size_t & cycle, Rcpp::NumericMatrix & loggedCumMeans,
+                        Rcpp::CharacterVector & parLoggedNames, size_t save, bool silent);
 void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & postMean,
                       Rcpp::NumericVector & postSD);
 void collectLoggedSamples(std::vector<modelBase *> & model, Rcpp::IntegerVector & parModelNr,
-                          Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples, size_t save);
+                          Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples,
+                          Rcpp::NumericMatrix & loggedCumMeans, size_t save);
 
 // [[Rcpp::export]]
 Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
@@ -117,25 +118,28 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       size_t nSamples = outputCycleNumbers.size();
       if (nSamples==0) throw (generalRbayzError("The chain settings do not make any output"));
       Rcpp::NumericMatrix loggedSamples(int(nSamples),int(parLoggedNames.size()));
+      Rcpp::NumericMatrix loggedCumMeans(int(nSamples),int(parLoggedNames.size()));
       Rcpp::NumericVector postMean(nEstimates,0);
       Rcpp::NumericVector postSD(nEstimates,0);
       Rcpp::colnames(loggedSamples) = parLoggedNames;
       Rcpp::rownames(loggedSamples) = Rcpp::as<Rcpp::CharacterVector>(outputCycleNumbers); 
-      int nShow = chain[0]/5;
+      Rcpp::colnames(loggedCumMeans) = parLoggedNames;
+      Rcpp::rownames(loggedCumMeans) = Rcpp::as<Rcpp::CharacterVector>(outputCycleNumbers); 
+      int nShow = chain[0]/10;
       lastDone="Preparing to run MCMC";
       if (silent==9) Rcpp::Rcout << "Preparing to run MCMC done\n";
 
       // Run the model by calling the sample() method for each modelTerm
       for (size_t cycle=1, save=0; cycle <= chain[0]; cycle++) {
          for(size_t mt=0; mt<model.size(); mt++) model[mt]->sample();
-         if (cycle % nShow == 0 )
-            writeLoggedSamples(cycle, model, parLogged, parLoggedNames, parModelNr, silent);
          if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {
             for(size_t mt=0; mt<model.size(); mt++) model[mt]->prepForOutput();
             collectPostStats(model, postMean, postSD);
-            collectLoggedSamples(model, parModelNr, parLogged, loggedSamples, save);
+            collectLoggedSamples(model, parModelNr, parLogged, loggedSamples, loggedCumMeans, save);
             save++;  // save is counter for output (saved) cycles
          }
+         if (cycle % nShow == 0 )
+            writeLoggedSamples(cycle, loggedCumMeans, parLoggedNames, save, silent);
       }
       lastDone="Finished running MCMC";
       if (silent==9) Rcpp::Rcout << "Finished running MCMC\n";
@@ -419,11 +423,10 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
 }
 
 // This is the only part that writes to the screen under normal operation (if there are no errors)
-void writeLoggedSamples(size_t & cycle, std::vector<modelBase *> & model, Rcpp::IntegerVector & parLogged,
-                        Rcpp::CharacterVector & parLoggedNames, Rcpp::IntegerVector & parModelNr, bool silent) {
+void writeLoggedSamples(size_t & cycle, Rcpp::NumericMatrix & loggedCumMeans, 
+                        Rcpp::CharacterVector & parLoggedNames, size_t save, bool silent) {
    if (silent) return;
    static int writtenHead=0;
-   double x=0.0;
    if (!writtenHead) {
       Rcpp::Rcout << "cycle ";
       for(size_t i=0; i<parLoggedNames.size(); i++)
@@ -431,16 +434,16 @@ void writeLoggedSamples(size_t & cycle, std::vector<modelBase *> & model, Rcpp::
       Rcpp::Rcout <<  std::endl;
       writtenHead=1;
    }
+   // note: save-counter is already updated, so the last available save'd item is (save-1).
+   // to compute change also save-2 is needed, and output can only be written if save >= 2.
+   if (save < 2) return;
+   double change=0.0l;
    Rcpp::Rcout << cycle << " ";
-   for(size_t i=0; i<parLogged.size(); i++) {
-      if (parLogged[i] > 0) {
-         if (parLogged[i] == 1) x = model[parModelNr[i]]->hpar[0];
-         else if (parLogged[i] == 2) x = model[parModelNr[i]]->par[0];
-         else if (parLogged[i] == 3) x = model[parModelNr[i]]->par[1];
-         Rcpp::Rcout << x << " ";
-      }
+   for(size_t i=0; i<loggedCumMeans.ncol(); i++) {
+      change = 100.0l * (loggedCumMeans(save-1,i) - loggedCumMeans(save-2,i) ) / loggedCumMeans(save-2,i);
+      Rcpp::Rcout << loggedCumMeans(save-1,i) << " (" << change << ")" << " ";
    }
-   Rcpp::Rcout << std::endl;
+   Rcpp::Rcout << "\n";
 }
 
 void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & postMean,
@@ -467,9 +470,12 @@ void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & po
 }
 
 void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector & parModelNr,
-                          Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples, size_t save) {
+                          Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples,
+                          Rcpp::NumericMatrix & loggedCumMeans, size_t save) {
    size_t k=0;
-   double x=0.0;
+   double x=0.0l, update=0.0l;
+   // save is counter for saved samples, it is counted in the loop in the main function and
+   // should go from 0 to loggedSamples.nrow().
    if(save > (loggedSamples.nrow()-1)) {
       throw(generalRbayzError("Storage for logged samples out of bounds"));
    }
@@ -479,6 +485,13 @@ void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector &
          else if (parLogged[i] == 2) x = model[parModelNr[i]]->par[0];
          else if (parLogged[i] == 3) x = model[parModelNr[i]]->par[1];
          loggedSamples(save,k) = x;
+         if (save==0) {
+            loggedCumMeans(save,k) = x;
+         }
+         else {
+            update = (x-loggedCumMeans(save-1,k))/double(save+1);
+            loggedCumMeans(save,k) = loggedCumMeans(save-1,k) + update;
+         }
          k++;
       }
    }

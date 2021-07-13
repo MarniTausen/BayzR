@@ -25,10 +25,11 @@ plot.bayz <- function(x, ...){
 
     par(mfrow=ncolnrow(npar),
         mar=c(3.5,2.5,3,2), mgp=c(1.5,0.5,0))
+    cyclenr = as.integer(rownames(x$Samples))
     for(j in 1:npar){
-        variable_name <- rev(unlist(strsplit(colnames(x$Samples)[j],
-                                             split=".", fixed=TRUE)))[1]
-        plot(1:length(x$Samples[,j]), x$Samples[,j], main=variable_name,
-             xlab = "Number of cycles", ylab = colnames(x$Samples)[j], pch=16)
+        coldata = x$Samples[,j];
+        plot(cyclenr, coldata, main=colnames(x$Samples)[j],
+             xlab = "Cycle Number", ylab = colnames(x$Samples)[j], pch=16, cex=0.7)
+        lines(cyclenr, cumsum(coldata)/seq(1,length(coldata)), col=2, lwd=2)
     }
 }
