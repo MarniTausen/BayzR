@@ -29,8 +29,8 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
                     Rcpp::IntegerVector & parModelNr, Rcpp::CharacterVector & parModelFunc, Rcpp::IntegerVector & parLogged,
                     Rcpp::CharacterVector & parLoggedNames, Rcpp::CharacterVector & estimNames);
-void writeLoggedSamples(size_t & cycle, Rcpp::NumericMatrix & loggedCumMeans,
-                        Rcpp::CharacterVector & parLoggedNames, size_t save, bool silent);
+void writeScreenLogHead(Rcpp::CharacterVector & parLoggedNames);
+void writeScreenLog(size_t & cycle, Rcpp::NumericMatrix & loggedCumMeans, size_t save);
 void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & postMean,
                       Rcpp::NumericVector & postSD);
 void collectLoggedSamples(std::vector<modelBase *> & model, Rcpp::IntegerVector & parModelNr,
@@ -129,7 +129,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       lastDone="Preparing to run MCMC";
       if (silent==9) Rcpp::Rcout << "Preparing to run MCMC done\n";
 
-      // Run the model by calling the sample() method for each modelTerm
+      // Run the MCMC chain by calling the sample() method for each modelTerm
+      if(!silent) writeScreenLogHead(parLoggedNames);
       for (size_t cycle=1, save=0; cycle <= chain[0]; cycle++) {
          for(size_t mt=0; mt<model.size(); mt++) model[mt]->sample();
          if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {
@@ -138,8 +139,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
             collectLoggedSamples(model, parModelNr, parLogged, loggedSamples, loggedCumMeans, save);
             save++;  // save is counter for output (saved) cycles
          }
-         if (cycle % nShow == 0 )
-            writeLoggedSamples(cycle, loggedCumMeans, parLoggedNames, save, silent);
+         if (cycle % nShow == 0 && !silent)
+            writeScreenLog(cycle, loggedCumMeans, save);
       }
       lastDone="Finished running MCMC";
       if (silent==9) Rcpp::Rcout << "Finished running MCMC\n";
@@ -423,27 +424,23 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
 }
 
 // This is the only part that writes to the screen under normal operation (if there are no errors)
-void writeLoggedSamples(size_t & cycle, Rcpp::NumericMatrix & loggedCumMeans, 
-                        Rcpp::CharacterVector & parLoggedNames, size_t save, bool silent) {
-   if (silent) return;
-   static int writtenHead=0;
-   if (!writtenHead) {
-      Rcpp::Rcout << "cycle ";
-      for(size_t i=0; i<parLoggedNames.size(); i++)
-      Rcpp::Rcout << parLoggedNames[i] << " ";
-      Rcpp::Rcout <<  std::endl;
-      writtenHead=1;
-   }
+void writeScreenLogHead(Rcpp::CharacterVector & parLoggedNames) {
+   Rcpp::Rcout << "Accum PMs for:";
+   for(size_t i=0; i<parLoggedNames.size(); i++)
+      Rcpp::Rcout << " " << parLoggedNames[i] << ",";
+   Rcpp::Rcout <<  " and [AbsAvgChange%]\n";
+}
+void writeScreenLog(size_t & cycle, Rcpp::NumericMatrix & loggedCumMeans, size_t save) {
    // note: save-counter is already updated, so the last available save'd item is (save-1).
    // to compute change also save-2 is needed, and output can only be written if save >= 2.
    if (save < 2) return;
    double change=0.0l;
-   Rcpp::Rcout << cycle << " ";
+   Rcpp::Rcout << cycle;
    for(size_t i=0; i<loggedCumMeans.ncol(); i++) {
-      change = 100.0l * (loggedCumMeans(save-1,i) - loggedCumMeans(save-2,i) ) / loggedCumMeans(save-2,i);
-      Rcpp::Rcout << loggedCumMeans(save-1,i) << " (" << change << ")" << " ";
+      change += abs( (loggedCumMeans(save-1,i) - loggedCumMeans(save-2,i) ) / loggedCumMeans(save-2,i) );
+      Rcpp::Rcout << " " << loggedCumMeans(save-1,i) ;
    }
-   Rcpp::Rcout << "\n";
+   Rcpp::Rcout << " [" << (100.0l*change/double(loggedCumMeans.ncol())) << "]\n";
 }
 
 void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & postMean,

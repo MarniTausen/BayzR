@@ -25,7 +25,7 @@ public:
    modelFreg(dcModelTerm & modeldescr, modelBase * rmod)
          : modelCoeff(modeldescr, rmod)
    {
-      if(varType[0] != 2)
+      if(varType[0] != 3)
          throw generalRbayzError("Not a numeric vector input: "+varNames[0]);
       C = new dataCovar(varObjects[0]);
       par.initWith(1,0.0l);
