@@ -29,13 +29,8 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
       hierarchModel = tempnames.substr(pos+1, std::string::npos);
       tempnames.erase(pos, std::string::npos);
    }
-
-       size_t pos2 = tempnames.find('(');  // proper hierarchy needs parentheses somewhere,
-      if (pos2 == std::string::npos) {    // without any parenthesis it is evaluated as
-         hierarchType=1;                  // the simplified form variable/variable and
-         tempnames[pos]=':';              // the '/' is replaced by ':' for further processing
-      }
-   // Here the variable names get in their final storage as variable names in a vector
+   // Here insert finding the variable patterns based on :|/
+   // ....
    allVariableNames = tempnames;
    variableNames = splitString(tempnames,":|/");
    // For every variable get an RObject pointing to it (whether it is from the data frame
