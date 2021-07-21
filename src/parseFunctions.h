@@ -12,7 +12,7 @@
 #define parseFunctions_h
 
 void removeSpaces(std::string &s);
-std::vector<std::string> splitString(std::string text, char splitchar);
+std::vector<std::string> splitString(std::string text, std::string splitchar);
 std::string convertFormula(Rcpp::Formula f);
 int getVariableType(Rcpp::RObject x);
 Rcpp::RObject getVariableObject(Rcpp::DataFrame &d, std::string name);

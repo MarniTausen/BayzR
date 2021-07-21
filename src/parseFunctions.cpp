@@ -16,7 +16,7 @@ void removeSpaces(std::string &s) {
    while((pos=s.find(' '))!=std::string::npos) s.erase(pos,1);
 }
 
-std::vector<std::string> splitString(std::string text, char splitchar) {
+std::vector<std::string> splitString(std::string text, std::string splitchar) {
    std::vector<std::string> parts;
    if (text=="") {
       return parts;
@@ -87,21 +87,21 @@ Rcpp::RObject getVariableObject(Rcpp::DataFrame &d, std::string name) {
 
 std::vector<std::string> getModelLHSTerms(std::string mf) {
    // split on ~, it must create two pieces that are the response term and list of explanatory terms
-   std::vector<std::string> lhsrhs = splitString(mf,'~');
+   std::vector<std::string> lhsrhs = splitString(mf,"~");
    if(lhsrhs.size() != 2)
       throw(generalRbayzError("Model-formula has no ~ to separate response and explanatory terms"));
    if(lhsrhs[0].size()==0)
       throw(generalRbayzError("Model-formula has no response term(s)"));
    // split the first part on + to make list of the LHS terms
-   std::vector<std::string> parts = splitString(lhsrhs[0],'+');
+   std::vector<std::string> parts = splitString(lhsrhs[0],"+");
    return parts;
 }
 
 std::vector<std::string> getModelRHSTerms(std::string mf) {
    // split on ~, it must create two pieces that are the response term and list of explanatory terms
-   std::vector<std::string> lhsrhs = splitString(mf,'~');
+   std::vector<std::string> lhsrhs = splitString(mf,"~");
    // split the RHS string on + to make list of explanatory model terms
-   std::vector<std::string> parts = splitString(lhsrhs[1],'+');
+   std::vector<std::string> parts = splitString(lhsrhs[1],"+");
    if(lhsrhs[1].size()==0) {   // RHS string was empty, insert default intercept
       parts.insert(parts.begin(),"1");
       return parts;
@@ -133,11 +133,11 @@ std::vector<std::string> parseColNames(Rcpp::DataFrame & d, size_t col) {
    names[0]=colName.substr(0,pos);   // name of the function
    // split all the rest on comma, starting from pos++ (after opening parenthesis)
    pos++;
-   std::vector<std::string> arguments = splitString(colName.substr(pos,std::string::npos), ',');
+   std::vector<std::string> arguments = splitString(colName.substr(pos,std::string::npos), ",");
    if(arguments.size()==0)        // no arguments inside the function, we are ready
       return names;
    // now we're dealing with at least one term inside the function, it must start with variable name(s)
-   std::vector<std::string> varNames = splitString(arguments[0], ':');
+   std::vector<std::string> varNames = splitString(arguments[0], ":");
    for(size_t i=0; i<varNames.size() && i<3; i++ )
       names[i+1] = varNames[i];
    if (varNames.size() > 3)

@@ -34,7 +34,7 @@ public:
          pos3 = priordescr.find(')',pos2);    // here want to get the part before first parenthesis
          dist = priordescr.substr(0,pos2);    // as the dist name, and split part inside parenthesis
          std::vector<std::string> parlist     // in a list of par=value strings
-                 = splitString(priordescr.substr(pos2+1,(pos3-pos2-1)),',');
+                 = splitString(priordescr.substr(pos2+1,(pos3-pos2-1)),",");
          std::string parname;
          double parvalue;
          for(size_t i=0; i<parlist.size(); i++) {
