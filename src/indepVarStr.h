@@ -20,6 +20,7 @@ public:
    indepVarStr(dcModelTerm & modeldescr, modelBase* cm) : modelVar(modeldescr, cm) {
        coefmodel = cm;
        weights.initWith(cm->par.nelem, 1.0l);
+       fname = "vi";
    }
    simpleDblVector weights;
    modelBase* coefmodel;

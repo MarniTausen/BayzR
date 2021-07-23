@@ -1,6 +1,7 @@
 #' Extract posterior means and SDs for `random´ effects
 #'
-#' Extract from the Bayz output the estimates (posterior mean and SD) for those terms that would be called random in mixed models,
+#' Extract from the Bayz output the estimates (posterior mean and SD) for those terms that would be
+#' called random in mixed models,
 #' i.e. those that have shrinkage priors such as a Normal prior, but also other shrinkage priors.
 #'
 #' @param object  A bayz model output

@@ -12,10 +12,10 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
 {
    // funcName will be empty if there is no opening parenthesis
    size_t pos1, pos2, pos3;
-   if ( (pos = modelTerm.find('(')) == std::string::npos)
+   if ( (pos1 = modelTerm.find('(')) == std::string::npos)
       funcName = "";
    else
-      funcName = modelTerm.substr(0, pos);
+      funcName = modelTerm.substr(0, pos1);
    // Variables name(s) need some pre-treatment to handle hierarchy specifications
    std::string tempnames = getVarNames(modelTerm);
    pos1 = tempnames.find('/');
@@ -26,8 +26,8 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
       // put it in hierarchModel string, all processing continuous without it.
       // The string allVariableNames will also not have the hierarchy part.
       hierarchType=2;
-      hierarchModel = tempnames.substr(pos+1, std::string::npos);
-      tempnames.erase(pos, std::string::npos);
+      hierarchModel = tempnames.substr(pos1+1, std::string::npos);
+      tempnames.erase(pos1, std::string::npos);
    }
    // Here insert finding the variable patterns based on :|/
    // ....
