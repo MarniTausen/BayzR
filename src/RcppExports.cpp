@@ -5,6 +5,11 @@
 
 using namespace Rcpp;
 
+#ifdef RCPP_USE_GLOBAL_ROSTREAM
+Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
+Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
+#endif
+
 // mfactor_cpp
 Rcpp::IntegerVector mfactor_cpp(Rcpp::List fact_list);
 RcppExport SEXP _BayzR_mfactor_cpp(SEXP fact_listSEXP) {

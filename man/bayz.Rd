@@ -79,7 +79,5 @@ is then built up from a combination of given (proportional) variance-covariance 
 kernel matrices and predefined acronyms IDEN, DIAG and VCOV that indicate parameterized
 matrices (with parameters to be estimated from the data). 
 Alternatively, the variance structure can be specified as a linear model using V=~, 
-which is interpreted as a use of a log-linear model for the variances. 
-
-Bayesian shrinkage models ...
+which is interpreted as a use of a log-linear model for the variances.
 }
