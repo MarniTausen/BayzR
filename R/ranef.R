@@ -9,7 +9,7 @@
 #'                      in multiple columns (default TRUE). 
 #' @param ...           Additional parameters passed onto the Model function.
 #'
-#' @return 
+#' @return a list with one member (a data frame) for each random effect
 #' @export
 ranef.bayz <- function(object, splitLabels=TRUE, ...){
     new_object = list()
