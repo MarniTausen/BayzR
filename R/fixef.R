@@ -8,9 +8,10 @@
 #'                      in multiple columns (default TRUE). 
 #'
 #' @return a list with one member (a data frame) for each fixed effect
+#' @method fixef bayz
 #' @export
 fixef.bayz <- function(object, splitLabels=TRUE){
     par = object$Parameters
     par_select = ( par$ModelTerm=="fx" | par$ModelTerm=="rg" )
-    return(coef.bayz(object, par_select, splitLabels)
+    return(coef.bayz(object, par_select, splitLabels))
 }

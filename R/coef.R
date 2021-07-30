@@ -18,7 +18,7 @@ coef.bayz <- function(object, which=NULL, splitLabels=TRUE){
        which = ( par$ModelTerm=="fx" | par$ModelTerm=="rg" | par$ModelTerm=="rn" )
     }
     else {
-       if(length(which) != nrow(par)) stop 'in coef.R which= is not of right length'
+       if(length(which) != nrow(par)) stop("In coef.R which= is not of right length")
        # can also check that which vector is proper TRUE/FALSE
     }
     par = par[which,]

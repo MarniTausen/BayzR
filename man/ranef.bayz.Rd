@@ -4,7 +4,7 @@
 \alias{ranef.bayz}
 \title{Extract posterior means and SDs for `random´ effects}
 \usage{
-ranef.bayz(object, splitLabels = TRUE, ...)
+\method{ranef}{bayz}(object, splitLabels = TRUE, ...)
 }
 \arguments{
 \item{object}{A bayz model output}
@@ -15,10 +15,8 @@ in multiple columns (default TRUE).}
 \item{...}{Additional parameters passed onto the Model function.}
 }
 \value{
-
+a list with one member (a data frame) for each random effect
 }
 \description{
-Extract from the Bayz output the estimates (posterior mean and SD) for those terms that would be
-called random in mixed models,
-i.e. those that have shrinkage priors such as a Normal prior, but also other shrinkage priors.
+Extract from the Bayz output the coefficients (posterior mean and SD) for rn() model terms.
 }

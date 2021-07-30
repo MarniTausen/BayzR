@@ -8,9 +8,10 @@
 #' @param ...           Additional parameters passed onto the Model function.
 #'
 #' @return a list with one member (a data frame) for each random effect
+#' @method ranef bayz
 #' @export
 ranef.bayz <- function(object, splitLabels=TRUE, ...){
     par = object$Parameters
     par_select = ( par$ModelTerm=="rn" )
-    return(coef.bayz(object, par_select, splitLabels)
+    return(coef.bayz(object, par_select, splitLabels))
 }
