@@ -28,11 +28,14 @@ public:
                // will not be a respModel object ....
 //         respModel = rmod;
       }
+      isCoeff=true;
    }
 
    virtual ~modelCoeff() {
    }
-   
+
+   virtual void accumFit(simpleDblVector & fit) = 0;
+
    modelResp* respModel;
    double *resid=NULL, *residPrec=NULL;
    size_t Nresid=0;

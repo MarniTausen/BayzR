@@ -76,6 +76,14 @@ public:
       }
    }
 
+   void accumFit(simpleDblVector & fit) {
+      // There is a fit vector declared in this object, but it is not filled.
+      // If that fit would be available, addding it here to the total fit would be faster.
+      double * colptr = M->data[col];
+      for (size_t obs=0; obs < F->data.nelem; obs++)
+         fit[obs] += par[col] * colptr[obsIndex[obs]];
+   }
+
    // Here no sample() yet, modelMatrix remains virtual. The derived classes implement sample()
    // by combining update_regressions() with update of hyper-paramters for that derived class.
 

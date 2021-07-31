@@ -48,6 +48,12 @@ public:
    ~modelFactor() {
       delete F;
    }
+
+   void accumFit(simpleDblVector & fit) {
+      for (size_t obs=0; obs < F->data.nelem; obs++)
+        fit[obs] += par[F->data[obs]];
+   }
+
    
 protected:
 

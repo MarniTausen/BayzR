@@ -44,6 +44,11 @@ public:
       for (obs=0; obs < Nresid; obs++) resid[obs] -= par[0];
    }
 
+   void accumFit(simpleDblVector & fit) {
+      for (size_t obs=0; obs < Nresid; obs++)
+        fit[obs] += par[0];
+   }
+
 private:
 };
 

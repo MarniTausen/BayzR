@@ -91,6 +91,11 @@ public:
       hpar[0] = gprior.samplevar(ssq, K->ncol);
    }
 
+   void accumFit(simpleDblVector & fit) {
+      for (size_t obs=0; obs < F->data.nelem; obs++)
+        fit[obs] += fitval[obs];
+   }
+
    // prepForOutput puts the transform to random effects in the par-vector
    void prepForOutput() {
       for(size_t row=0; row< K->nrow; row++) {

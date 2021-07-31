@@ -10,6 +10,7 @@
 #'                      in multiple columns (default TRUE). 
 #'
 #' @return a list with one member (a data frame) for each coefficient
+#' @import stats
 #' @export
 coef.bayz <- function(object, which=NULL, splitLabels=TRUE){
     par = object$Parameters

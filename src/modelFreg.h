@@ -42,6 +42,11 @@ public:
       resid_correct();
    }
 
+   void accumFit(simpleDblVector & fit) {
+      for (size_t obs=0; obs < C->nelem; obs++)
+        fit[obs] += par[0] * C->data[obs];
+   }
+
 protected:
 
    void resid_correct() {
