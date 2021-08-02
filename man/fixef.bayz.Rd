@@ -4,13 +4,15 @@
 \alias{fixef.bayz}
 \title{Extract posterior means and SDs for `fixed´ effects}
 \usage{
-\method{fixef}{bayz}(object, splitLabels = TRUE)
+\method{fixef}{bayz}(object, splitLabels = TRUE, ...)
 }
 \arguments{
 \item{object}{A bayz model output}
 
 \item{splitLabels}{Whether labels that contain % (in interactions) such as a%b should be split
 in multiple columns (default TRUE).}
+
+\item{...}{Additional parameters passed onto the Model function.}
 }
 \value{
 a list with one member (a data frame) for each fixed effect
