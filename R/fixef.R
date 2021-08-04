@@ -9,9 +9,7 @@
 #' @param ...           Additional parameters passed onto the Model function.
 #'
 #' @return a list with one member (a data frame) for each fixed effect
-##' @method fixef bayz
-##' @import nlme
-#' @export fixef.bayz
+#' @importFrom lme4 fixef
 #' @export
 fixef.bayz <- function(object, splitLabels=TRUE, ...){
     par = object$Parameters

@@ -11,5 +11,6 @@ LazyData: true
 Suggests: testthat
 RoxygenNote: 7.1.1
 Imports:
-    Rcpp
+    Rcpp,
+    lme4
 LinkingTo: Rcpp
