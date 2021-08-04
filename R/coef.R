@@ -26,6 +26,7 @@ coef.bayz <- function(object, which=NULL, splitLabels=TRUE){
     new_object = list()
     for(i in 1:nrow(par)) {
         estim_select = est[par$EstStart[i]:par$EstEnd[i],]
+        if (!grepl("%",rownames(estim_select)[1],fixed=TRUE)) splitLabels = FALSE
         if(splitLabels) {
             splitlabels = t(as.data.frame(strsplit(rownames(estim_select),"%")))
             colnm = splitlabels[1,1]
