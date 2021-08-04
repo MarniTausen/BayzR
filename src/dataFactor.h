@@ -50,10 +50,19 @@ public:
          throw generalRbayzError("Variable is not a factor (unfortunately cannot get the name here)\n");
       }
       Rcpp::IntegerVector tempvec = Rcpp::as<Rcpp::IntegerVector>(col);
-      data.initWith(tempvec);
-      for (size_t i=0; i< data.nelem; i++) {
-         data[i] -= 1;
+      Rcpp::LogicalVector missing = Rcpp::is_na(tempvec);
+      if (Rcpp::sum(missing) > 0) {
+         labels.push_back("NA");
+         for(size_t row=0; row<tempvec.size(); row++) {
+            if(missing[row]) tempvec[row] = 0;
+         }
       }
+      else {
+         for(size_t row=0; row<tempvec.size(); row++) {
+            tempvec[row] -= 1;
+         }
+      }
+      data.initWith(tempvec);
       Rcpp::CharacterVector templabels = col.attr("levels");
       CharVec2cpp(labels, templabels);
       Nvar=1;
@@ -75,25 +84,19 @@ public:
       if(Nvar==0)
          setupFirstVariable(Rcol);
       else { // add (interact) another factor with already stored factor(s)
-         if (!Rf_isFactor(Rcol)) {
-            throw generalRbayzError("Variable is not a factor (unfortunately cannot get the name here)\n");
-         }
+         dataFactor tempFact(Rcol); 
          std::vector<std::string> oldlabels(labels);
-         std::vector<std::string> newFactorLabels;
-         CharVec2cpp(newFactorLabels, Rcol.attr("levels"));
-         Rcpp::IntegerVector newdata = Rcpp::as<Rcpp::IntegerVector>(Rcol);
-         // note: newdata still has level-coding from 1
-         size_t nLevel1=oldlabels.size();
-         size_t nLevel2=newFactorLabels.size();
+         size_t nLevel1=labels.size();
+         size_t nLevel2=tempFact.labels.size();
          labels.resize(nLevel1 * nLevel2);
          for(size_t i=0; i<nLevel1; i++) {  // generate the new labels
             for(size_t j=0; j<nLevel2; j++) {
-               labels[i*nLevel2+j] = oldlabels[i] + "%" + newFactorLabels[j];
+               labels[i*nLevel2+j] = oldlabels[i] + "%" + newFact.labels[j];
             }
          }
          // Replace existing data-level-coding with codes to match the new interaction
          for(size_t i=0; i<data.nelem; i++) {
-            data[i] = data[i]*nLevel2 + newdata[i]-1;
+            data[i] = data[i]*nLevel2 + newFact.data[i];
          }
          Nvar++;
       }
