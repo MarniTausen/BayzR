@@ -51,18 +51,18 @@ public:
       }
       Rcpp::IntegerVector tempvec = Rcpp::as<Rcpp::IntegerVector>(col);
       Rcpp::LogicalVector missing = Rcpp::is_na(tempvec);
+      data.initWith(tempvec);
       if (Rcpp::sum(missing) > 0) {
          labels.push_back("NA");
          for(size_t row=0; row<tempvec.size(); row++) {
-            if(missing[row]) tempvec[row] = 0;
+            if(missing[row]) data[row] = 0;
          }
       }
       else {
          for(size_t row=0; row<tempvec.size(); row++) {
-            tempvec[row] -= 1;
+            data[row] -= 1;
          }
       }
-      data.initWith(tempvec);
       Rcpp::CharacterVector templabels = col.attr("levels");
       CharVec2cpp(labels, templabels);
       Nvar=1;
@@ -91,12 +91,12 @@ public:
          labels.resize(nLevel1 * nLevel2);
          for(size_t i=0; i<nLevel1; i++) {  // generate the new labels
             for(size_t j=0; j<nLevel2; j++) {
-               labels[i*nLevel2+j] = oldlabels[i] + "%" + newFact.labels[j];
+               labels[i*nLevel2+j] = oldlabels[i] + "%" + tempFact.labels[j];
             }
          }
          // Replace existing data-level-coding with codes to match the new interaction
          for(size_t i=0; i<data.nelem; i++) {
-            data[i] = data[i]*nLevel2 + newFact.data[i];
+            data[i] = data[i]*nLevel2 + tempFact.data[i];
          }
          Nvar++;
       }

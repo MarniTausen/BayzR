@@ -16,7 +16,7 @@
 // Note: the C++ vector should be empty, the algorithm uses push_back.
 void CharVec2cpp(std::vector<std::string> & CppStrings, Rcpp::CharacterVector RStrings) {
    std::string s;
-   CppStrings.reserve(CppStrings.size()+Rstrings.size());
+   CppStrings.reserve(CppStrings.size()+RStrings.size());
    for(size_t i=0; i< RStrings.size(); i++) {
       s = Rcpp::as<std::string>(RStrings[i]);
       CppStrings.push_back(s);
