@@ -96,10 +96,12 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       Rcpp::IntegerVector parLogged;                // If the parameter will be logged
       Rcpp::CharacterVector parLoggedNames;         // Shortened list of names of logged parameters
       Rcpp::CharacterVector estimNames;             // Names of all 'estimates' (individual levels)
-      
       collectParInfo(model, parNames, parHyper, parSizes, parEstFirst, parEstLast, parModelNr,
                      parModelFunc, parLogged, parLoggedNames, estimNames);
       size_t nEstimates = estimNames.size();
+
+      // Residuals matrix
+      Rcpp::NumericMatrix residuals(inputData.nrow(),2*modelLHSTerms.size());
 
       // Check the chain settings and make list of output sample cycle-numbers.
       if (chain[0]==0 && chain[1]==0 && chain[2]==0) {  // chain was not set
@@ -321,7 +323,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
 
    // First collect list of used hpar and par vectors, and set what model(-term) they belong to.
    for(size_t mt=0; mt<model.size(); mt++) {     // Done in two loops over model-terms, all hpar will come
-      if ( model[mt]->hpar.nelem > 0 ) {         // first, then all par vectors
+      if ( model[mt]->hpar.nelem > 0 && model[mt]->fname != "rp") {  // first, then all par vectors
          parHyper.push_back(TRUE);
          parModelNr.push_back(mt);
          parModelFunc.push_back(model[mt]->fname);
@@ -344,7 +346,7 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
       }
    }
    for(size_t mt=0; mt<model.size(); mt++) {
-      if (model[mt]->par.nelem > 0 ) {
+      if (model[mt]->par.nelem > 0 && model[mt]->fname != "rp") {
          parHyper.push_back(FALSE);
          parModelNr.push_back(mt);
          parModelFunc.push_back(model[mt]->fname);
@@ -447,7 +449,7 @@ void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & po
                       Rcpp::NumericVector & postSD) {
    size_t k=0;
    for(size_t mt=0; mt<model.size(); mt++) {
-      if(model[mt]->hpar.nelem > 0 ) {
+      if(model[mt]->hpar.nelem > 0 && model[mt]->fname != "rp") {
          for(size_t i=0; i<model[mt]->hpar.nelem; i++) {
             postMean[k] += model[mt]->hpar[i];
             postSD[k] += (model[mt]->hpar[i])*(model[mt]->hpar[i]);
@@ -456,7 +458,7 @@ void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & po
       }
    }
    for(size_t mt=0; mt<model.size(); mt++) {
-      if(model[mt]->par.nelem > 0 ) {
+      if(model[mt]->par.nelem > 0 && model[mt]->fname != "rp") {
          for(size_t i=0; i<model[mt]->par.nelem; i++) {
             postMean[k] += model[mt]->par[i];
             postSD[k] += (model[mt]->par[i])*(model[mt]->par[i]);
