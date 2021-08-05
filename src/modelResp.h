@@ -36,7 +36,7 @@ public:
          }
       }
       fname = "rp";
-      parName = "resid";
+//      parName = "resid";
       fit.initWith(par.nelem, 0.0l);
       // no labels for residuals yet!
    }

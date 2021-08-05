@@ -33,7 +33,8 @@ void writeScreenLogHead(Rcpp::CharacterVector & parLoggedNames);
 void writeScreenLog(size_t & cycle, Rcpp::NumericMatrix & loggedCumMeans, size_t save);
 void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & postMean,
                       Rcpp::NumericVector & postSD);
-void collectResiduals(Rcpp::NumericMatrix &residuals);
+void collectResiduals(std::vector<modelBase *> &model, Rcpp::NumericMatrix &residuals);
+void finishResiduals(std::vector<modelBase *> &model, Rcpp::NumericMatrix &residuals, size_t save);
 void collectLoggedSamples(std::vector<modelBase *> & model, Rcpp::IntegerVector & parModelNr,
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples,
                           Rcpp::NumericMatrix & loggedCumMeans, size_t save);
@@ -103,6 +104,17 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
 
       // Residuals matrix
       Rcpp::NumericMatrix residuals(inputData.nrow(),2*modelLHSTerms.size());
+      Rcpp::CharacterVector residColNames;
+      for(size_t mt=0; mt<model.size(); mt++) {
+         if(model[mt]->fname=="rp") {
+            residColNames.push_back("resid."+model[mt]->parName);
+            residColNames.push_back("fit."+model[mt]->parName);
+         }
+      }
+      Rcpp::colnames(residuals) = residColNames;
+      for(size_t col=0; col<2*modelLHSTerms.size(); col++) {
+         for(size_t row=0; row<inputData.nrow(); row++) residuals(row,col)=0.0l;
+      }
 
       // Check the chain settings and make list of output sample cycle-numbers.
       if (chain[0]==0 && chain[1]==0 && chain[2]==0) {  // chain was not set
@@ -140,7 +152,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
             for(size_t mt=0; mt<model.size(); mt++) model[mt]->prepForOutput();
             collectPostStats(model, postMean, postSD);
             collectLoggedSamples(model, parModelNr, parLogged, loggedSamples, loggedCumMeans, save);
-            collectResiduals(residuals);  // add new function
+            collectResiduals(model, residuals);
             save++;  // save is counter for output (saved) cycles
          }
          if (cycle % nShow == 0 && !silent)
@@ -163,19 +175,20 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
       for(size_t i=0; i<nEstimates; i++)
           postSD[i] = sqrt(postSD[i]/double(nSamples) - postMean[i]*postMean[i]);
       lastDone="Computing postMeans and PostSDs";
-     Rcpp::DataFrame estimates = Rcpp::DataFrame::create
+      Rcpp::DataFrame estimates = Rcpp::DataFrame::create
               (Rcpp::Named("postMean")=postMean, Rcpp::Named("postSD")=postSD);
       estimates.attr("row.names") = estimNames;
       lastDone="Setting up estimates dataframe";
+      finishResiduals(model, residuals, nSamples);
       result.push_back(0,"nError");
       result.push_back(parInfo,"Parameters");
       result.push_back(loggedSamples,"Samples");
       result.push_back(estimates,"Estimates");
+      result.push_back(residuals,"Residuals");
       result.push_back(chain,"Chain");
       lastDone="Filling return list";
       if (silent==9) Rcpp::Rcout << "Ready filling return list\n";
       return(result);   // normal termination
-
    } 
    catch (generalRbayzError &err) {
       errorMessages.push_back(err.what());
@@ -470,8 +483,48 @@ void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & po
    }
 }
 
-void collectResiduals(Rcpp::NumericMatrix &residuals) {
+// Collect sums of residuals and fitted values from the response model-objects
+void collectResiduals(std::vector<modelBase *> &model, Rcpp::NumericMatrix &residuals) {
+   size_t k=0;             // counter for response models
+   size_t col1, col2;
+   for(size_t mt=0; mt<model.size(); mt++) {
+      if(model[mt]->fname=="rp") {
+         col1 = k*2;       // column to store residuals for k'th response
+         col2 = k*2 + 1;   // column to store fitted values for k'th response
+         modelResp* tempptr = dynamic_cast<modelResp*>(model[mt]);
+         for(size_t row=0; row<tempptr->par.nelem; row++) {
+            residuals(row,col1) += tempptr->par.data[row];
+         }
+         for(size_t row=0; row<tempptr->par.nelem; row++) {
+            residuals(row,col2) += tempptr->fit.data[row];
+         }
+         k++;
+      }
+   }
+}
 
+void finishResiduals(std::vector<modelBase *> &model, Rcpp::NumericMatrix &residuals,
+                     size_t save) {
+   size_t k=0;
+   size_t col1, col2;
+   double nsave = double(save);
+   for(size_t mt=0; mt<model.size(); mt++) {
+      if(model[mt]->fname=="rp") {
+         col1 = k*2;
+         col2 = k*2 + 1;
+         modelResp* tempptr = dynamic_cast<modelResp*>(model[mt]);
+         for(size_t row=0; row<tempptr->par.nelem; row++) {
+            if (tempptr->missing[row])
+               residuals(row,col1) = NA_REAL;
+            else
+               residuals(row,col1) /= nsave;
+         }
+         for(size_t row=0; row<tempptr->par.nelem; row++) {
+            residuals(row,col2) /= nsave;
+         }
+         k++;
+      }
+   }
 }
 
 void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector & parModelNr,
