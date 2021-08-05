@@ -20,7 +20,7 @@ class modelResp : public modelBase {
 public:
    
    modelResp(dcModelTerm & modeldescr, modelBase * rmod)
-            : modelBase(modeldescr, rmod), Ydata(), fit(), oldresid()
+            : modelBase(modeldescr, rmod), fit(), Y()
    {
       // For now there is no check on the response vector to be correctly numerical, in future
       // rbayz main may need to make a triage for different types of response and then construct
@@ -28,12 +28,16 @@ public:
       Rcpp::NumericVector tempY = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
       Y.initWith(tempY);
       par.initWith(tempY);
-      missing = Rcpp::is_na(Ydata);
-      for(size_t row=0; row<par.nelem; row++)
-         if(missing[row]) par.data[row] = 0.0l;
+      missing = Rcpp::is_na(tempY);
+      for(size_t row=0; row<par.nelem; row++) {
+         if(missing[row]) {
+            par.data[row] = 0.0l;
+            Y.data[row] = 0.0l;
+         }
+      }
       fname = "rp";
       parName = "resid";
-      fit.initWith(par.size(), 0.0l);
+      fit.initWith(par.nelem, 0.0l);
       // no labels for residuals yet!
    }
    
