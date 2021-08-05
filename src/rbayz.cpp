@@ -33,6 +33,7 @@ void writeScreenLogHead(Rcpp::CharacterVector & parLoggedNames);
 void writeScreenLog(size_t & cycle, Rcpp::NumericMatrix & loggedCumMeans, size_t save);
 void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & postMean,
                       Rcpp::NumericVector & postSD);
+void collectResiduals(Rcpp::NumericMatrix &residuals);
 void collectLoggedSamples(std::vector<modelBase *> & model, Rcpp::IntegerVector & parModelNr,
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples,
                           Rcpp::NumericMatrix & loggedCumMeans, size_t save);
@@ -139,6 +140,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
             for(size_t mt=0; mt<model.size(); mt++) model[mt]->prepForOutput();
             collectPostStats(model, postMean, postSD);
             collectLoggedSamples(model, parModelNr, parLogged, loggedSamples, loggedCumMeans, save);
+            collectResiduals(residuals);  // add new function
             save++;  // save is counter for output (saved) cycles
          }
          if (cycle % nShow == 0 && !silent)
@@ -466,6 +468,10 @@ void collectPostStats(std::vector<modelBase *> & model, Rcpp::NumericVector & po
          }
       }
    }
+}
+
+void collectResiduals(Rcpp::NumericMatrix &residuals) {
+
 }
 
 void collectLoggedSamples(std::vector<modelBase *> &model, Rcpp::IntegerVector & parModelNr,
