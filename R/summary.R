@@ -3,7 +3,7 @@
 #' Produced summary statistics of the bayz object and returns a summarybayz object.
 #'
 #' @param object    bayz output object
-#' @param maxlevel  controls the inclusion of estimates in the "Main estimates" table by selecting
+#' @param maxLevel  controls the inclusion of estimates in the "Main estimates" table by selecting
 #'                  only the model-terms with less <= maxlevel coefficients
 #' @param HPDprob   the probability for the Highest Posterior Density intervals reported in the
 #'                  table "Convergence diagnostics"
@@ -41,9 +41,9 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
     if(length(output_cycles<10)) convergence_status = 1       # fail because too few output
     convergence_table = data.frame()
     if(require("coda")) {
-        samp = mcmc(object$Samples, start=output_cycles[1], end=output_cycles[length(output_cycles)],
+        samp = coda::mcmc(object$Samples, start=output_cycles[1], end=output_cycles[length(output_cycles)],
                      thin=output_cycles[2]-output_cycles[1])
-        effSizes = effectiveSize(samp)
+        effSizes = coda::effectiveSize(samp)
         postMeans =  apply(object$Samples,2,mean)
         postSDs  = apply(object$Samples,2,sd)
         MCSEs = postSDs / sqrt(effSizes)
@@ -51,7 +51,7 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
         HPDbounds = rep("none",ncol(object$Samples))
         HPDbounds[substr(colnames(object$Samples),0,3)=="var"] = "var"
         HPDs = HPDbayz(object$Samples,prob=HPDprob, bound=HPDbounds)
-        GewekeZ = abs(geweke.diag(object$Samples)$z)
+        GewekeZ = abs(coda::geweke.diag(object$Samples)$z)
         convergence_table = data.frame(postMeans,postSDs,effSizes,GewekeZ,MCSEs,MCCVpct,HPDs)
         colnames(convergence_table) = c("postMean","postSD","effSize","GewekeZ","MCSE","MCCV%","HPDleft","HPDright")
         rownames(convergence_table) = colnames(object$Samples)

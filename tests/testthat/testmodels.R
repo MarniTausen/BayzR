@@ -2,6 +2,8 @@ context("bayz.models")
 
 test_that("Two fixed effects", {
     testdat1 = read.table("../testdat1.txt",header=TRUE)
+    testdat1$YR = as.factor(testdat1$YR)
+    testdat1$LC = as.factor(testdat1$LC)
     fit = bayz(y~fx(YR)+fx(LC),data=testdat1,chain=c(5000,100,10), silent=TRUE)
     YRestimates = fit$Estimates[fit$Parameters["YR","EstStart"]:fit$Parameters["YR","EstEnd"],]
     LCestimates = fit$Estimates[fit$Parameters["LC","EstStart"]:fit$Parameters["LC","EstEnd"],]

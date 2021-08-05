@@ -9,13 +9,13 @@
 \arguments{
 \item{object}{bayz output object}
 
+\item{maxLevel}{controls the inclusion of estimates in the "Main estimates" table by selecting
+only the model-terms with less <= maxlevel coefficients}
+
 \item{HPDprob}{the probability for the Highest Posterior Density intervals reported in the
 table "Convergence diagnostics"}
 
 \item{...}{additional parameters}
-
-\item{maxlevel}{controls the inclusion of estimates in the "Main estimates" table by selecting
-only the model-terms with less <= maxlevel coefficients}
 }
 \value{
 summarybayz object

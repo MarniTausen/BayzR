@@ -8,11 +8,12 @@
 #'                      in the $Parameters table in a bayz output object). It can be omitted to extract all coefficients.
 #' @param splitLabels   Whether labels that contain % (in interactions) such as a%b should be split
 #'                      in multiple columns (default TRUE). 
+#' @param ...           Additional parameters.
 #'
 #' @return a list with one member (a data frame) for each coefficient
 #' @import stats
 #' @export
-coef.bayz <- function(object, which=NULL, splitLabels=TRUE){
+coef.bayz <- function(object, which=NULL, splitLabels=TRUE, ...){
     par = object$Parameters
     est = object$Estimates
     if(is.null(which)) {

@@ -2,8 +2,6 @@
 //  BayzR -- modelResp.h
 //  model class for modelling response and residual variance. The base class is for the
 //  standard continuous data case, there are derived classes for non-linear models.
-// - the coldata is NumericVector (double)
-// - hpar vector is size 1 to hold residual variance
 // note: modelBase constructor has set parName to name of response variable
 //
 //  Created by Luc Janss on 03/08/2018.
@@ -15,24 +13,27 @@
 #include <Rcpp.h>
 #include "modelBase.h"
 #include "indepVarStr.h"
+#include "simpleVector.h"
 
 class modelResp : public modelBase {
    
 public:
    
    modelResp(dcModelTerm & modeldescr, modelBase * rmod)
-            : modelBase(modeldescr, rmod)
+            : modelBase(modeldescr, rmod), Ydata(), fit(), oldresid()
    {
       // For now there is no check on the response vector to be correctly numerical, in future
       // rbayz main may need to make a triage for different types of response and then construct
       // appropriate response objects.
-      Ydata = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
-      par.initWith(Ydata);
+      Rcpp::NumericVector tempY = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
+      Y.initWith(tempY);
+      par.initWith(tempY);
       missing = Rcpp::is_na(Ydata);
       for(size_t row=0; row<par.nelem; row++)
          if(missing[row]) par.data[row] = 0.0l;
       fname = "rp";
       parName = "resid";
+      fit.initWith(par.size(), 0.0l);
       // no labels for residuals yet!
    }
    
@@ -40,9 +41,16 @@ public:
    }
 
    void sample() {
-      // re-sample the residuals for missing data
+      // Store fitted values and re-sample the Ydata / residuals for missing data
       for(size_t row=0; row<par.nelem; row++) {
-         if(missing[row]) par.data[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
+         if(missing[row]) {
+            fit.data[row] = Y.data[row] - par.data[row];
+            par.data[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
+            Y.data[row] = fit.data[row] + par.data[row];
+         }
+         else {
+            fit.data[row] = Y.data[row] - par.data[row];
+         }
       }
 
 /*    variance update is now moded to indepVar objects
@@ -62,9 +70,11 @@ public:
 
    indepVarStr* varModel;
    Rcpp::LogicalVector missing;
+   simpleDblVector fit;
+
 
 protected:
-   Rcpp::NumericVector Ydata;
+   simpleDblVector Y;
 
 };
 

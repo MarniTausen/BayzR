@@ -1,8 +1,8 @@
 context("summary.bayz")
 
 test_that("Validation", {
-    example_data = data.frame(y = 1:20, x = 20:1)
-    fit <- bayz(y ~ rn(x), data=example_data, chain=c(10000, 100, 10))
+    example_data = data.frame(y = 1:20, x = as.factor(20:1))
+    fit <- bayz(y ~ rn(x), data=example_data, chain=c(1000, 100, 10))
 
     summary_object <- summary(fit)
 
