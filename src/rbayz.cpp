@@ -112,6 +112,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
          }
       }
       Rcpp::colnames(residuals) = residColNames;
+      Rcpp::CharacterVector inputRowNames = inputData.attr("row.names");
+      Rcpp::rownames(residuals) = inputRowNames;
       for(size_t col=0; col<2*modelLHSTerms.size(); col++) {
          for(size_t row=0; row<inputData.nrow(); row++) residuals(row,col)=0.0l;
       }
