@@ -1,50 +1,32 @@
-#' Predict new response variables from the bayz object
+#' Obtain / retrieve predictictions from a bayz model for NA response values in the original data input 
 #'
-#' Predict new data points from a fitted bayz model, if no new data is given returns the fitted response variables. If new data is given, it gives predicted response variables.
-#'
-#' @param object  A formula describing the model.
+#' Prediction in bayz currently only supports prediction of the NA responses that were in the
+#' original data frame. Predict is simply a wrapper to retrieve them from the output. 
+#' To predict data points that were not in the original data frame for analysis, the training model
+#' needs to be re-run with these data points added in the training data.
+#' 
+#' @param object  An output object of a bayz model run of class 'bayz'.
+#' @param id      An optional ID that can be attached to the predicted values for reference.
+#'                This should be a vector with length and order matching the original input data frame
+#'                - typically it is a column of the original data frame such as id=mydata$myID.
+#'                Omit for not attaching any reference ID.
 #' @param ...     Additional parameters passed onto the Model function.
 #'
 #' @return fitted
 #' @export
-predict.bayz <- function(object, ...){
-    parameters <- list(...)
-
-    findDF <- Vectorize(function(x) class(x)=="data.frame")
-
-    data_included <- FALSE
-
-    modeldata <- parameters$data
-    if(is.null(modeldata)){
-        ## Find any data.frame included in the predict function
-        ## Makes it possible to provide a data.frame without using the name data=df
-        if(sum(unlist(findDF(parameters)))==1) {
-            modeldata <- parameters[[findDF(parameters)]]
-            data_included
+predict.bayz <- function(object, id=NULL, ...){
+    resid = object$Residuals
+    if(!is.null(id)) {
+        if(length(id) != nrow(resid)) {
+           stop("Error: the length of the supplied id-vector does not match the original input data")
         }
-    } else {
-        data_included <- TRUE
+        resid =  cbind(resid,id)
     }
-
-    if(data_included){
-        ## Data was provided
-
-        ## check for matching variable names between
-
-        ### compute the new response based on the fitted values! ###
-
-        predictions <- 0
-
-        return(predictions) ## Return new predicted values
-
-    } else {
-        ## No Data has been provided
-
-        ## Return fitted values
-
-        fitted_values <- 0
-
-        return(fitted_values) ## Return
+    NAresiduals = is.na(resid[,1])   # residuals are set to NA where response was missing
+    if (sum(NAresiduals)==0) {
+        cat("There are no predicted values because there seem to have been no NA in the original data\n")
+        return
     }
-
+    predicted = resid[NAresiduals,-1]
+    return(as.data.frame(predicted))
 }

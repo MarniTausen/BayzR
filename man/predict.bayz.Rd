@@ -2,12 +2,17 @@
 % Please edit documentation in R/predict.R
 \name{predict.bayz}
 \alias{predict.bayz}
-\title{Predict new response variables from the bayz object}
+\title{Obtain / retrieve predictictions from a bayz model for NA response values in the original data input}
 \usage{
-\method{predict}{bayz}(object, ...)
+\method{predict}{bayz}(object, id = NULL, ...)
 }
 \arguments{
-\item{object}{A formula describing the model.}
+\item{object}{An output object of a bayz model run of class 'bayz'.}
+
+\item{id}{An optional ID that can be attached to the predicted values for reference.
+This should be a vector with length and order matching the original input data frame
+- typically it is a column of the original data frame such as id=mydata$myID.
+Omit for not attaching any reference ID.}
 
 \item{...}{Additional parameters passed onto the Model function.}
 }
@@ -15,5 +20,8 @@
 fitted
 }
 \description{
-Predict new data points from a fitted bayz model, if no new data is given returns the fitted response variables. If new data is given, it gives predicted response variables.
+Prediction in bayz currently only supports prediction of the NA responses that were in the
+original data frame. Predict is simply a wrapper to retrieve them from the output. 
+To predict data points that were not in the original data frame for analysis, the training model
+needs to be re-run with these data points added in the training data.
 }

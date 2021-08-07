@@ -4,7 +4,7 @@
 \alias{coef.bayz}
 \title{Extract posterior means and SDs for all or a selection of coefficients}
 \usage{
-\method{coef}{bayz}(object, which = NULL, splitLabels = TRUE)
+\method{coef}{bayz}(object, which = NULL, splitLabels = TRUE, ...)
 }
 \arguments{
 \item{object}{A bayz model output}
@@ -14,6 +14,8 @@ in the $Parameters table in a bayz output object). It can be omitted to extract 
 
 \item{splitLabels}{Whether labels that contain % (in interactions) such as a%b should be split
 in multiple columns (default TRUE).}
+
+\item{...}{Additional parameters.}
 }
 \value{
 a list with one member (a data frame) for each coefficient
