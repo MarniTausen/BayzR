@@ -34,7 +34,7 @@ public:
       // For now only allowing a matrix input where there is an index variable (model
       // made with id/matrix). It could be extended to allow for no id, so that matrix needs to
       // be aliged 1:1 with data records, then the 'id' is bascially a 1:1 link.
-      if( ! (varType[0]==1 && varType[1]==6 && hierType==1) )
+      if( ! (varType[0]==1 && varType[1]==6 && hierType==0) )
          throw generalRbayzError("rr() model not supported, can now only deal with <factor>/<matrix> input");
       F = new dataFactor(varObjects[0]);
       M = new dataMatrix(varObjects[1], varNames[1]);

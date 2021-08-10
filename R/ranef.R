@@ -12,6 +12,6 @@
 #' @export
 ranef.bayz <- function(object, splitLabels=TRUE, ...){
     par = object$Parameters
-    par_select = ( par$ModelTerm=="rn" )
+    par_select = ( par$ModelTerm=="rn" | par$ModelTerm=="rr" )
     return(coef.bayz(object, par_select, splitLabels))
 }

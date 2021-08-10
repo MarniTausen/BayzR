@@ -101,7 +101,7 @@ public:
       for(size_t row=0; row< K->nrow; row++) {
          par[row]=0.0l;
          for(size_t col=0; col<K->ncol; col++) {
-            par[row] += K->data[col][row] * par[col];
+            par[row] += K->data[col][row] * regcoeff[col];
          }
       }
    };

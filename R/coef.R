@@ -17,7 +17,7 @@ coef.bayz <- function(object, which=NULL, splitLabels=TRUE, ...){
     par = object$Parameters
     est = object$Estimates
     if(is.null(which)) {
-       which = ( par$ModelTerm=="fx" | par$ModelTerm=="rg" | par$ModelTerm=="rn" )
+       which = ( par$ModelTerm=="fx" | par$ModelTerm=="rg" | par$ModelTerm=="rn" | par$ModelTerm=="rr" )
     }
     else {
        if(length(which) != nrow(par)) stop("In coef.R which= is not of right length")

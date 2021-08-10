@@ -264,7 +264,7 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
       model.push_back(new modelFreg(modeldescr, rmod));
    else if (modeldescr.funcName=="rr") {
       // For the moment only accept rr model with xxx/<matrix>
-      if (modeldescr.variableNames.size()==2 && modeldescr.hierarchType==1 && modeldescr.variableTypes[1]==6) {
+      if (modeldescr.variableNames.size()==2 && modeldescr.hierarchType==0 && modeldescr.variableTypes[1]==6) {
          modelRreg* tempptr = new modelRreg(modeldescr, rmod);
          model.push_back(dynamic_cast<modelBase *>(tempptr));
          insertIndepVar(model, modeldescr, model.back());
