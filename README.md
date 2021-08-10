@@ -1,4 +1,4 @@
-# Bayesian Linear Mixed Models
+# Bayesian mixed models, shrinkage and interaction kernel regression
 
 [![Build
 Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage
