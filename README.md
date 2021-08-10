@@ -14,19 +14,22 @@ access the website: <http://www.bayz.biz/>.
 
 # How to install
 
-Currently, you need to install BayzR from github, which involves
-compiling the package from source on your local machine. We are working
-on also getting pre-compiled binary packages for Windows 10 and Mac-OS
-ready.
+Most users would like to install our binary packages, that we have
+available for Windows 10 and MacOS in the bayz.biz website
+<http://www.bayz.biz/>.
 
-For all common users installation from the ljanss/BayzR repository is
-recommended, this repository contains regulalry ‘frozen’ version that
-are tested on different data sets and compile-tested on Windows Mac-OS.
-There is also a version in MarniTausen/BayzR, which is our development
-version and when downloading this you may run into bugs or compilation
-errors.
+If you need or want to use the source code for installation, we have two
+repositories on github: in ljanss/BayzR, and in MarniTausen/BayzR.
+Installation from the ljanss/BayzR is recommended as first option, this
+repository contains regularly ‘frozen’ version that are tested on
+different data sets and compile-tested on Windows and Mac-OS. The
+version in MarniTausen/BayzR is our development version and may only be
+of interest to those that want to co-develop and submit changes to our
+source code. You may run into bugs or compilation errors when using the
+MarniTausen/BayzR version because we may just be in the middle of
+developing / testing something.
 
-To install from the github repository, the following is needed:
+To install from the github repositories, the following is needed:
 
 1). download and install Rtools. This is not an R-package but a separate
 part of the R system and can be found on r-project.org.
@@ -37,25 +40,25 @@ part of the R system and can be found on r-project.org.
 install.packages("devtools")
 ```
 
-3). Download and install/compile the BayzR package using:
+3). Install dependencies lme4, coda and Rcpp.
+
+``` r
+install.packages("lme4")
+install.packages("coda")
+install.packages("Rcpp")
+```
+
+4). Download and install/compile the BayzR package using:
 
 ``` r
 library(devtools)
 devtools::install_github("ljanss/BayzR")
 ```
 
-You will be asked to install several other packages, among other Rcpp.
-Accept to install these as well. If you are sure you want the
-development-version, replace in step 3 to install from
+You may be asked to install several other packages. If you are sure you
+want the development-version, replace in step 3 to install from
 MarniTausen/BayzR. If the compilation succeeds, you are ready to use the
 main function bayz() after loading the package with library(BayzR).
-
-4). To use the summary() method with output from the bayz() function,
-you need the coda-package:
-
-``` r
-install.packages("coda")
-```
 
 # Short Manual
 
