@@ -8,7 +8,7 @@
 #' @param ...           Additional parameters passed onto the Model function.
 #'
 #' @return a list with one member (a data frame) for each random effect
-#' @importFrom lme4 ranef
+#' @importFrom nlme ranef
 #' @export
 ranef.bayz <- function(object, splitLabels=TRUE, ...){
     par = object$Parameters

@@ -16,6 +16,26 @@ void removeSpaces(std::string &s) {
    while((pos=s.find(' '))!=std::string::npos) s.erase(pos,1);
 }
 
+// Find matching closing bracket in a string, starting at fromPos which should be on an
+// opening bracket. If during search a new opening bracket it found, this recurses on itself
+// to first find the matching closing bracket of that one, etc...
+// Works both on square [ and round ( brackets, searching for the closing one of the
+// same kind.
+// Returns the position of the matching closing bracket, or string::npos if failed to find it.
+size_t findClosingBrack(std::string &s, size_t fromPos) {
+   char closingBrack;
+   if (s[fromPos] == '[') closingBrack == ']';
+   else if (s[fromPos] == '(' ) closingBrack == ')';
+   else
+      throw(generalRbayzError("Wrong use of findClosingBrack"));
+   while(s[fromPos] != closingBrack && fromPos != std::string::npos) {
+      if(s[fromPos] == '[' || s[fromPos] == '(')
+         findClosingBrack(s,fromPos);
+      fromPos++;
+   }
+   return fromPos;
+}
+
 std::vector<std::string> splitString(std::string text, std::string splitchar) {
    std::vector<std::string> parts;
    if (text=="") {

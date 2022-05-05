@@ -25,7 +25,7 @@ predict.bayz <- function(object, id=NULL, ...){
     NAresiduals = is.na(resid[,1])   # residuals are set to NA where response was missing
     if (sum(NAresiduals)==0) {
         cat("There are no predicted values because there seem to have been no NA in the original data\n")
-        return
+        return(NULL)
     }
     predicted = resid[NAresiduals,-1]
     return(as.data.frame(predicted))
