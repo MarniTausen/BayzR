@@ -213,7 +213,16 @@ std::string getVarDescr(std::string modelTerm) {
    if(pos1==std::string::npos) {
       return "";
    }
-   pos2 = modelTerm.find_first_of("),",pos1);
+   pos2 = pos1+1;  // pos2 starts scanning from character after V= until it has
+                   // landed on a closing ')' or ',' that finishes the V= term, while
+                   // skipping any nested opening-closing [] or () that it may find
+                   // on the way as well as all commas inside nested brackets.
+   while( ! (modelTerm[pos2] == ')' || modelTerm[pos2] == ',' || pos2==std::string::npos) ) {
+      if(modelTerm[pos2]=='[' || modelTerm[pos2]=='(')
+         pos2 = findClosingBrack(modelTerm, pos2);
+      pos2++;
+   }
+// pos2 = modelTerm.find_first_of("),",pos1);
    std::string temp = modelTerm.substr(pos1+2,pos2-pos1-2);
    return temp;
 }
