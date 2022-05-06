@@ -225,7 +225,7 @@ void insertIndepVar(std::vector<modelBase *> & model, dcModelTerm & modeldescr, 
          model.push_back(new idenVarStr(modeldescr, coeffmod));
       }
       else if (modeldescr.varianceNames[0]=="MIXT") {
-         // first insert mixture indicator class
+         // add here to insert mixture indicator class before the variance object
          model.push_back(new mixtVarStr(modeldescr, coeffmod));
       }
       else {
@@ -249,7 +249,7 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
    else if (modeldescr.funcName=="fx" || modeldescr.funcName=="fixf")
       model.push_back(new modelFixf(modeldescr, rmod));
    else if (modeldescr.funcName=="rn" || modeldescr.funcName=="ranf") {
-      if(modeldescr.varianceType==2) {
+      if(modeldescr.varianceType==2) {  // correlated var-structure
          // here need to add like for ranfi below
          model.push_back(new modelRanf_cor(modeldescr, rmod));
       }

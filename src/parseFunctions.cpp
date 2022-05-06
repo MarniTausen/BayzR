@@ -30,8 +30,8 @@ size_t findClosingBrack(std::string &s, size_t fromPos) {
       throw(generalRbayzError("Wrong use of findClosingBrack"));
    while(s[fromPos] != closingBrack && fromPos != std::string::npos) {
       if(s[fromPos] == '[' || s[fromPos] == '(')
-         findClosingBrack(s,fromPos);
-      fromPos++;
+         fromPos = findClosingBrack(s,fromPos);
+      if (fromPos != std::string::npos ) fromPos++;
    }
    return fromPos;
 }
