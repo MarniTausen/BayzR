@@ -220,9 +220,13 @@ std::string getVarDescr(std::string modelTerm) {
    while( ! (modelTerm[pos2] == ')' || modelTerm[pos2] == ',' || pos2==std::string::npos) ) {
       if(modelTerm[pos2]=='[' || modelTerm[pos2]=='(')
          pos2 = findClosingBrack(modelTerm, pos2);
-      pos2++;
+      if(pos2 != std::string::npos) pos2++;
    }
-// pos2 = modelTerm.find_first_of("),",pos1);
+   if(pos2 == std::string::npos) {  // somehow failed to get a variance description
+      std::string s = modelTerm.substr(0,pos1);
+      throw generalRbayzError("Syntax error in variance specification at: "+s);
+      return "";
+   }
    std::string temp = modelTerm.substr(pos1+2,pos2-pos1-2);
    return temp;
 }

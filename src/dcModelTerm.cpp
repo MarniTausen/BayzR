@@ -8,7 +8,7 @@
 #include "rbayzExceptions.h"
 
 dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
-   varianceType(0), hierarchType(0), varianceModel(""), priorModel(""), hierarchModel("")
+   varianceType(0), hierarchType(0), varianceLinMod(""), priorModel(""), hierarchModel("")
 {
    // funcName will be empty if there is no opening parenthesis
    size_t pos1, pos2, pos3;
@@ -50,32 +50,57 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
          }
       }
    }
-   // Get the variance information, the part after V=, also first in a temporary string.
-   // For a linear model specification (type 2) the whole part after '~' goes in varianceModel,
-   // otherwise, the description must be a set of matrices and it is split on '*' and goes
-   // in the vector of varianceNames.
+   // varianceType sets the main 3 cases of how variance is given:
+   //   0: not given (there was no V= in the model term)
+   //   1: linear model version (V=~....)
+   //   2: list of structures (matrices) separated by stars e.g., V=VCOV[]*K1 or K1*K2*K3, etc
+   // If varianceType is 1, the whole string after ~ is stored in VarianceLinMod.
+   // If varianceType is 2, varianceNames, varianceParams and varianceObjects will have
+   // one element for every component of the variance description (every part separated by stars) with
+   //   varianceNames: the name such as "VCOV" or "K1"
+   //   varianceParams: if there are parentheses after the name, the part that was inside
+   //   varianceObjects: if the name can be found as an RObject, a link to the object
+   // The name must be a known structure (now recognizing VCOV and MIXT) or name of an RObject,
+   // otherwise an error is thrown.
+   // Note: presence of not-Nil RObject means the variance name was not one of the bayz predefined
+   // structures, and the RObject will be attempted to be interpreted as a kernel.
    std::string tempvariance = getVarDescr(modelTerm);
-   if (tempvariance != "") {
-      if (tempvariance[0]=='~') {
-         varianceType=3;
-         varianceModel=tempvariance.substr(1,std::string::npos);
-      }
-      else {
-         // this may need reviewing or extension later:
-         // 1) not sure how to handle or to accept variance with multiple indep structures, e.g. WEI*MIXT etc.
-         // 2) WEI and maybe also MIXT may get extra parameters or variables
-         varianceNames = splitString(tempvariance,"*");
+   if (tempvariance != "") {           // type 0 is set as default, only need to handle not zero
+      if (tempvariance[0]=='~') {      // type 1
          varianceType=1;
-         for(size_t i=0; i<varianceNames.size(); i++) {
-            if( varianceNames[i]=="IDEN" || varianceNames[i]=="WEI" || varianceNames[i]=="MIXT" ) {
+         varianceLinMod=tempvariance.substr(1,std::string::npos);
+      }
+      else {                           // must be / is interpreted as type 2
+         varianceType=2;
+         std::vector<std::string> varianceElements = splitString(tempvariance,"*");
+         for(size_t i=0; i<varianceElements.size(); i++) {
+            size_t bracket = varianceElements[i].find_first_of("([");
+            size_t len_tot = varianceElements[i].length();
+            std::string name;
+            std::string params;
+            if (bracket == std::string::npos) {
+               name = varianceElements[i];
+               params = "";
+            }
+            else {
+               size_t closeBrack = findClosingBrack(varianceElements[i], bracket);
+               if(closeBrack != (len_tot-1) ) {
+                  throw generalRbayzError("Unbalanced parentheses in: "+varianceElements[i]);
+               }
+               name = varianceElements[i].substr(0,bracket);
+               params = varianceElements[i].substr(bracket+1,(len_tot-bracket-2));
+            }
+            varianceNames.push_back(name);
+            varianceParams.push_back(params);
+            if( name == "MIXT" ) {
                varianceObjects.push_back(R_NilValue);
             }
             else {
-               varianceObjects.push_back(getVariableObject(d,varianceNames[i]));
+               varianceObjects.push_back(getVariableObject(d,name));
                if(varianceObjects.back() == R_NilValue) {
-                  throw generalRbayzError("Kernel object not found: "+varianceNames[i]);
+                  throw generalRbayzError("Variance/kernel object not found in the R Environment: "
+                       +varianceNames[i]);
                }
-               varianceType=2; // flag variance type 2 if some matrices are not IDEN, WEI, MIXT
             }
          }
       }

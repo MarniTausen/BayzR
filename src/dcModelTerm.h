@@ -20,11 +20,12 @@ public:
    std::vector<std::string> variableNames;
    std::vector<Rcpp::RObject> variableObjects;
    std::vector<int> variableTypes;
-   int varianceType; // 0=not given, 1=with Indep matrices, 2=with some non-Indep matrix/ces, 3=linear model
-   int hierarchType; // 0=no, 1=simplified form index/matrix, 2=genuine
-   std::vector<std::string> varianceNames;  // list of matrices (names) for varianceType 1 and 2
+   int varianceType;
+   std::string varianceLinMod;
+   std::vector<std::string> varianceParams;
+   std::vector<std::string> varianceNames;
    std::vector<Rcpp::RObject> varianceObjects;
-   std::string varianceModel;  // the variance linear model description (varianceType 3)
+   int hierarchType; // 0=no, 1=simplified form index/matrix, 2=genuine
    std::string priorModel;
    std::string hierarchModel;
    std::string logging;
