@@ -218,10 +218,15 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
 // Note2: if there is not varianceType set (0, no V= was found), the default IDEN is inserted;
 // this part of code is only supposed to be called when a variance model is needed.
 void insertIndepVar(std::vector<modelBase *> & model, dcModelTerm & modeldescr, modelBase * coeffmod) {
-   if (modeldescr.varianceType==0 || modeldescr.varianceType==1) {
-      // for now assume there are no multiple varianceNames and there are no parentheses with
-      // parameters in the variance specifications
-      if (modeldescr.varianceType==0 || modeldescr.varianceNames[0]=="IDEN") {
+   if (modeldescr.varianceType==0) {   // this can happen, use rn() or rr() without V=
+      model.push_back(new idenVarStr(modeldescr, coeffmod));
+   }
+   else if (modeldescr.varianceType==1) {
+      // here insert linmod version
+      throw (generalRbayzError("Not yet ready to insert variance linear model for model term: "+modeldescr.funcName));
+   }
+   else if {  // type must be 2 and variance must be one of the INDEP structures
+      if (modeldescr.varianceNames[0]=="IDEN") {
          model.push_back(new idenVarStr(modeldescr, coeffmod));
       }
       else if (modeldescr.varianceNames[0]=="MIXT") {
@@ -232,13 +237,11 @@ void insertIndepVar(std::vector<modelBase *> & model, dcModelTerm & modeldescr, 
          throw (generalRbayzError("Unknown variance term in model term "+modeldescr.funcName+": "+modeldescr.varianceNames[0]));
       }
    }
-   else if (modeldescr.varianceType==2) {
-      throw (generalRbayzError("Cannot use correlated variance structures for model term: "+modeldescr.funcName));
-   }
-   else {  // varianceType must be 3
-      throw (generalRbayzError("Not yet ready to insert variance linear model for model term: "+modeldescr.funcName));
-   }
 }
+
+// This is not yet used ...
+//void insertCorrelVar(std::vector<modelBase *> & model, dcModelTerm & modeldescr, modelBase * coeffmod) {
+//}
 
 void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, modelBase * rmod)
 {
@@ -249,11 +252,12 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
    else if (modeldescr.funcName=="fx" || modeldescr.funcName=="fixf")
       model.push_back(new modelFixf(modeldescr, rmod));
    else if (modeldescr.funcName=="rn" || modeldescr.funcName=="ranf") {
-      if(modeldescr.varianceType==2) {  // correlated var-structure
-         // here need to add like for ranfi below
+      if(modeldescr.varianceStruct==2) {  // correlated var-structure
+         // For the moment ranf_cor builds its own variance structure and only
+         // accepts kernels, needs work to work the same as ranfi.
          model.push_back(new modelRanf_cor(modeldescr, rmod));
       }
-      else {
+      else {   // INDEP var-structure
          modelRanfi* tempptr = new modelRanfi(modeldescr, rmod);
          model.push_back(dynamic_cast<modelBase *>(tempptr));
          insertIndepVar(model, modeldescr, model.back());
@@ -263,7 +267,10 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
    else if (modeldescr.funcName=="rg" || modeldescr.funcName=="freg")
       model.push_back(new modelFreg(modeldescr, rmod));
    else if (modeldescr.funcName=="rr") {
-      // For the moment only accept rr model with xxx/<matrix>
+      // For the moment only accept rr model with xxx/<matrix> and only INDEP var structures
+      if(modeldescr.varianceStruct==2) {
+         throw (generalRbayzError("Cannot use rr() with correlated variance structure"));
+      }
       if (modeldescr.variableNames.size()==2 && modeldescr.hierarchType==0 && modeldescr.variableTypes[1]==6) {
          modelRreg* tempptr = new modelRreg(modeldescr, rmod);
          model.push_back(dynamic_cast<modelBase *>(tempptr));
@@ -273,7 +280,6 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
       else {
          throw (generalRbayzError("Cannot yet use rr() with something else than id/matrix"));
       }
-      // Here should create an indepVarStr object with pointer in the Rreg (last model) object
    }
    else if (modeldescr.funcName=="smurf")
       throw (generalRbayzError("Aha! Caught you trying to smurf a variable into the model"));

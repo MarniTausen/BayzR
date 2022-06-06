@@ -8,7 +8,7 @@
 #include "rbayzExceptions.h"
 
 dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
-   varianceType(0), hierarchType(0), varianceLinMod(""), priorModel(""), hierarchModel("")
+   varianceType(0), varianceStruct(0), hierarchType(0), varianceLinMod(""), priorModel(""), hierarchModel("")
 {
    // funcName will be empty if there is no opening parenthesis
    size_t pos1, pos2, pos3;
@@ -64,13 +64,18 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
    // otherwise an error is thrown.
    // Note: presence of not-Nil RObject means the variance name was not one of the bayz predefined
    // structures, and the RObject will be attempted to be interpreted as a kernel.
+   // The varianceStruct sets if the variance structure can be handled by one of the INDEP
+   // variance objects (varianceStruct=1) or if it needs a correlated structure (varianceStruct=2).
+   // The linear model version, MIXT, weighted are INDEP, anything with VCOV of a kernel is CORR.
+   // (Maybe need to expand for combinations VCOV*MIXT? - have to see how model objects are built...)
    std::string tempvariance = getVarDescr(modelTerm);
    if (tempvariance != "") {           // type 0 is set as default, only need to handle not zero
       if (tempvariance[0]=='~') {      // type 1
          varianceType=1;
+         varianceStruct=1;
          varianceLinMod=tempvariance.substr(1,std::string::npos);
       }
-      else {                           // must be / is interpreted as type 2
+      else {                           // must be (is interpreted as) type 2
          varianceType=2;
          std::vector<std::string> varianceElements = splitString(tempvariance,"*");
          for(size_t i=0; i<varianceElements.size(); i++) {
@@ -94,6 +99,7 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
             varianceParams.push_back(params);
             if( name == "MIXT" ) {
                varianceObjects.push_back(R_NilValue);
+               varianceStruct=1;
             }
             else {
                varianceObjects.push_back(getVariableObject(d,name));
@@ -101,6 +107,7 @@ dcModelTerm::dcModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
                   throw generalRbayzError("Variance/kernel object not found in the R Environment: "
                        +varianceNames[i]);
                }
+               varianceStruct=2;   // varianceStruct setting is not yet full-proof for multiple elements
             }
          }
       }

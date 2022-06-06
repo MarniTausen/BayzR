@@ -3,6 +3,8 @@
 // defined in the base class and accessible through a pointer to base class.
 // The actual form of this variance structure and implementation details for updating
 // the variances can remain hidden for most (or all) uses of it.
+// The log-linear variance model is also in this class, because it can interface in the
+// same way with a vector of variances per random effect.
 
 #ifndef indepVarStr_h
 #define indepVarStr_h
@@ -45,6 +47,16 @@ public:
 class mixtVarStr : public indepVarStr {
 public:
     mixtVarStr(dcModelTerm & modeldescr, modelBase* cm) : indepVarStr(modeldescr, cm) {
+        // add constructor
+    }
+    void sample() {
+        // add sample implementation
+    }
+};
+
+class loglinVarStr : public indepVarStr {
+public:
+    loglintVarStr(dcModelTerm & modeldescr, modelBase* cm) : indepVarStr(modeldescr, cm) {
         // add constructor
     }
     void sample() {

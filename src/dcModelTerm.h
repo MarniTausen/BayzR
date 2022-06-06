@@ -20,7 +20,7 @@ public:
    std::vector<std::string> variableNames;
    std::vector<Rcpp::RObject> variableObjects;
    std::vector<int> variableTypes;
-   int varianceType;
+   int varianceType, varianceStruct;
    std::string varianceLinMod;
    std::vector<std::string> varianceParams;
    std::vector<std::string> varianceNames;

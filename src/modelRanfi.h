@@ -35,6 +35,7 @@ public:
       resid_correct();
    }
 
+   // note: the model building (in rbayz.cpp) attaches var-object to this pointer
    indepVarStr* varmodel;
 
 };
