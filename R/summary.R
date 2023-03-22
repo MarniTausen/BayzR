@@ -38,7 +38,7 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
 
     # 'logged' parameters analysis with convergence diagnostics and HPD intervals
     output_cycles = as.numeric(rownames(object$Samples))
-    if(length(output_cycles<10)) convergence_status = 1       # fail because too few output
+    if(length(output_cycles)<10) convergence_status = 1       # fail because too few output
     convergence_table = data.frame()
     samp = coda::mcmc(object$Samples, start=output_cycles[1], end=output_cycles[length(output_cycles)],
                  thin=output_cycles[2]-output_cycles[1])
