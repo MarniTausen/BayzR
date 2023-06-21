@@ -76,7 +76,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
          modelResp* tempptr = new modelResp(parsedResponseModelDescr, NULL);
          modelBase* responseModel = dynamic_cast<modelBase *>(tempptr);
          model.push_back(responseModel);
-         insertIndepVar(model, parsedResponseModelDescr, model.back());
+            insertIndepVar(model, parsedResponseModelDescr, model.back());
          tempptr->varModel = dynamic_cast<indepVarStr *>(model.back());
          for(size_t term=0; term<modelRHSTerms.size(); term++) {
             dcModelTerm modeldescr(modelRHSTerms[term], inputData);
