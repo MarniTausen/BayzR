@@ -12,14 +12,15 @@
 //#include "dataMatrix.h"
 //#include "dataFactor.h"
 
+using Rsize_t = long long int;
+
 // Transform R CharacterVector to the c++ equivalent vector<string>
-// Note: the C++ vector should be empty, the algorithm uses push_back.
+// Note: the C++ vector should be empty, the algorithm uses push_back;
+// if not empty, elements will be added after existing elements!
 void CharVec2cpp(std::vector<std::string> & CppStrings, Rcpp::CharacterVector RStrings) {
-   std::string s;
    CppStrings.reserve(CppStrings.size()+RStrings.size());
-   for(size_t i=0; i< RStrings.size(); i++) {
-      s = Rcpp::as<std::string>(RStrings[i]);
-      CppStrings.push_back(s);
+   for(Rsize_t i=0; i< RStrings.size(); i++) {
+      CppStrings.push_back(Rcpp::as<std::string>(RStrings[i]));
    }
 }
 
