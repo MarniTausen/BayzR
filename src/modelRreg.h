@@ -20,11 +20,7 @@ class modelRreg : public modelMatrix {
 public:
 
    modelRreg(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelMatrix(modeldescr, rmod)
-   {
-      if (M->colnames.size() >0)    // if there are no colnames in matrix, default ones
-         parLabels = M->colnames;   // will be inserted in the parameter names list
-
+         : modelMatrix(modeldescr, rmod)   {
    }
 
    ~modelRreg() {
