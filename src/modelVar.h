@@ -17,7 +17,7 @@ class modelVar : public modelBase {
    
 public:
 
-   modelVar(parsedModelTerm & modeldescr, modelBase * rmod)
+   modelVar(parsedModelTerm & modeldescr)
       : modelBase(), gprior(modeldescr.priormodDescr) { }
 
    virtual ~modelVar() { }
