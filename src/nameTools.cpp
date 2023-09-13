@@ -57,6 +57,16 @@ int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, 
    }
 }
 
+std::vector<std::string> generateLabels(std::string text, int n) {
+   Rcpp::IntegerVector seq_ints = Rcpp::seq_len(n);      // 1..n as integers
+   Rcpp::CharacterVector seq_strings                     // 1..n in Rcpp charvec
+                   = Rcpp::as<Rcpp::CharacterVector>(seq_ints);
+   std::vector<std::string> labels;
+   for(size_t i=0; i<n; i++)                             // "text"+1..n
+      labels.push_back(text+Rcpp::as<std::string>(seq_strings[i]))
+   return labels;
+}
+
 // Find 'name' in the column-names of a data frame.
 // The column names are not sorted, so applying a simple sequential search, but it will
 // get slow if the data frame is large (e.g. with large covariate data in it!).
