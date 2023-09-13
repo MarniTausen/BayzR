@@ -39,6 +39,15 @@ void collectLoggedSamples(std::vector<modelBase *> & model, Rcpp::IntegerVector 
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples,
                           Rcpp::NumericMatrix & loggedCumMeans, size_t save);
 
+// !Global variable!
+// Vector to collect (pointers to) all par-vectors in the model-objects. The only alternative for a global
+// variable is to have it as argument in all model-object cstr'ors and pass it around to all parents and
+// to all additional objects that are created ... that's also quite an annoyance.
+// Now the base-class constructor can nicely collect all these pointers.
+// Note: the 'par' member in model-objects is itself a pointer, but not yet allocated when the base cstr'or
+// runs, so I'm collected pointers-to-pointers to later access what the par-pointer is pointing to ...
+std::vector<parVector**> parList;
+
 // [[Rcpp::export]]
 Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
                      Rcpp::IntegerVector chain, int silent)
