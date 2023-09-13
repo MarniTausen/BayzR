@@ -1,4 +1,7 @@
 // Base class for variance models
+// Defines that that all modelVar objects have a gprior and parVector* coeff
+// (points to par from coefficient model) to work on.
+//
 // Created by Luc Janss on 03/03/2021.
 
 #ifndef modelVar_h
@@ -8,24 +11,20 @@
 #include <vector>
 #include "modelBase.h"
 #include "priorClasses.h"
-#include "simpleVector.h"
-#include "dcModelTerm.h"
+#include "parsedModelTerm.h"
 
 class modelVar : public modelBase {
    
 public:
 
-   modelVar(dcModelTerm & modeldescr, modelBase * rmod)
-      : modelBase(modeldescr, rmod), gprior(modeldescr.priorModel) { }
+   modelVar(parsedModelTerm & modeldescr, modelBase * rmod)
+      : modelBase(), gprior(modeldescr.priormodDescr) { }
 
    virtual ~modelVar() { }
    
-//   simpleDblVector par, hpar;
-//   std::string parName, hparName;
-//   std::vector<std::string> parLabels, hparLabels;
-
 protected:
    GenericPrior gprior;
+   parVector* coefpar=0;
 
 };
 
