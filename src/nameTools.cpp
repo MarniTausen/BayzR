@@ -30,31 +30,24 @@ inline bool compString2Pair(const std::pair<std::string, size_t> & p, const std:
     return p.first < s;
 }
 
-// addMatrixNames: fills matrix row or col-names (dim=1 or 2) in an c++ vector<string>,
-//     return value 0 for success, 1 for errors (missing names).
-// Note: addMatrixNames uses push_back, typical use is to pass an empty vector<string> as 'names'
-// argument and it will be filled. 
-
-int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, int dim) {
+// getMatrixNames: attempts to retrieve row or col-names (dim=1 or 2) from an R matrix
+// and return in an c++ vector<string>.
+// Failure can be checked by the return vector to have size() 0.
+std::vector<std::string> getMatrixNames(Rcpp::NumericMatrix & mat, int dim) {
+   std::vector<std::string> names;
    if (mat.hasAttribute("dimnames")) {
       Rcpp::List dimnames = Rcpp::as<Rcpp::List>(mat.attr("dimnames"));
       if(dim==1 && dimnames[0] != R_NilValue) {
          Rcpp::CharacterVector matNames = Rcpp::as<Rcpp::CharacterVector>(dimnames[0]);
          CharVec2cpp(names, matNames);
-         return 0;  // sucess
       }
       else if (dim==2 && dimnames[1] != R_NilValue) {
          Rcpp::CharacterVector matNames = Rcpp::as<Rcpp::CharacterVector>(dimnames[1]);
          CharVec2cpp(names, matNames);
-         return 0;  // sucess
-      }
-      else {
-         return 1;  // the dimnames for the requested dim must have been empty
       }
    }
-   else {
-      return 1;    // no dimnames attributes
-   }
+   // in all other cases (no dimnames, or dimnames empty), names is an empty vector
+   return names;
 }
 
 std::vector<std::string> generateLabels(std::string text, int n) {
