@@ -12,41 +12,39 @@
 #include <Rcpp.h>
 #include "modelVar.h"
 #include "modelBase.h"
-#include "dcModelTerm.h"
+#include "parsedModelTerm.h"
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
 #include "simpleVector.h"
 
 class indepVarStr : public modelVar {
 public:
-   indepVarStr(dcModelTerm & modeldescr, modelBase* cm) : modelVar(modeldescr, cm) {
-       coefmodel = cm;
-       weights.initWith(cm->par.nelem, 1.0l);
-       fname = "vi";
+    indepVarStr(parsedModelTerm & modeldescr, parVector* cpar) : modelVar(modeldescr), weights() {
+       coefpar = cpar;
+       weights.initWith(coefpar->nelem, 1.0l);
    }
    simpleDblVector weights;
-   modelBase* coefmodel;
 };
 
 class idenVarStr : public indepVarStr {
 public:
-    idenVarStr(dcModelTerm & modeldescr, modelBase* cm) : indepVarStr(modeldescr, cm) {
-      par.initWith(1,1.0l);
-      parName = "var." + parName;
+    idenVarStr(parsedModelTerm & modeldescr, parVector* coefpar) : indepVarStr(modeldescr, coefpar) {
+       std::string name="var."+coefpar->parName;
+       par = new parVector(name,1.0l);
     }
     void sample() {
       double ssq=0.0;
-      for(size_t k=0; k < coefmodel->par.nelem; k++)
-         ssq += coefmodel->par[k]*coefmodel->par[k];
-      par[0] = gprior.samplevar(ssq,coefmodel->par.nelem);
-      double invvar = 1.0l/par[0];
+      for(size_t k=0; k < coefpar->nelem; k++)
+         ssq += coefpar->val[k]*coefpar->val[k];
+      par->val[0] = gprior.samplevar(ssq,coefpar->nelem);
+      double invvar = 1.0l/par->val[0];
       for(size_t k=0; k < weights.nelem; k++) weights[k] = invvar;
     }
 };
 
 class mixtVarStr : public indepVarStr {
 public:
-    mixtVarStr(dcModelTerm & modeldescr, modelBase* cm) : indepVarStr(modeldescr, cm) {
+    mixtVarStr(parsedModelTerm & modeldescr, parVector* coefpar) : indepVarStr(modeldescr, coefpar) {
         // add constructor
     }
     void sample() {
@@ -56,7 +54,7 @@ public:
 
 class loglinVarStr : public indepVarStr {
 public:
-    loglinVarStr(dcModelTerm & modeldescr, modelBase* cm) : indepVarStr(modeldescr, cm) {
+    loglinVarStr(parsedModelTerm & modeldescr, parVector* coefpar) : indepVarStr(modeldescr, coefpar) {
         // add constructor
     }
     void sample() {
