@@ -46,6 +46,8 @@ public:
    }
 
    void setupFirstVariable(Rcpp::RObject col) {
+      // Here is place where conversion of IntegerVector and CharacterVector to
+      // factor could be added. 
       if (!Rf_isFactor(col)) {
          throw generalRbayzError("Variable is not a factor (unfortunately cannot get the name here)\n");
       }

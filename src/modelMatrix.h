@@ -28,21 +28,21 @@ class modelMatrix : public modelCoeff {
    
 public:
    
-   modelMatrix(dcModelTerm & modeldescr, modelBase * rmod)
+   modelMatrix(parsedModelTerm & modeldescr, modelResp * rmod)
          : modelCoeff(modeldescr, rmod)
    {
       // For now only allowing a matrix input where there is an index variable (model
       // made with id/matrix). It could be extended to allow for no id, so that matrix needs to
       // be aliged 1:1 with data records, then the 'id' is bascially a 1:1 link.
-      if( ! (varType[0]==1 && varType[1]==6 && hierType==0) )
-         throw generalRbayzError("rr() model not supported, can now only deal with <factor>/<matrix> input");
-      F = new dataFactor(varObjects[0]);
-      M = new dataMatrix(varObjects[1], varNames[1]);
-      par.initWith(M->ncol,0.0l);
+      // 2: probably more variable-types could be accepted here, if dataFactor and dataMatrix
+      // would know how to convert them (e.g. integer vector to factor, dataframe to matrix).
+      if( ! (modeldescr.variableTypes[0]==1 && modeldescr.variableTypes[1]==6) )
+         throw generalRbayzError("variable types in rr() model are not <factor>/<matrix>");
+      F = new dataFactor(modeldescr.variableObjects[0]);
+      M = new dataMatrix(modeldescr.variableObjects[1], modeldescr.variableNames[1]);
+   // OBS M->colnames may not be filled, need to fix in labeledMatrix.
+      par = new parVector(modeldescr.variableString, 0.0l, M->colnames);
       weights.initWith(M->ncol,1.0l);
-      // here level-names for the regression coefficients are not filled in parLevelNames,
-      // therefore automatically the levels 1,2,3,... are inserted in collectParInfo.
-      // It would be nicer to collect the column names (if available), or else fill with "col"+1,2,3...
       builObsIndex(obsIndex,F,M);
       lhs = 0.0l;
       rhs = 0.0l;
