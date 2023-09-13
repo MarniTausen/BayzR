@@ -225,7 +225,7 @@ void insertIndepVar(std::vector<modelBase *> & model, dcModelTerm & modeldescr, 
       // here insert linmod version
       throw (generalRbayzError("Not yet ready to insert variance linear model for model term: "+modeldescr.funcName));
    }
-   else if {  // type must be 2 and variance must be one of the INDEP structures
+   else {  // type must be 2 and variance must be one of the INDEP structures
       if (modeldescr.varianceNames[0]=="IDEN") {
          model.push_back(new idenVarStr(modeldescr, coeffmod));
       }

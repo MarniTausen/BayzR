@@ -56,7 +56,7 @@ public:
 
 class loglinVarStr : public indepVarStr {
 public:
-    loglintVarStr(dcModelTerm & modeldescr, modelBase* cm) : indepVarStr(modeldescr, cm) {
+    loglinVarStr(dcModelTerm & modeldescr, modelBase* cm) : indepVarStr(modeldescr, cm) {
         // add constructor
     }
     void sample() {
