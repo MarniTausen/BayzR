@@ -16,7 +16,7 @@
 //#include "nameTools.h"  // strange, including nameTools.h does not work to make
                           // addMatrixNames available here ...
 
-int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, int dim);
+std::vector<std::string> getMatrixNames(Rcpp::NumericMatrix & mat, int dim);
 
 class labeledMatrix : public simpleMatrix {
 
@@ -25,22 +25,29 @@ public:
    labeledMatrix() : simpleMatrix() {  
    }
 
-   labeledMatrix(Rcpp::RObject col, std::string & name) : simpleMatrix(col) {
-      // I need to temporarily redo the conversion of the input Robject to
-      // Rcpp::NumericMatrix to retrieve row and col names.
-      Rcpp::NumericMatrix tempdata = Rcpp::as<Rcpp::NumericMatrix>(col);
-      if (addMatrixNames(rownames, tempdata, 1) >0) {
+   // add/copy names from Rcpp matrix in the labeledMatrix object.
+   // Throws errror if rownames not available, auto-fills colnames if colnames not available
+   addRowColNames(Rcpp::NumericMatrix M, std::string & name) {
+      rownames = getMatrixNames(M, 1);
+      if(rownames.size()==0) {  // rownames empty not allowed
          throw generalRbayzError("No rownames on matrix " + name + "\n");
       }
-      addMatrixNames(colnames, tempdata, 2); // no throw here, colnames are optional
+      colnames = getMatrixNames(Rmatrix, 2);
+      if (rownames.size()==0) { // colnames empty, fill auto colnames
+         colnames = generateLabels("col",Rmatrix.ncol());
+      }
+   }
+
+   labeledMatrix(Rcpp::RObject col, std::string & name) : simpleMatrix(col) {
+      // Need to temporarily redo the conversion of the input Robject to
+      // Rcpp::NumericMatrix to retrieve row and col names.
+      Rcpp::NumericMatrix Rmatrix = Rcpp::as<Rcpp::NumericMatrix>(col);
+      addRowColNames(Rmatrix, name);
    }
 
    void initWith(Rcpp::NumericMatrix & M, std::string & name, size_t useCol) {
       simpleMatrix::initWith(M, useCol);
-      if (addMatrixNames(rownames, M, 1) >0) {
-         throw generalRbayzError("No rownames on matrix "+name);
-      }
-      addMatrixNames(colnames, M, 2); // no throw here, colnames are optional
+      addRowColNames(M, name);
    }
 
    ~labeledMatrix() {
