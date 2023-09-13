@@ -64,11 +64,11 @@ int addMatrixNames(std::vector<std::string> & names, Rcpp::NumericMatrix & mat, 
 // search myself that goes over the vector of names.
 // Could be improved by making a sorted version of the column names and using binary_search,
 // but ideally then also storing and re-using the sorted version for all look-ups.
-// Then the sorted names must be prepared in the main functinon....?
+// Then the sorted names must be prepared in the main function....?
 int findDataColumn(Rcpp::DataFrame d, std::string name) {
    std::vector<std::string> colnames;
    CharVec2cpp(colnames, d.names());
-   int col;
+   size_t col;
    for(col=0; col<colnames.size(); col++) {
       if(colnames[col]==name) break;
    }
