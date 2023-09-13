@@ -11,6 +11,8 @@
 #include "rbayzExceptions.h"
 #include "nameTools.h"
 
+using Rsize_t = long long int;
+
 void removeSpaces(std::string &s) {
    size_t pos;
    while((pos=s.find(' '))!=std::string::npos) s.erase(pos,1);
@@ -57,11 +59,13 @@ std::vector<std::string> splitString(std::string text, std::string splitchar) {
    return parts;
 }
 
+// Transform R model formula to a string
+// Deparse can make multiple strings! 
 std::string convertFormula(Rcpp::Formula f) {
    Rcpp::Function deparse("deparse");
    Rcpp::CharacterVector formparts = deparse(f,Rcpp::Named("width.cutoff")=100);
    std::string s;
-   for(size_t i=0; i<formparts.size(); i++ ) {
+   for(Rsize_t i=0; i<formparts.size(); i++ ) {
       s += Rcpp::as<std::string>(formparts[i]);
    }
    return(s);
