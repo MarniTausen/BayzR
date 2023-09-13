@@ -7,28 +7,25 @@
 
 #include <Rcpp.h>
 #include "modelResp.h"
-#include "dcModelTerm.h"
+#include "parsedModelTerm.h"
 
 class modelCoeff : public modelBase {
    
 public:
 
-   modelCoeff(dcModelTerm & modeldescr, modelBase * rmod) : modelBase(modeldescr, rmod) {
-      respModel = dynamic_cast<modelResp *>(rmod);  // for now rmod passed is a modelResp, but maybe not
-                                                    // when using hierarchies -> rmod can become a modelCoeff
-      if (modeldescr.hierarchType == 0 || modeldescr.hierarchType == 1) {
-         if (respModel != NULL) {
-            resid = respModel->par.data;
-            residPrec = respModel->varModel->weights.data;
-            Nresid = respModel->par.nelem;
-         }
-      } else { // Hierarchical model:
-               // don't know yet how to do here, there can be different cases,
-               // but the rmod may not have a resid and residPrec vector, and the rmod
-               // will not be a respModel object ....
-//         respModel = rmod;
-      }
-      isCoeff=true;
+   modelCoeff(parsedModelTerm & modeldescr, modelResp * rmod) : modelBase() {
+      // updating bayzR to handle hierarchical models can imply some (large?) changes here,
+      // because then the "response model" can then be another coefficient model.
+      // modelResp and modelCoeff are in different branches of the class hierarchy, and cannot
+      // be cast from one to the other.
+      // Maybe it needs a special interface class to help presenting a modelCoeff object
+      // "as if" it is a modelResp class for the hierarchical model?
+      Rcpp::Rcout << "In modelCoeff cstror\n";
+      respModel=rmod;
+      resid = respModel->par->parVals.data;
+      if(respModel->varModel==0) Rcpp::Rcout << "!respModel->varModel pointer is zero!\n";
+      residPrec = respModel->varModel->weights.data;
+      Nresid = respModel->par->nelem;
    }
 
    virtual ~modelCoeff() {
@@ -37,6 +34,9 @@ public:
    virtual void accumFit(simpleDblVector & fit) = 0;
 
    modelResp* respModel;
+   // The following is for convenience so that all modelCoeff objects have direct
+   // pointers to residuals and residual variance, and it only needs to be set once
+   // here in modelCoeff cstr'or.
    double *resid=NULL, *residPrec=NULL;
    size_t Nresid=0;
 
