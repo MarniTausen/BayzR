@@ -26,21 +26,17 @@ class modelFactor : public modelCoeff {
    
 public:
    
-   modelFactor(dcModelTerm & modeldescr, modelBase * rmod)
+   modelFactor(parsedModelTerm & modeldescr, modelResp * rmod)
          : modelCoeff(modeldescr, rmod)
    {
       F = new dataFactor();
-      for(size_t i=0; i<varNames.size(); i++) {
-         if (varType[i] != 1)
-            throw generalRbayzError("Variable is not a factor: "+varNames[i]);
-         F->addVariable(varObjects[i]);
+      for(size_t i=0; i<modeldescr.variableNames.size(); i++) {
+         if (modeldescr.variableTypes[i] != 1)
+            throw generalRbayzError("Variable is not a factor: "+modeldescr.variableNames[i]);
+         F->addVariable(modeldescr.variableObjects[i]);
       }
 
-      parLabels = F->labels;            // I think this would make a copy, but actually only
-                                        // a reference is enough. The double storage arises here
-                                        // because all model-classes have a parLabels vector, which
-                                        // here happens to be equal to the labels of the Factor object.
-      par.initWith(parLabels.size(),0.0l);
+      par = new parVector(modeldescr.variableString, 0.0l, F->labels);
       lhs.resize(parLabels.size(),0);
       rhs.resize(parLabels.size(),0);
    }
@@ -51,7 +47,7 @@ public:
 
    void accumFit(simpleDblVector & fit) {
       for (size_t obs=0; obs < F->data.nelem; obs++)
-        fit[obs] += par[F->data[obs]];
+        fit[obs] += par->val[F->data[obs]];
    }
 
    
@@ -59,17 +55,17 @@ protected:
 
    void resid_correct() {
       for (size_t obs=0; obs < F->data.nelem; obs++)
-        resid[obs] -= par[F->data[obs]];
+        resid[obs] -= par-val[F->data[obs]];
    }
 
    void resid_decorrect() {
       for (size_t obs=0; obs < F->data.nelem; obs++)
-        resid[obs] += par[F->data[obs]];
+        resid[obs] += par->val[F->data[obs]];
    }
 
    void collect_lhs_rhs() {
       size_t k;
-      for(k=0; k<par.nelem; k++) {
+      for(k=0; k<par->nelem; k++) {
          rhs[k] = 0.0;
          lhs[k] = 0.0;
       }
@@ -82,6 +78,7 @@ protected:
 
    dataFactor *F;
    std::vector<double> lhs, rhs;          // working vectors to collect LHS an RHS of equations
+                                          // maybe faster using the simpleVector class?
 
 };
 
