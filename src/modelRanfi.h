@@ -16,10 +16,11 @@ class modelRanfi : public modelFactor {
 
 public:
 
-   modelRanfi(dcModelTerm & modeldescr, modelBase * rmod)
+   modelRanfi(parsedModelTerm & modeldescr, modelResp * rmod)
       : modelFactor(modeldescr, rmod) {  }
 
    ~modelRanfi() {
+      delete varmodel;
    }
 
    void sample() {
@@ -28,9 +29,9 @@ public:
       // To update parameters as random effects varmodel->weights[k] are added in LHS.
       resid_decorrect();
       collect_lhs_rhs();
-      for(size_t k=0; k<par.nelem; k++) {
+      for(size_t k=0; k<par->nelem; k++) {
          lhs[k] += varmodel->weights[k];
-         par[k] = R::rnorm((rhs[k]/lhs[k]), sqrt(1.0/lhs[k]));
+         par->val[k] = R::rnorm((rhs[k]/lhs[k]), sqrt(1.0/lhs[k]));
       }
       resid_correct();
    }
@@ -39,5 +40,14 @@ public:
    indepVarStr* varmodel;
 
 };
+
+class modelRanFacIden : public modelRanfi {
+public:
+   modelRanFacIden(parsedModelTerm & pmdescr, modelResp * rmod)
+      : modelRanfi(pmdescr, rmod) {
+      varmodel = new idenVarStr(pmdescr, this->par);
+   }
+};
+
 
 #endif /* modelRanfi_h */
