@@ -40,7 +40,6 @@ public:
          throw generalRbayzError("variable types in rr() model are not <factor>/<matrix>");
       F = new dataFactor(modeldescr.variableObjects[0]);
       M = new dataMatrix(modeldescr.variableObjects[1], modeldescr.variableNames[1]);
-   // OBS M->colnames may not be filled, need to fix in labeledMatrix.
       par = new parVector(modeldescr.variableString, 0.0l, M->colnames);
       weights.initWith(M->ncol,1.0l);
       builObsIndex(obsIndex,F,M);
@@ -56,13 +55,13 @@ public:
    void resid_correct(size_t col) {
       double * colptr = M->data[col];
       for (size_t obs=0; obs < F->data.nelem; obs++)
-         resid[obs] -= par[col] * colptr[obsIndex[obs]];
+         resid[obs] -= par->val[col] * colptr[obsIndex[obs]];
    }
 
    void resid_decorrect(size_t col) {
       double * colptr = M->data[col];
       for (size_t obs=0; obs < F->data.nelem; obs++)
-         resid[obs] += par[col] * colptr[obsIndex[obs]];
+         resid[obs] += par->val[col] * colptr[obsIndex[obs]];
    }
 
    void collect_lhs_rhs(size_t col) {
@@ -83,7 +82,7 @@ public:
       for(size_t k=0; k < M->ncol; k++) {
          colptr = M->data[k];
          for (size_t obs=0; obs < F->data.nelem; obs++)
-            fit[obs] += par[k] * colptr[obsIndex[obs]];
+            fit[obs] += par->val[k] * colptr[obsIndex[obs]];
       }
    }
 
