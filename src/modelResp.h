@@ -2,7 +2,7 @@
 //  BayzR -- modelResp.h
 //  model class for modelling response and residual variance. The base class is for the
 //  standard continuous data case, there are derived classes for non-linear models.
-// note: modelBase constructor has set parName to name of response variable
+//  note: modelBase constructor has set parName to name of response variable
 //
 //  Created by Luc Janss on 03/08/2018.
 //
@@ -19,26 +19,29 @@ class modelResp : public modelBase {
    
 public:
    
-   modelResp(dcModelTerm & modeldescr, modelBase * rmod)
-            : modelBase(modeldescr, rmod), fit(), Y()
+   modelResp(parsedModelTerm & modeldescr)
+            : modelBase(), fit(), Y()
    {
-      // For now there is no check on the response vector to be correctly numerical, in future
-      // rbayz main may need to make a triage for different types of response and then construct
-      // appropriate response objects.
-      Rcpp::NumericVector tempY = Rcpp::as<Rcpp::NumericVector>(varObjects[0]);
+      if(resp.variableNames.size()>1) {
+         throw generalRbayzError("Multiple response variables (" + resp.variableString + ") cannot be handled this way");
+      }
+      if( ! (resp.variableTypes[0]==2 || resp.variableTypes[0]==3 )) {
+         throw generalRbayzError("Response variable (" + resp.variableString + ") is not an R integer or numerical vector");
+      }
+      Rcpp::NumericVector tempY = Rcpp::as<Rcpp::NumericVector>(resp.variableObjects[0]);
       Y.initWith(tempY);
-      par.initWith(tempY);
+      Rcpp::IntegerVector labels_int = Rcpp::seq_len(tempY.size());
+      Rcpp::CharacterVector labels = Rcpp::as<Rcpp::CharacterVector>(labels_int);
+      par=new parVector("resid",tempY,labels);
       missing = Rcpp::is_na(tempY);
-      for(size_t row=0; row<par.nelem; row++) {
+      for(size_t row=0; row<par->nelem; row++) {
          if(missing[row]) {
-            par.data[row] = 0.0l;
+            par->parVals.data[row] = 0.0l;
             Y.data[row] = 0.0l;
          }
       }
-      fname = "rp";
-//      parName = "resid";
-      fit.initWith(par.nelem, 0.0l);
-      // no labels for residuals yet!
+      fit.initWith(par->nelem, 0.0l);
+      varModel = new idenVarStr(resp,this->par);
    }
    
    ~modelResp() {
@@ -46,14 +49,14 @@ public:
 
    void sample() {
       // Store fitted values and re-sample the Ydata / residuals for missing data
-      for(size_t row=0; row<par.nelem; row++) {
+      for(size_t row=0; row<par->nelem; row++) {
          if(missing[row]) {
-            fit.data[row] = Y.data[row] - par.data[row];
-            par.data[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
-            Y.data[row] = fit.data[row] + par.data[row];
+            fit.data[row] = Y.data[row] - par->val[row];
+            par->val[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
+            Y.data[row] = fit.data[row] + par->val[row];
          }
          else {
-            fit.data[row] = Y.data[row] - par.data[row];
+            fit.data[row] = Y.data[row] - par->val[row];
          }
       }
 
