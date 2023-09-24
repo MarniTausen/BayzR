@@ -42,14 +42,20 @@ public:
     }
 };
 
+// mixtVarStr is now standard 2-class mixture with pi0, pi1, v0, v1
 class mixtVarStr : public indepVarStr {
 public:
     mixtVarStr(parsedModelTerm & modeldescr, parVector* coefpar) : indepVarStr(modeldescr, coefpar) {
+
         // add constructor
     }
+
     void sample() {
         // add sample implementation
     }
+
+    getSetOptions(modelDescr.varianceDescr);
+    modelBVS *mixmod;
 };
 
 class loglinVarStr : public indepVarStr {

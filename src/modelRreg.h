@@ -19,7 +19,7 @@ class modelRreg : public modelMatrix {
 
 public:
 
-   modelRreg(dcModelTerm & modeldescr, modelBase * rmod)
+   modelRreg(parsedModelTerm & modeldescr, modelResp * rmod)
          : modelMatrix(modeldescr, rmod)   {
    }
 
@@ -39,5 +39,16 @@ public:
    indepVarStr* varmodel;
 
 };
+
+// Here can start working on defining different variance structures for modelRreg
+
+class modelRregIden : public modelRreg {
+public:
+   modelRregIden(parsedModelTerm & pmdescr, modelResp * rmod)
+      : modelRreg(pmdescr, rmod) {
+      varmodel = new idenVarStr(pmdescr, this->par);
+   }
+};
+
 
 #endif /* modelRreg */
