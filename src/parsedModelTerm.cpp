@@ -7,20 +7,17 @@
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
 
-// parseModelTerm_step1: function used in parsedModelTerm cstr'or.
-// Splits model-term in 3 strings according to possible syntaxes
+// parseModelTerm_step1: splits a model-term in 3 strings according to possible syntaxes
 //  (1)   funcname(variableString,optionString)
 //  (2)   funcname(variableString)
 //  (3)   variableString
 // Return is vector of 3 strings for funcname, variableString, optionString, some can
-// empty ("") if not available from syntaxes (2) and (3).
+// be empty ("") if not available from syntaxes (2) and (3).
 std::vector<std::string> parseModelTerm_step1(std::string mt) {
 
    std::vector<std::string> result(3);
    size_t pos1, pos2;
    bool has_funcname=false;
-
-//   Rcpp::Rcout << "Working in parseModelTerm_step1\n";
 
    // determine if there are parenthesis - so there should be a funcname
    if ( (pos1 = mt.find('(')) != std::string::npos)
@@ -68,21 +65,14 @@ std::vector<std::string> parseModelTerm_step1(std::string mt) {
    else
       result[2]="";
 
-//   Rcpp::Rcout << "Ready\n";
-
    return result;
 
 }
 
-parsedModelTerm::parsedModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
-{
-   size_t pos1, pos2, pos3;
+// parseModelTerm_step2: splitting / interpreting variables, options, etc.
+// This one is defined as a member function to fill object member variables
+parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string variableString, std:string optionString) {
 
-   std::vector<std::string> parse_step1 = parseModelTerm_step1(mt);
-
-   funcName = parse_step1[0];
-   variableString = parse_step1[1];
-   std::string optionString = parse_step1[2];  // this one not stored but used below
    if(variableString.length()<=12) {
      if(optionString=="") shortModelTerm=mt;
      else shortModelTerm=funcName+"("+variableString+",...)";
@@ -239,5 +229,31 @@ parsedModelTerm::parsedModelTerm(std::string modelTerm, Rcpp::DataFrame &d) :
          }
       }
    }
+
+}
+
+// constructor for handling response term with separate variance description
+parsedModelTerm::parsedModelTerm(std::string mt, std::string VEdescr, Rcpp::DataFrame &d);
+{
+   std::vector<std::string> parse_step1 = parseModelTerm_step1(mt);
+   // for now not accepting functions on response, but it could be extended here to
+   // allow e.g. log(Y), probit(Y), etc
+   if(parse_step1[0]!="") throw(generalRbayzError("Unexpected function on response term: "+mt));
+   // the next one could just be a message, but not easy here to get things in the messages list
+   if(parse_step1[2]!="") throw(generalRbayzError("Unexpected options retrieved from response term: "+mt));
+
+   parseModelTerm_step2("", parse_step1[1], VEdescr);
+   
+}
+
+// constructor for handling RHS model terms
+parsedModelTerm::parsedModelTerm(std::string mt, Rcpp::DataFrame &d)
+{
+   size_t pos1, pos2, pos3;
+
+   std::vector<std::string> parse_step1 = parseModelTerm_step1(mt);
+
+   parseModelTerm_step2(parse_step1[0], parse_step1[1], parse_step1[2]);
+
 }
 
