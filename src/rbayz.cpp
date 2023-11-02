@@ -45,17 +45,14 @@ void collectLoggedSamples(std::vector<modelBase *> & model, Rcpp::IntegerVector 
 // to all additional objects that are created ... that's also quite an annoyance.
 // Now the base-class constructor can nicely collect all these pointers.
 // Note: the 'par' member in model-objects is itself a pointer, but not yet allocated when the base cstr'or
-// runs, so I'm collected pointers-to-pointers to later access what the par-pointer is pointing to ...
+// runs, so I'm collecting pointers-to-pointers to later access what the par-pointer is pointing to ...
 std::vector<parVector**> parList;
 
 // [[Rcpp::export]]
-Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData,
+Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputData,
                      Rcpp::IntegerVector chain, int silent)
 {
-   // Some check of chain settings is needed. Also the rbayz wrapper function now
-   // handles chain being NULL, but it can be done here, so that warning message
-   // can come in output.
-   
+
    // Vectors to collect error and 'notes' messages are defined outside the try-block,
    // so it remains available in case of errors.
    Rcpp::CharacterVector errorMessages;
