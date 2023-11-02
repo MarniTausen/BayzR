@@ -148,6 +148,9 @@ parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string variable
          if(tmpstring.substr(0,2)=="V=") {
             varianceDescr=tmpstring.substr(2,(tmpstring.size()-2));
          }
+         else if(tmpstring.substr(0,3)=="VE=") {
+            varianceDescr=tmpstring.substr(3,(tmpstring.size()-3));
+         }
          else if (tmpstring.substr(0,6)=="prior=") {
             priormodDescr=tmpstring.substr(6,(tmpstring.size()-6));
          }
