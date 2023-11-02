@@ -39,55 +39,54 @@ void collectLoggedSamples(std::vector<modelBase *> & model, Rcpp::IntegerVector 
                           Rcpp::IntegerVector & parLogged, Rcpp::NumericMatrix & loggedSamples,
                           Rcpp::NumericMatrix & loggedCumMeans, size_t save);
 
-// !Global variable!
-// Vector to collect (pointers to) all par-vectors in the model-objects. The only alternative for a global
-// variable is to have it as argument in all model-object cstr'ors and pass it around to all parents and
-// to all additional objects that are created ... that's also quite an annoyance.
-// Now the base-class constructor can nicely collect all these pointers.
-// Note: the 'par' member in model-objects is itself a pointer, but not yet allocated when the base cstr'or
-// runs, so I'm collecting pointers-to-pointers to later access what the par-pointer is pointing to ...
+// !Global variable! Vector to collect pointers to all par-vectors pointers in the model-objects.
+// I thought this was too annoying to pass around between all constructors, now the modelBase class
+// takes care that these pointers are collected.
 std::vector<parVector**> parList;
 
 // [[Rcpp::export]]
 Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputData,
                      Rcpp::IntegerVector chain, int silent)
+//                   note VE must be a string, it will be converted below
 {
 
-   // Vectors to collect error and 'notes' messages are defined outside the try-block,
-   // so it remains available in case of errors.
-   Rcpp::CharacterVector errorMessages;
-   Rcpp::CharacterVector notesMessages;
+   // Vectors for messages defined outside the try-block, so it remains available in catch() part.
+   Rcpp::CharacterVector Messages;
    std::string lastDone;
 
-   try {     // a large try-block wraps nearly all of code, in case of normal execution
-             // the code builds a return list and returns before the catch().
-             // In case of errors, catch() builds a return list with the messages vector.
+   try {     // normal execution builds a return list at the end of try{}, in case of
+             // errors, catch() builds a return list with the messages vector defined above.
 
       // split the modelFormula in a list of response (LHS) and explanatory (RHS) terms.
       // getModelRHSTerms makes sure there is a "0" or "1" to specify if a mean is needed.
       std::string formulaAsCppstring = convertFormula(modelFormula);
       removeSpaces(formulaAsCppstring);
-      std::vector<std::string> modelLHSTerms = getModelLHSTerms(formulaAsCppstring);
-      std::vector<std::string> modelRHSTerms = getModelRHSTerms(formulaAsCppstring);
+      std::vector<std::string> modelTerms = splitModelTerms(formulaAsCppstring);
+                                    // response will be modelTerms[0]
+                                    // intercept is inserted as mn(0) or mn(1)
       lastDone="Parsing model";
       if (silent==9) Rcpp::Rcout << "Parsing model done\n";
 
-      // Vectors to hold pointers to the modelling objects
-      std::vector<modelBase *> model;
+      // build response object - including response variance structure
+      std::string VEstr =  Rcpp::as<std::string>(VE);
+      // need to add parsing of VEstr and then build response object with the needed variance structure.
+      parsedModelTerm parsedResponseVariable(modelTerms[0], inputData);
+      modelResp* modelR = new modelResp(parsedResponseVariable);   
 
-      // Build the modelling objects. The RHS terms are nested within the LHS (response)
-      // terms to build a explanatory term for every response.
-      for(size_t resp=0; resp<modelLHSTerms.size(); resp++) {
-         dcModelTerm parsedResponseModelDescr(modelLHSTerms[resp], inputData);
-         modelResp* tempptr = new modelResp(parsedResponseModelDescr, NULL);
-         modelBase* responseModel = dynamic_cast<modelBase *>(tempptr);
-         model.push_back(responseModel);
-            insertIndepVar(model, parsedResponseModelDescr, model.back());
-         tempptr->varModel = dynamic_cast<indepVarStr *>(model.back());
-         for(size_t term=0; term<modelRHSTerms.size(); term++) {
-            dcModelTerm modeldescr(modelRHSTerms[term], inputData);
-            buildModel(model, modeldescr, responseModel);
-            // Same for hierarchical models ...
+      // Build vector of modelling objects from RHS terms (loop from term=1)
+      std::vector<modelBase *> model;
+      for(size_t term=1; term<modelTerms.size(); term++) {         // for RHS terms: from term=1
+         parsedModelTerm pmt(modelTerms[term], inputData);
+         if(pmt.funcName=="mn") model.push_back(new modelMean(pmt, modelR));
+         else if(pmt.funcName=="fx") model.push_back(new modelFixf(pmt, modelR));
+         else if(pmt.funcName=="rn") {
+            if(pmt.varianceStruct=="iden")
+               model.push_back(new modelRanFacIden(pmt, modelR));
+            else
+               throw generalRbayzError("There is no class to model rn(...) with Variance structure " + pmt.varianceDescr);
+            }
+         else {
+           throw generalRbayzError("Unknown model-function \'" + pmt.funcName + "\' at "+pmt.shortModelTerm);
          }
       }
       lastDone="Model building";
