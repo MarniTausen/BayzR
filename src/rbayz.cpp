@@ -58,7 +58,6 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
              // errors, catch() builds a return list with the messages vector defined above.
 
       // split the modelFormula in a list of response (LHS) and explanatory (RHS) terms.
-      // getModelRHSTerms makes sure there is a "0" or "1" to specify if a mean is needed.
       std::string formulaAsCppstring = convertFormula(modelFormula);
       removeSpaces(formulaAsCppstring);
       std::vector<std::string> modelTerms = splitModelTerms(formulaAsCppstring);
@@ -69,13 +68,13 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
 
       // build response object - including response variance structure
       std::string VEstr =  Rcpp::as<std::string>(VE);
-      // need to add parsing of VEstr and then build response object with the needed variance structure.
-      parsedModelTerm parsedResponseVariable(modelTerms[0], inputData);
+      parsedModelTerm parsedResponseVariable(modelTerms[0], VEstr, inputData);
+      // here still need to add selecting different response objects based on variance structure
       modelResp* modelR = new modelResp(parsedResponseVariable);   
 
       // Build vector of modelling objects from RHS terms (loop from term=1)
       std::vector<modelBase *> model;
-      for(size_t term=1; term<modelTerms.size(); term++) {         // for RHS terms: from term=1
+      for(size_t term=1; term<modelTerms.size(); term++) {
          parsedModelTerm pmt(modelTerms[term], inputData);
          if(pmt.funcName=="mn") model.push_back(new modelMean(pmt, modelR));
          else if(pmt.funcName=="fx") model.push_back(new modelFixf(pmt, modelR));

@@ -244,19 +244,13 @@ parsedModelTerm::parsedModelTerm(std::string mt, std::string VEdescr, Rcpp::Data
    if(parse_step1[0]!="") throw(generalRbayzError("Unexpected function on response term: "+mt));
    // the next one could just be a message, but not easy here to get things in the messages list
    if(parse_step1[2]!="") throw(generalRbayzError("Unexpected options retrieved from response term: "+mt));
-
    parseModelTerm_step2("", parse_step1[1], VEdescr);
-   
 }
 
 // constructor for handling RHS model terms
 parsedModelTerm::parsedModelTerm(std::string mt, Rcpp::DataFrame &d)
 {
-   size_t pos1, pos2, pos3;
-
    std::vector<std::string> parse_step1 = parseModelTerm_step1(mt);
-
    parseModelTerm_step2(parse_step1[0], parse_step1[1], parse_step1[2]);
-
 }
 
