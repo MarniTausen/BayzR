@@ -26,8 +26,8 @@ public:
    modelRanf_cor(dcModelTerm & modeldescr, modelBase * rmod)
          : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.priorModel)
    {
-      hpar.initWith(1,1.0l);
-      hparName = "var." + parName;
+//      hpar.initWith(1,1.0l);
+//      hparName = "var." + parName;
       // For the moment all variance objects must be kernels
       for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
          if (modeldescr.varianceObjects[i]==R_NilValue) {

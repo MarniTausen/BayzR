@@ -28,7 +28,7 @@ public:
       if(varType[0] != 3)
          throw generalRbayzError("Not a numeric vector input: "+varNames[0]);
       C = new dataCovar(varObjects[0]);
-      par.initWith(1,0.0l);
+      par = new parVector(modeldescr, 0.0l);
    }
    
    ~modelFreg() {

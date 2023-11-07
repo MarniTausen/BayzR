@@ -15,11 +15,11 @@ void common_constructor_items(parsedModelTerm & modeldescr) {
    postVar.initWith(nelem,0.0l);
 }
 
-// contructor for par-vector with single element where parname is also used for the label
+// contructor for par-vector with single element where the "variableString" is also used for the label
 parVector::parVector(parsedModelTerm & modeldescr, double initval) : parVals() {
    nelem=1;
    parVals.initWith(1, initval);
-   parLabels.push_back(parname);
+   parLabels.push_back(modeldescr.variableString);
    common_constructor_items(modeldescr);
 }
 

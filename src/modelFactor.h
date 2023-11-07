@@ -36,7 +36,7 @@ public:
          F->addVariable(modeldescr.variableObjects[i]);
       }
 
-      par = new parVector(modeldescr.variableString, 0.0l, F->labels);
+      par = new parVector(modeldescr, 0.0l, F->labels);
       lhs.resize(parLabels.size(),0);
       rhs.resize(parLabels.size(),0);
    }

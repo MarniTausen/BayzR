@@ -24,7 +24,9 @@ public:
 
    modelMean(parsedModelTerm & modeldescr, modelResp * rmod)
          : modelCoeff(modeldescr, rmod) {
-      par = new parVector("mean", 0.0l);
+      par = new parVector(modeldescr, 0.0l);
+      par->parName="mean";       // a little repair because the
+      par->parLabels[0]="mean";  // constructor has not set it right
    }
 
    ~modelMean() {

@@ -32,7 +32,8 @@ public:
       Y.initWith(tempY);
       Rcpp::IntegerVector labels_int = Rcpp::seq_len(tempY.size());
       Rcpp::CharacterVector labels = Rcpp::as<Rcpp::CharacterVector>(labels_int);
-      par=new parVector("resid",tempY,labels);
+      par=new parVector(modeldescr,tempY,labels);
+      par->parName="resid."+modeldescr.variableString;
       missing = Rcpp::is_na(tempY);
       for(size_t row=0; row<par->nelem; row++) {
          if(missing[row]) {

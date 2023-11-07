@@ -21,13 +21,13 @@ class modelPolyg : public modelBase {
 
 public:
 
-   modelPolyg(dcModelTerm & modeldescr, modelBase * rmod)
+   modelPolyg(parsedModelTerm & modeldescr, modelBase * rmod)
          : modelBase(modeldescr, rmod) {
       coldata = d[col];
       // need to process the column data, simple character list? Needs index or searching?
       // + need to extract and process pedigree
-      hpar.initWith(1,0.0l);
-      hparName = "var." + parName;
+      par = new parVector(modeldescr, 0.0l); // not right yet
+      // variance needs to be added
    }
 
    ~modelPolyg() {
