@@ -22,7 +22,6 @@ public:
    std::string parName="";
    std::vector<std::string> parLabels;
    std::string modelFunction="";
-   std::string variableList="";
    std::string varianceStruct="";
    size_t nelem=0;
    double* val=0;  // convenience shortcut to retrieve parameter values as par->val[k]
@@ -33,8 +32,8 @@ public:
    parVector(std::string parname, Rcpp::NumericVector initval, Rcpp::CharacterVector& labels);
    parVector(std::string parname, double initval, Rcpp::CharacterVector& labels);
    parVector(std::string parname, double initval, std::vector<std::string>& labels);
+   void common_constructor_items();
    void collecStats();
-   void setParInfo(std::string fname, std::string vars, std::string varstruct);
    
 };
 

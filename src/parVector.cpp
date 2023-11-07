@@ -4,58 +4,57 @@
 
 #include "parVector.h"
 
-// contructor for par-vector with single element where parname is also used for the label
-parVector::parVector(std::string parname, double initval) : parVals() {
-   parName=parname;
-   nelem=1;
-   parVals.initWith(1, initval);
-   parLabels.push_back(parname);
+// common things for all contructors, this one is called at the end of every
+// constructor because nelem must be set.
+void common_constructor_items(parsedModelTerm & modeldescr) {
+   parName=modeldescr.variableString;
+   modelFunction=modeldescr.funcName;
+   varianceStruct=modeldescr.varianceStruct;
    val=parVals.data;
    postMean.initWith(nelem,0.0l);
    postVar.initWith(nelem,0.0l);
 }
 
+// contructor for par-vector with single element where parname is also used for the label
+parVector::parVector(parsedModelTerm & modeldescr, double initval) : parVals() {
+   nelem=1;
+   parVals.initWith(1, initval);
+   parLabels.push_back(parname);
+   common_constructor_items(modeldescr);
+}
+
 // response model needs a constructor with a vector of values and vector of labels
-parVector::parVector(std::string parname, Rcpp::NumericVector initval, Rcpp::CharacterVector& labels)
+parVector::parVector(parsedModelTerm & modeldescr, Rcpp::NumericVector initval, Rcpp::CharacterVector& labels)
           : parVals() {
-   parName=parname;
    nelem = labels.size();
    parVals.initWith(initval);
    parLabels.resize(labels.size());
    for(Rsize_t i=0; i<labels.size(); i++)
       parLabels[i]=labels[i];
-   val=parVals.data;
-   postMean.initWith(nelem,0.0l);
-   postVar.initWith(nelem,0.0l);
+   common_constructor_items(modeldescr);
 }
 
 // many other model objects can initialize from a single scalar value and labels, the size
 // needed is taken from labels size.
-parVector::parVector(std::string parname, double initval, Rcpp::CharacterVector& labels)
+parVector::parVector(parsedModelTerm & modeldescr, double initval, Rcpp::CharacterVector& labels)
           : parVals() {
-   parName=parname;
    nelem = labels.size();
    parVals.initWith(nelem, initval);
    parLabels.resize(labels.size());
    for(Rsize_t i=0; i<labels.size(); i++)
       parLabels[i]=labels[i];
-   val=parVals.data;
-   postMean.initWith(nelem,0.0l);
-   postVar.initWith(nelem,0.0l);
+   common_constructor_items(modeldescr);
 }
 
 // nearly the same but labels is a vector<string>
-parVector::parVector(std::string parname, double initval, std::vector<std::string>& labels)
+parVector::parVector(parsedModelTerm & modeldescr, double initval, std::vector<std::string>& labels)
   : parVals() {
-   parName=parname;
    nelem = labels.size();
    parVals.initWith(nelem, initval);
    parLabels.resize(labels.size());
    for(size_t i=0; i<labels.size(); i++)
       parLabels[i]=labels[i];
-   val=parVals.data;
-   postMean.initWith(nelem,0.0l);
-   postVar.initWith(nelem,0.0l);
+   common_constructor_items(modeldescr);
 }
 
 // Update cumulative means and variances
@@ -77,13 +76,6 @@ void parVector::collecStats() {
          postVar[i] += (olddev*newdev)/(n-1.0l);
       }
    }
-}
-
-// 
-void parVector::setParInfo(std::string fname, std::string vars, std::string varstruct) {
-   modelFunction=fname;
-   variableList=vars;
-   varianceStruct=varstruct;
 }
 
 // Function to write (part of) parVector (for debugging purposes) - Rcout accepts this fine.

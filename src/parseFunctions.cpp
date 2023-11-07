@@ -108,7 +108,42 @@ Rcpp::RObject getVariableObject(Rcpp::DataFrame &d, std::string name) {
    return tempObject;
 }
 
+// [!] New replaced getModelLHSTerms and getModelRHSTerms
+// Split model-terms: splits model formula in individual pieces (separated by ~ and +).
+// The return is a vector with strings, 0: response, 1: a 'mn(0)' or 'mn(1)' for intercept,
+// 2 and further: the model terms from RHS.
+// The intercept is formed with "mn()" so that mn comes in 'funcName' of the paresed model-term,
+// and that is used in the main function to create the right modelling object.
+std::vector<std::string> splitModelTerms(std::string mf) {
+   std::vector<std::string> modelTerms;
+   std::vector<std::string> lhsrhs = splitString(mf,"~");
+   if(lhsrhs.size() != 2)
+      throw(generalRbayzError("Model-formula has no (or multiple?) '~'"));
+   if(lhsrhs[0].size()==0)
+      throw(generalRbayzError("Model-formula has no response term(s)"));
+   modelTerms.push_back(lhsrhs[0]);
+   if(lhsrhs[1].size()==0) {        // RHS part is empty, insert default intercept
+      modelTerms.push_back("mn(1)");    // and ready to return
+      return modelTerms;
+   }
+   std::vector<std::string> RHSparts = splitString(lhsrhs[1],"+");
+   if (RHSparts[0]=="0" || RHSparts[0]=="1") {  // There is an intercept specified
+      if( RHSparts[0]=="0" )
+         modelTerms.push_back("mn(0)");
+      else
+         modelTerms.push_back("mn(1)");
+      for(size_t i=1; i<RHSparts.size(); i++)   // now there is RHSparts left from i=1
+         modelTerms.push_back(RHSparts[i]);
+   }
+   else {                                       // no intercept specified:
+      modelTerms.push_back("mn(1)");            // add an intercept and all
+      for(size_t i=0; i<RHSparts.size(); i++)   // RHSparts counting from i=0
+         modelTerms.push_back(RHSparts[i]);
+   }
+   return modelTerms;
+}
 
+/*
 std::vector<std::string> getModelLHSTerms(std::string mf) {
    // split on ~, it must create two pieces that are the response term and list of explanatory terms
    std::vector<std::string> lhsrhs = splitString(mf,"~");
@@ -135,6 +170,7 @@ std::vector<std::string> getModelRHSTerms(std::string mf) {
       parts.insert(parts.begin(),"1");
    return parts;
 }
+*/
 
 std::vector<std::string> parseColNames(Rcpp::DataFrame & d, size_t col) {
    std::vector<std::string> names(7,"");
