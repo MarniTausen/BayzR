@@ -12,7 +12,7 @@ parVector::parVector(std::string parname, double initval) : parVals() {
    parLabels.push_back(parname);
    val=parVals.data;
    postMean.initWith(nelem,0.0l);
-   postSD.initWith(nelem,0.0l);
+   postVar.initWith(nelem,0.0l);
 }
 
 // response model needs a constructor with a vector of values and vector of labels
@@ -26,7 +26,7 @@ parVector::parVector(std::string parname, Rcpp::NumericVector initval, Rcpp::Cha
       parLabels[i]=labels[i];
    val=parVals.data;
    postMean.initWith(nelem,0.0l);
-   postSD.initWith(nelem,0.0l);
+   postVar.initWith(nelem,0.0l);
 }
 
 // many other model objects can initialize from a single scalar value and labels, the size
@@ -41,7 +41,7 @@ parVector::parVector(std::string parname, double initval, Rcpp::CharacterVector&
       parLabels[i]=labels[i];
    val=parVals.data;
    postMean.initWith(nelem,0.0l);
-   postSD.initWith(nelem,0.0l);
+   postVar.initWith(nelem,0.0l);
 }
 
 // nearly the same but labels is a vector<string>
@@ -55,24 +55,39 @@ parVector::parVector(std::string parname, double initval, std::vector<std::strin
       parLabels[i]=labels[i];
    val=parVals.data;
    postMean.initWith(nelem,0.0l);
-   postSD.initWith(nelem,0.0l);
+   postVar.initWith(nelem,0.0l);
 }
 
-parVector::collecStats() {
-  for(size_t i=0; i<nelem; i++) {
-    postMean.data[i] += par->val[i];
-    postSD[i] += (par->val[i])*(par->val[i]);
-  }
-  count_collect_stats++;
+// Update cumulative means and variances
+void parVector::collecStats() {
+   double olddev, newdev;
+   count_collect_stats++;
+   double n = (double)count_collect_stats;
+   if (count_collect_stats==1) {                  // only update mean
+      for(size_t i=0; i<nelem; i++) {
+         olddev = par->val[i] - postMean.data[i];
+         postMean.data[i] += olddev/n;
+      }
+   }
+   else {                                         // can update mean and var
+      for(size_t i=0; i<nelem; i++) {
+         olddev = par->val[i] - postMean.data[i]; // deviation current value with old mean
+         postMean.data[i] += olddev/n;
+         newdev = par->val[i] - postMean.data[i]; // deviation with updated mean
+         postVar[i] += (olddev*newdev)/(n-1.0l);
+      }
+   }
 }
 
 // 
-parVector::parInfo() {
-
+void parVector::setParInfo(std::string fname, std::string vars, std::string varstruct) {
+   modelFunction=fname;
+   variableList=vars;
+   varianceStruct=varstruct;
 }
 
-// Function to write (part of) parVector (for debugging purposes) - seems that Rcout accepts this.
-// operator<< overload must be defined as a non-member   
+// Function to write (part of) parVector (for debugging purposes) - Rcout accepts this fine.
+// operator<< overload must be defined as a non-member ...
 std::ostream& operator<<(std::ostream& os, const parVector& p)
 {
     os << p.parName << "[" << p.nelem << "] ";
