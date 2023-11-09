@@ -31,6 +31,7 @@ public:
     idenVarStr(parsedModelTerm & modeldescr, parVector* coefpar) : indepVarStr(modeldescr, coefpar) {
        std::string name="var."+coefpar->parName;
        par = new parVector(name,1.0l);
+       par->logged=1;
     }
     void sample() {
       double ssq=0.0;

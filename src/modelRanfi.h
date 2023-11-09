@@ -17,7 +17,8 @@ class modelRanfi : public modelFactor {
 public:
 
    modelRanfi(parsedModelTerm & modeldescr, modelResp * rmod)
-      : modelFactor(modeldescr, rmod) {  }
+      : modelFactor(modeldescr, rmod) {
+   }
 
    ~modelRanfi() {
       delete varmodel;

@@ -70,10 +70,10 @@ void parVector::collecStats() {
    }
    else {                                         // can update mean and var
       for(size_t i=0; i<nelem; i++) {
-         olddev = par->val[i] - postMean.data[i]; // deviation current value with old mean
+         olddev = par->val[i] - postMean.data[i]; // deviation with old mean
          postMean.data[i] += olddev/n;
          newdev = par->val[i] - postMean.data[i]; // deviation with updated mean
-         postVar[i] += (olddev*newdev)/(n-1.0l);
+         postVar[i] += (olddev*newdev-postVar[i])/(n-1.0l);
       }
    }
 }

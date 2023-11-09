@@ -23,6 +23,7 @@ public:
    std::vector<std::string> parLabels;
    std::string modelFunction="";
    std::string varianceStruct="";
+   int logged=0;
    size_t nelem=0;
    double* val=0;  // convenience shortcut to retrieve parameter values as par->val[k]
    simpleDblVector postMean;
