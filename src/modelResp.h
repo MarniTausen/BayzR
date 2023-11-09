@@ -2,7 +2,6 @@
 //  BayzR -- modelResp.h
 //  model class for modelling response and residual variance. The base class is for the
 //  standard continuous data case, there are derived classes for non-linear models.
-//  note: modelBase constructor has set parName to name of response variable
 //
 //  Created by Luc Janss on 03/08/2018.
 //
@@ -33,15 +32,16 @@ public:
       Rcpp::IntegerVector labels_int = Rcpp::seq_len(tempY.size());
       Rcpp::CharacterVector labels = Rcpp::as<Rcpp::CharacterVector>(labels_int);
       par=new parVector(modeldescr,tempY,labels);
-      par->parName="resid."+modeldescr.variableString;
+//    overwrite default naming made in modelBase constructor
+      par->parName="fval."+modeldescr.variableString;
       missing = Rcpp::is_na(tempY);
       for(size_t row=0; row<par->nelem; row++) {
          if(missing[row]) {
-            par->parVals.data[row] = 0.0l;
+            par->val[row] = 0.0l;
             Y.data[row] = 0.0l;
          }
       }
-      fit.initWith(par->nelem, 0.0l);
+      resid.initWith(par->nelem, 0.0l);
       varModel = new idenVarStr(resp,this->par);
    }
    
@@ -49,19 +49,20 @@ public:
    }
 
    void sample() {
-      // Store fitted values and re-sample the Ydata / residuals for missing data
+      // Store fitted values and re-sample the Ydata and residuals for missing data
+      // Fit, resid and Y are all needed because other objects modify the residuals, and with fit and Y
+      // it is possible to keep track of these modifications and collect fitted values for missing data.
       for(size_t row=0; row<par->nelem; row++) {
          if(missing[row]) {
-            fit.data[row] = Y.data[row] - par->val[row];
-            par->val[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
-            Y.data[row] = fit.data[row] + par->val[row];
+            par->val[row] = Y.data[row] - resid->val[row];
+            resid->val[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
+            Y.data[row] = par->val[row] + resid->val[row];
          }
          else {
-            fit.data[row] = Y.data[row] - par->val[row];
+            par->val[row] = Y.data[row] - resid->val[row];
          }
       }
-
-/*    variance update is now moded to indepVar objects
+/*    variance update is now moved to indepVar objects
       // Continuous data: sample() is only updating residual variance
       size_t obs;
       double sum=0.0;
@@ -74,11 +75,12 @@ public:
       for (obs=0; obs<Nresid; obs++)
          residPrec[obs] = temp;
 */
+      varModel->sample();
    }
 
    indepVarStr* varModel;
    Rcpp::LogicalVector missing;
-   simpleDblVector fit;
+   simpleDblVector resid;
 
 
 protected:
