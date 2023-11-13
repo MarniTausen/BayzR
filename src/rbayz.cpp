@@ -85,7 +85,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       {
          Rcpp::CharacterVector parNames;
          for(size_t i=1; i<parList.size(); i++)
-            parNames.push_back(parList[i]->parName);
+            parNames.push_back(parList[i]->Name);
          Rcpp::IntegerVector name_matches = Rcpp::match(parNames, parNames);
          std::vector<size_t> numb_matches(name_matches.size(),0);
          bool found_duplicates = FALSE;
@@ -102,7 +102,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          }
          if(found_duplicates) {  // copy new names back in parList->Names
             for(size_t i=0; i<parNames.size(); i++)
-               parList[i+1]->parName = parNames[i];
+               parList[i+1]->Name = parNames[i];
          }
       }
 
@@ -198,7 +198,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       Rcpp::CharacterVector parNames, parModelFunc, parVariables, parVarStruct;
       Rcpp::IntegerVector parSizes, parEstFirst, parEstLast, parlogged;
       for(size_t i=1, row=1; i<parList.size(); i++) {
-         parNames.push_back(parList[i]->parName);
+         parNames.push_back(parList[i]->Name);
          parModelFunc.push_back(parList[i]->funcName);
          parVariables.push_back(parList[i]->variables);
          parVarStruct.push_back(parList[i]->varianceStruct);
@@ -222,8 +222,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       Rcpp::CharacterVector allPostSDs(nParameters);
       for(size_t i=1, row=0; i<parList.size(); i++) {
          for(size_t j=0; j< *(parList[i])->nelem; j++) {
-            allParNames[row] = *(parList[i])->parName;
-            allParLabels[row] = *(parList[i])->parLabel[j];
+            allParNames[row] = *(parList[i])->Name;
+            allParLabels[row] = *(parList[i])->Label[j];
             allPostMeans[row] = *(parList[i])->postMean[j];
             allPostSDs[row] = sqrt( *(parList[i])->postVar[j] );
             row++;
@@ -240,11 +240,11 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       Rcpp::CharacterVector sampleColNames;
       for(size_t i=0; i<parList.size(); i++) {
          if( *(parList[i])->logged ) {
-            if(parList[i]->nelem==1) sampleColNames.push_back(parList[i]->parName);
+            if(parList[i]->nelem==1) sampleColNames.push_back(parList[i]->Name);
             else {
-               std::string s = parList[i]->parName;
+               std::string s = parList[i]->Name;
                for(size_t j=0; j<parList[i]->nelem; j++)
-                  sampleColNames.push_back(s + parList[i]->parLabels[j])
+                  sampleColNames.push_back(s + parList[i]->Labels[j])
             }
          }
       }
@@ -264,7 +264,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       }
       Rcpp::DataFrame residuals = Rcpp::DataFrame::create
               (Rcpp::Named("Fitval")=fitval, Rcpp::Named("Residual")=resid;     
-      residuals.attr("row.names") = Rcpp::as<Rcpp::CharacterVector>(modelR->par->parLabels); 
+      residuals.attr("row.names") = Rcpp::as<Rcpp::CharacterVector>(modelR->par->Labels); 
 
       // Build the final return list
       Rcpp::List result = Rcpp::List::create();
