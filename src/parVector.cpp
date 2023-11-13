@@ -8,58 +8,58 @@
 // constructor because nelem must be set.
 void common_constructor_items(parsedModelTerm & modeldescr) {
    variables=modeldescr.variableString;  // as original, e.g A|B:C
-   parName=modeldescr.variableString;    // R friendly version with dots, e.g. A.B.C
+   Name=modeldescr.variableString;    // R friendly version with dots, e.g. A.B.C
    size_t pos=0;
-   while(parName.find_first_of(":|/",pos) != std::string::npos) {
-      parName[pos]=".";
+   while(Name.find_first_of(":|/",pos) != std::string::npos) {
+      Name[pos]=".";
       pos++;  // start re-search after currently replaced character
    }
    modelFunction=modeldescr.funcName;
    varianceStruct=modeldescr.varianceStruct;
-   val=parVals.data;
+   val=parValues.data;
    postMean.initWith(nelem,0.0l);
    postVar.initWith(nelem,0.0l);
 }
 
 // contructor for par-vector with single element where the "variableString" is also used for the label
-parVector::parVector(parsedModelTerm & modeldescr, double initval) : parVals() {
+parVector::parVector(parsedModelTerm & modeldescr, double initval) : Values() {
    nelem=1;
-   parVals.initWith(1, initval);
-   parLabels.push_back(modeldescr.variableString);
+   Values.initWith(1, initval);
+   Labels.push_back(modeldescr.variableString);
    common_constructor_items(modeldescr);
 }
 
 // response model needs a constructor with a vector of values and vector of labels
-parVector::parVector(parsedModelTerm & modeldescr, Rcpp::NumericVector initval, Rcpp::CharacterVector& labels)
-          : parVals() {
-   nelem = labels.size();
-   parVals.initWith(initval);
-   parLabels.resize(labels.size());
-   for(Rsize_t i=0; i<labels.size(); i++)
-      parLabels[i]=labels[i];
+parVector::parVector(parsedModelTerm & modeldescr, Rcpp::NumericVector initval, Rcpp::CharacterVector& inplabels)
+          : Values() {
+   nelem = inplabels.size();
+   Values.initWith(initval);
+   Labels.resize(inplabels.size());
+   for(Rsize_t i=0; i<inplabels.size(); i++)
+      Labels[i]=inplabels[i];
    common_constructor_items(modeldescr);
 }
 
 // many other model objects can initialize from a single scalar value and labels, the size
 // needed is taken from labels size.
-parVector::parVector(parsedModelTerm & modeldescr, double initval, Rcpp::CharacterVector& labels)
-          : parVals() {
-   nelem = labels.size();
-   parVals.initWith(nelem, initval);
-   parLabels.resize(labels.size());
-   for(Rsize_t i=0; i<labels.size(); i++)
-      parLabels[i]=labels[i];
+parVector::parVector(parsedModelTerm & modeldescr, double initval, Rcpp::CharacterVector& inplabels)
+          : Values() {
+   nelem = inplabels.size();
+   Values.initWith(nelem, initval);
+   Labels.resize(inplabels.size());
+   for(Rsize_t i=0; i<inplabels.size(); i++)
+      Labels[i]=inplabels[i];
    common_constructor_items(modeldescr);
 }
 
 // nearly the same but labels is a vector<string>
-parVector::parVector(parsedModelTerm & modeldescr, double initval, std::vector<std::string>& labels)
-  : parVals() {
-   nelem = labels.size();
-   parVals.initWith(nelem, initval);
-   parLabels.resize(labels.size());
-   for(size_t i=0; i<labels.size(); i++)
-      parLabels[i]=labels[i];
+parVector::parVector(parsedModelTerm & modeldescr, double initval, std::vector<std::string>& inplabels)
+  : Values() {
+   nelem = inplabels.size();
+   Values.initWith(nelem, initval);
+   Labels.resize(inplabels.size());
+   for(size_t i=0; i<inplabels.size(); i++)
+      Labels[i]=inplabels[i];
    common_constructor_items(modeldescr);
 }
 

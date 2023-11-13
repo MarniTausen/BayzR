@@ -18,10 +18,10 @@ class parVector {
 
 public:
 
-   simpleDblVector parVals;
-   std::string parName="";
+   simpleDblVector Values;
+   std::string Name="";
    std::string variables="";
-   std::vector<std::string> parLabels;
+   std::vector<std::string> Labels;
    std::string modelFunction="";
    std::string varianceStruct="";
    int logged=0;
