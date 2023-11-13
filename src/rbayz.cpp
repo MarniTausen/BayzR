@@ -91,38 +91,16 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       lastDone="Model building";
       if (silent==9) Rcpp::Rcout << "Model building done\n";
 
-      // Parameter information vectors
-      Rcpp::CharacterVector parNames;               // collected names of used hpar and par vectors (where size>0)
-      Rcpp::LogicalVector parHyper;                 // if it is a hpar (TRUE) or par (FALSE) vector
-      Rcpp::IntegerVector parSizes;                 // size (number of levels) in each hpar and par vector
-      Rcpp::IntegerVector parEstFirst,parEstLast;   // First and last number in estimates vector (R coding from 1)
-      Rcpp::IntegerVector parModelNr;               // which model-number the parameter vector comes from
-      Rcpp::CharacterVector parModelFunc;           // The model-function name (fx, rn, rr, ...) the parameter vector comes from
-      // idea to also add type, e.g. var, coeff, prob, to make easy selections in summary()
-      Rcpp::IntegerVector parLogged;                // If the parameter will be logged
-      Rcpp::CharacterVector parLoggedNames;         // Shortened list of names of logged parameters
-      Rcpp::CharacterVector estimNames;             // Names of all 'estimates' (individual levels)
-      collectParInfo(model, parNames, parHyper, parSizes, parEstFirst, parEstLast, parModelNr,
-                     parModelFunc, parLogged, parLoggedNames, estimNames);
-      size_t nEstimates = estimNames.size();
+      // compute number of residuals (data points) and number of parameters in the model.
+      // Response object is built first and parList[0] has residuals/fitted values.
+      size_t nResiduals = *(parList[0])->nelem;
+      size_t nParameters = 0;
+      for(size_t i=1; i<parList.size(); i++)
+         nParameters += *(parList[i])->nelem;
+      if(!silent) Rcpp::Rcout << "Model built with " << nResiduals << " data points (incl NA) and "
+                              << nParameters << " parameters\n";
 
-      // Residuals matrix
-      Rcpp::NumericMatrix residuals(inputData.nrow(),2*modelLHSTerms.size());
-      Rcpp::CharacterVector residColNames;
-      for(size_t mt=0; mt<model.size(); mt++) {
-         if(model[mt]->fname=="rp") {
-            residColNames.push_back("resid."+model[mt]->parName);
-            residColNames.push_back("fit."+model[mt]->parName);
-         }
-      }
-      Rcpp::colnames(residuals) = residColNames;
-      Rcpp::CharacterVector inputRowNames = inputData.attr("row.names");
-      Rcpp::rownames(residuals) = inputRowNames;
-      for(size_t col=0; col<2*modelLHSTerms.size(); col++) {
-         for(size_t row=0; row<inputData.nrow(); row++) residuals(row,col)=0.0l;
-      }
-
-      // Check the chain settings and make list of output sample cycle-numbers.
+      // Check the chain settings and find number of output samples by making list of output cycle-numbers.
       if (chain[0]==0 && chain[1]==0 && chain[2]==0) {  // chain was not set
          chain[0]=1100; chain[1]=100; chain[2]=10;
          Rcpp::Rcout << "Warning: chain was not set, running 1100 cycles but it may be too short for many analyses\n";
@@ -138,36 +116,80 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       }
       size_t nSamples = outputCycleNumbers.size();
       if (nSamples==0) throw (generalRbayzError("The chain settings do not make any output"));
-      Rcpp::NumericMatrix loggedSamples(int(nSamples),int(parLoggedNames.size()));
-      Rcpp::NumericMatrix loggedCumMeans(int(nSamples),int(parLoggedNames.size()));
-      Rcpp::NumericVector postMean(nEstimates,0);
-      Rcpp::NumericVector postSD(nEstimates,0);
-      Rcpp::colnames(loggedSamples) = parLoggedNames;
-      Rcpp::rownames(loggedSamples) = Rcpp::as<Rcpp::CharacterVector>(outputCycleNumbers); 
-      Rcpp::colnames(loggedCumMeans) = parLoggedNames;
-      Rcpp::rownames(loggedCumMeans) = Rcpp::as<Rcpp::CharacterVector>(outputCycleNumbers); 
+
+      // Find the number of traced parameters and set-up matrix to store samples of traced parameters
+      size_t nTracedParam=0;
+      if(!silent) Rcpp::Rcout << "Saving full traces for:";
+      for(size_t i=0; i<parList.size(); i++) {
+         if( *(parList[i])->logged ) {
+            nTracedParam += *(parList[i])->nelem;
+            if(!silent) {
+               for(size_t j=0; j< *(parList[i])->nelem; j++) Rcpp::Rcout << " " << *(parList[i])->parLabels[j];
+            }
+         }
+      }
+      if(!silent) Rcpp::Rcout << "\n";
+      Rcpp::NumericMatrix tracedSamples(int(nSamples),int(nTracedParam));
+      // The traced samples matrix has no col and row-names yet, this is the old code:
+//      Rcpp::colnames(loggedSamples) = parLoggedNames;
+//      Rcpp::rownames(loggedSamples) = Rcpp::as<Rcpp::CharacterVector>(outputCycleNumbers); 
+
+      // to show convergence set "nShow" interval and make vector to hold previously shown solutions
       int nShow = chain[0]/10;
+      Rcpp::NumericVector prevShowConv(int(nTracedParam), 0.0l);
       lastDone="Preparing to run MCMC";
       if (silent==9) Rcpp::Rcout << "Preparing to run MCMC done\n";
 
       // Run the MCMC chain by calling the sample() method for each modelTerm
-      if(!silent) writeScreenLogHead(parLoggedNames);
-      for (size_t cycle=1, save=0; cycle <= chain[0]; cycle++) {
+      if(!silent) {
+         Rcpp::Rcout << "Cycle, cumulative postMeans for traced parameters and [convergence]\n:";
+      }
+      for (size_t cycle=1, save=0, showconv=0; cycle <= chain[0]; cycle++) {
          for(size_t mt=0; mt<model.size(); mt++) model[mt]->sample();
-         if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {
+         if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {  // save cycle
             for(size_t mt=0; mt<model.size(); mt++) model[mt]->prepForOutput();
-            collectPostStats(model, postMean, postSD);
-            collectLoggedSamples(model, parModelNr, parLogged, loggedSamples, loggedCumMeans, save);
-            collectResiduals(model, residuals);
+            for(size_t i=0; i<parList.size(); i++) *(parList[i])->collectStats();
+            for(size_t i=0, col=0; i<parList.size(); i++) {
+               if( *(parList[i])->logged ) {
+                  for(size_t j=0; j< *(parList[i])->nelem; j++) {
+                     tracedSamples[save,col] = *(parList[i])->val[j]; col++;
+               }
+            }
             save++;  // save is counter for output (saved) cycles
          }
-         if (cycle % nShow == 0 && !silent)
-            writeScreenLog(cycle, loggedCumMeans, save);
+         if (cycle % nShow == 0 && !silent) {  // show convergence
+            Rcpp::Rcout << cycle;
+            double conv_change=0.0l, postmean;
+            for(size_t i=0, col=0; i<parList.size(); i++) {
+               if( *(parList[i])->logged ) {
+                  for(size_t j=0; j< *(parList[i])->nelem; j++) {
+                     postmean = *(parList[i])->postMean[j];
+                     Rcpp::Rcout << " " << postmean;
+                     // compute relative change compared to previously stored values, ...
+                     conv_change = abs( (prevShowConv[col] - postmean) / prevShowConv[col] );
+                     // and keep this postmean for the next convergence showing
+                     prevShowConv[col] = postmean;
+                     col++;
+                  }
+               }
+            }
+            conv_change /= double(nTracedParam);
+            // do not show convergence the first time
+            if(showconv>0) Rcpp::Rcout << " [" << conv_change << "]";
+            else showconv=1;
+            Rcpp::Rcout << "\n";
+         }
       }
       lastDone="Finished running MCMC";
       if (silent==9) Rcpp::Rcout << "Finished running MCMC\n";
 
-      // Build result list for normal termination
+      // Build tables (data frames or matrices) to go in the output
+      // 1. "Estimates" table with parName, parLabels, postMean and postSD
+      Rcpp::CharacterVector allParNames(nParameters);
+      Rcpp::CharacterVector allParLabels(nParameters);
+      Rcpp::CharacterVector allPostMeans(nParameters);
+      Rcpp::CharacterVector allPostSDs(nParameters);
+
       Rcpp::List result = Rcpp::List::create();
       Rcpp::DataFrame parInfo = Rcpp::DataFrame::create
                (Rcpp::Named("ModelNr")=parModelNr, Rcpp::Named("ModelTerm")=parModelFunc, 
@@ -176,6 +198,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
                 Rcpp::Named("EstEnd")=parEstLast, Rcpp::Named("Logged")=parLogged);
       parInfo.attr("row.names") = parNames;
       lastDone="Setting up return list";
+
       for(size_t i=0; i<nEstimates; i++)
           postMean[i] /= double(nSamples);   // finish computing post mean and SD, so far it is sum and sum squares
       for(size_t i=0; i<nEstimates; i++)
@@ -291,57 +314,6 @@ void buildModel(std::vector<modelBase *> & model, dcModelTerm & modeldescr, mode
       throw (generalRbayzError("Unknown model (function) term: "+modeldescr.funcName));
 }
 
-/* old model build
-void buildModelTerm(std::vector<modelBase *> & model, std::string modelTerm, Rcpp::DataFrame & data,
-                    simpleMatrix & resid, size_t respnr) {
-   std::string s = getWrapName(modelFrame, col);
-   if (s=="" && col==0) {
-      model.push_back(new modelResp(modelFrame, col));
-      int k=0;
-      if (terms.hasAttribute("intercept"))
-         k = terms.attr("intercept");
-      if (k==1)   // model has intercept
-         model.push_back(new modelMean(modelFrame, 0));
-   }
-   else if (s=="fixf")
-      model.push_back(new modelFixf(modelFrame, col));
-   else if(s=="ranf") {
-      Rcpp::RObject thiscol = modelFrame[col];
-      if(thiscol.hasAttribute("evalues")) {
-         model.push_back(new modelRanf_cor(modelFrame, col));
-      }
-      else {
-         model.push_back(new modelRanf(modelFrame, col));
-      }
-   }
-   else if(s=="ran2f") {
-      Rcpp::RObject thiscol = modelFrame[col];
-      Rcpp::RObject secondcol = thiscol.attr("factor2");
-      if(thiscol.hasAttribute("evectors") && secondcol.hasAttribute("evectors")) {
-         model.push_back(new modelRan2f_2cor(modelFrame, col));
-      }
-      else if (!thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
-         model.push_back(new modelRan2f(modelFrame, col));
-      }
-      else if (thiscol.hasAttribute("evectors") && !secondcol.hasAttribute("evectors")) {
-         throw(generalRbayzError("Version of ran2f not yet implemented"));
-      }
-      else {
-         throw(generalRbayzError("In ran2f(...,V1=,V2=) cannot set V2 only, swap the variables and set V1"));
-      }
-   }
-   else if (s=="freg")
-      model.push_back(new modelFreg(modelFrame, col));
-   else if (col==0 && s!="") {
-      throw(generalRbayzError("Cannot handle wrapper function on response column"));
-   }
-   else {
-      throw(generalRbayzError("Unknown wrapper function on data column"));
-   }
-   return;
-}
- */
-
 void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & parNames,
                     Rcpp::LogicalVector & parHyper, Rcpp::IntegerVector & parSizes,
                     Rcpp::IntegerVector & parEstFirst, Rcpp::IntegerVector & parEstLast,
@@ -452,13 +424,6 @@ void collectParInfo(std::vector<modelBase *> & model, Rcpp::CharacterVector & pa
 
 }
 
-// This is the only part that writes to the screen under normal operation (if there are no errors)
-void writeScreenLogHead(Rcpp::CharacterVector & parLoggedNames) {
-   Rcpp::Rcout << "Accum PMs for:";
-   for(size_t i=0; i<parLoggedNames.size(); i++)
-      Rcpp::Rcout << " " << parLoggedNames[i] << ",";
-   Rcpp::Rcout <<  " and [AbsAvgChange%]\n";
-}
 void writeScreenLog(size_t & cycle, Rcpp::NumericMatrix & loggedCumMeans, size_t save) {
    // note: save-counter is already updated, so the last available save'd item is (save-1).
    // to compute change also save-2 is needed, and output can only be written if save >= 2.
