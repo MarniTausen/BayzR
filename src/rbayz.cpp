@@ -189,20 +189,24 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       // ---------------------------------
 
       // 1. "Parameter" information table (this is not including residuals)
-      Rcpp::CharacterVector parNames, parModelFunc, parVariables;
+      Rcpp::CharacterVector parNames, parModelFunc, parVariables, parVarStruct;
       Rcpp::IntegerVector parSizes, parEstFirst, parEstLast, parlogged;
-      for(size_t i=1; i<parList.size(); i++) {
+      for(size_t i=1, row=1; i<parList.size(); i++) {
          parNames.push_back(parList[i]->parName);
          parModelFunc.push_back(parList[i]->funcName);
-         parVariables.push_back(parList[i]->)
+         parVariables.push_back(parList[i]->variables);
+         parVarStruct.push_back(parList[i]->varianceStruct);
+         parSizes.push_back(parList[i]->nelem);
+         parEstFirst.push_back(row);
+         parEstLast.push_back(row+parList[i]->nelem-1);
+         row += parList[i]->nelem;
+         parLogged.push_back(parList[i]->logged);
       }
-
-
       Rcpp::DataFrame parInfo = Rcpp::DataFrame::create
-               (Rcpp::Named("ModelNr")=parModelNr, Rcpp::Named("ModelTerm")=parModelFunc, 
-                Rcpp::Named("Hyper")=parHyper,
-                Rcpp::Named("Size")=parSizes, Rcpp::Named("EstStart")=parEstFirst,
-                Rcpp::Named("EstEnd")=parEstLast, Rcpp::Named("Logged")=parLogged);
+               (Rcpp::Named("Model")=parModelFunc, Rcpp::Named("Variables")=parVariables, 
+                Rcpp::Named("Variance")=parVarStruct,
+                Rcpp::Named("Size")=parSizes, Rcpp::Named("Start")=parEstFirst,
+                Rcpp::Named("End")=parEstLast, Rcpp::Named("Logged")=parLogged);
       parInfo.attr("row.names") = parNames;
 
       // 2. "Estimates" table with parName, parLabels, postMean and postSD
