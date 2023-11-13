@@ -100,6 +100,31 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       if(!silent) Rcpp::Rcout << "Model built with " << nResiduals << " data points (incl NA) and "
                               << nParameters << " parameters\n";
 
+      // Make parameter name disambiguation - this skips residuals (parList[0])
+      {
+         Rcpp::CharacterVector parNames;
+         for(size_t i=1; i<parList.size(); i++)
+            parNames.push_back(parList[i]->parName);
+         Rcpp::IntegerVector name_matches = Rcpp::match(parNames, parNames);
+         std::vector<size_t> numb_matches(name_matches.size(),0);
+         bool found_duplicates = FALSE;
+         for(size_t i=0; i<name_matches.size(); i++) {
+            if(name_matches[i] != (i+1))  {  // the i'th name matches (name_matches[i]-1)'th name in the list
+               if(numb_matches[name_matches[i]-1] == 0) {
+                  parName[name_matches[i]-1] += "1";
+                  numb_matches[name_matches[i]-1]++; 
+               }
+               numb_matches[name_matches[i]-1]++;
+               parName[i] += std::to_string(numb_matches[name_matches[i]-1]);
+            }
+            found_duplicates=TRUE;
+         }
+         if(found_duplicates) {  // copy new names back in parList->Names
+            for(size_t i=0; i<parNames.size(); i++)
+               parList[i+1]->parName = parNames[i];
+         }
+      }
+
       // Check the chain settings and find number of output samples by making list of output cycle-numbers.
       if (chain[0]==0 && chain[1]==0 && chain[2]==0) {  // chain was not set
          chain[0]=1100; chain[1]=100; chain[2]=10;
