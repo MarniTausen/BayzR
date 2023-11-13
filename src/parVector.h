@@ -20,6 +20,7 @@ public:
 
    simpleDblVector parVals;
    std::string parName="";
+   std::string variables="";
    std::vector<std::string> parLabels;
    std::string modelFunction="";
    std::string varianceStruct="";

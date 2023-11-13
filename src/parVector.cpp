@@ -7,7 +7,13 @@
 // common things for all contructors, this one is called at the end of every
 // constructor because nelem must be set.
 void common_constructor_items(parsedModelTerm & modeldescr) {
-   parName=modeldescr.variableString;
+   variables=modeldescr.variableString;  // as original, e.g A|B:C
+   parName=modeldescr.variableString;    // R friendly version with dots, e.g. A.B.C
+   size_t pos=0;
+   while(parName.find_first_of(":|/",pos) != std::string::npos) {
+      parName[pos]=".";
+      pos++;  // start re-search after currently replaced character
+   }
    modelFunction=modeldescr.funcName;
    varianceStruct=modeldescr.varianceStruct;
    val=parVals.data;

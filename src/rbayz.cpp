@@ -188,7 +188,16 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       // Build tables to go in the output:
       // ---------------------------------
 
-      // 1. "Parameter" information table
+      // 1. "Parameter" information table (this is not including residuals)
+      Rcpp::CharacterVector parNames, parModelFunc, parVariables;
+      Rcpp::IntegerVector parSizes, parEstFirst, parEstLast, parlogged;
+      for(size_t i=1; i<parList.size(); i++) {
+         parNames.push_back(parList[i]->parName);
+         parModelFunc.push_back(parList[i]->funcName);
+         parVariables.push_back(parList[i]->)
+      }
+
+
       Rcpp::DataFrame parInfo = Rcpp::DataFrame::create
                (Rcpp::Named("ModelNr")=parModelNr, Rcpp::Named("ModelTerm")=parModelFunc, 
                 Rcpp::Named("Hyper")=parHyper,
