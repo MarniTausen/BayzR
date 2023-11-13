@@ -68,7 +68,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          else {
            throw generalRbayzError("Unknown model-function \'" + pmt.funcName + "\' at "+pmt.shortModelTerm);
          }
-      }
+      } // end for(term ...) to build model
       lastDone="Model building";
       if (silent==9) Rcpp::Rcout << "Model building done\n";
 
@@ -161,6 +161,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
                if( *(parList[i])->logged ) {
                   for(size_t j=0; j< *(parList[i])->nelem; j++) {
                      tracedSamples[save,col] = *(parList[i])->val[j]; col++;
+                  }
                }
             }
             save++;  // save is counter for output (saved) cycles
@@ -187,7 +188,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
             else showconv=1;
             Rcpp::Rcout << "\n";
          }
-      }
+      } // end for(cycle ...)
       lastDone="Finished running MCMC";
       if (silent==9) Rcpp::Rcout << "Finished running MCMC\n";
 
@@ -305,5 +306,5 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
    Rcpp::Rcout << "Bayz finished with errors - use summary() or check $Errors" << std::endl;
    return(result);
 
-}
+}  // end rbayz_cpp main function
 
