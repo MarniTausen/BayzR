@@ -13,10 +13,11 @@
 #include <string>
 #include "rbayzExceptions.h"
 #include "simpleMatrix.h"
+#include "nameTools.h"
 //#include "nameTools.h"  // strange, including nameTools.h does not work to make
                           // addMatrixNames available here ...
 
-std::vector<std::string> getMatrixNames(Rcpp::NumericMatrix & mat, int dim);
+//std::vector<std::string> getMatrixNames(Rcpp::NumericMatrix & mat, int dim);
 
 class labeledMatrix : public simpleMatrix {
 
@@ -27,14 +28,14 @@ public:
 
    // add/copy names from Rcpp matrix in the labeledMatrix object.
    // Throws errror if rownames not available, auto-fills colnames if colnames not available
-   addRowColNames(Rcpp::NumericMatrix M, std::string & name) {
+   void addRowColNames(Rcpp::NumericMatrix M, std::string & name) {
       rownames = getMatrixNames(M, 1);
       if(rownames.size()==0) {  // rownames empty not allowed
          throw generalRbayzError("No rownames on matrix " + name + "\n");
       }
-      colnames = getMatrixNames(Rmatrix, 2);
+      colnames = getMatrixNames(M, 2);
       if (rownames.size()==0) { // colnames empty, fill auto colnames
-         colnames = generateLabels("col",Rmatrix.ncol());
+         colnames = generateLabels("col",M.ncol());
       }
    }
 

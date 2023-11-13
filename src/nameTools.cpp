@@ -9,9 +9,6 @@
 #include <algorithm>
 #include <map>
 
-//#include "dataMatrix.h"
-//#include "dataFactor.h"
-
 using Rsize_t = long long int;
 
 // Transform R CharacterVector to the c++ equivalent vector<string>
@@ -50,13 +47,13 @@ std::vector<std::string> getMatrixNames(Rcpp::NumericMatrix & mat, int dim) {
    return names;
 }
 
-std::vector<std::string> generateLabels(std::string text, int n) {
+std::vector<std::string> generateLabels(std::string text, size_t n) {
    Rcpp::IntegerVector seq_ints = Rcpp::seq_len(n);      // 1..n as integers
    Rcpp::CharacterVector seq_strings                     // 1..n in Rcpp charvec
                    = Rcpp::as<Rcpp::CharacterVector>(seq_ints);
    std::vector<std::string> labels;
    for(size_t i=0; i<n; i++)                             // "text"+1..n
-      labels.push_back(text+Rcpp::as<std::string>(seq_strings[i]))
+      labels.push_back(text+Rcpp::as<std::string>(seq_strings[i]));
    return labels;
 }
 

@@ -56,12 +56,12 @@ public:
       data.initWith(tempvec);
       if (Rcpp::sum(missing) > 0) {
          labels.push_back("NA");
-         for(size_t row=0; row<tempvec.size(); row++) {
+         for(size_t row=0; row < unsigned(tempvec.size()); row++) {
             if(missing[row]) data[row] = 0;
          }
       }
       else {
-         for(size_t row=0; row<tempvec.size(); row++) {
+         for(size_t row=0; row < unsigned(tempvec.size()); row++) {
             data[row] -= 1;
          }
       }

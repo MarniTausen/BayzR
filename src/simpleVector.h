@@ -103,7 +103,7 @@ public:
 */
    
    void initWith(Rcpp::NumericVector v, size_t useElem) {
-      if (useElem > v.size()) {
+      if (useElem > unsigned(v.size())) {
          throw(generalRbayzError("useElem is larger than actual nelem in simpleDblVector"));
       }
       doalloc(useElem);

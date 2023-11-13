@@ -49,14 +49,14 @@ public:
       if (nrow> 0 || ncol>0 ) {    // oops this matrix is already allocated
          throw(generalRbayzError("Cannot resize matrix in simpleMatrix"));
       }
-      if (useCol > M.ncol()) {
+      if (useCol > unsigned(M.ncol())) {
          throw(generalRbayzError("useCol is larger than actual ncol in simpleMatrix"));
       }
       doalloc(M.nrow(), useCol);
       double *col;  // temporary column pointer
       for(size_t icol=0; icol<useCol; icol++) {
          col=data[icol];
-         for(size_t irow=0; irow<M.nrow(); irow++) {
+         for(size_t irow=0; irow< unsigned(M.nrow()); irow++) {
             col[irow] = M(irow,icol);
          }
       }
