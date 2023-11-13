@@ -22,23 +22,24 @@ BEGIN_RCPP
 END_RCPP
 }
 // rbayz_cpp
-Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, Rcpp::DataFrame inputData, Rcpp::IntegerVector chain, int silent);
-RcppExport SEXP _BayzR_rbayz_cpp(SEXP modelFormulaSEXP, SEXP inputDataSEXP, SEXP chainSEXP, SEXP silentSEXP) {
+Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputData, Rcpp::IntegerVector chain, int silent);
+RcppExport SEXP _BayzR_rbayz_cpp(SEXP modelFormulaSEXP, SEXP VESEXP, SEXP inputDataSEXP, SEXP chainSEXP, SEXP silentSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::Formula >::type modelFormula(modelFormulaSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type VE(VESEXP);
     Rcpp::traits::input_parameter< Rcpp::DataFrame >::type inputData(inputDataSEXP);
     Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type chain(chainSEXP);
     Rcpp::traits::input_parameter< int >::type silent(silentSEXP);
-    rcpp_result_gen = Rcpp::wrap(rbayz_cpp(modelFormula, inputData, chain, silent));
+    rcpp_result_gen = Rcpp::wrap(rbayz_cpp(modelFormula, VE, inputData, chain, silent));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
     {"_BayzR_mfactor_cpp", (DL_FUNC) &_BayzR_mfactor_cpp, 1},
-    {"_BayzR_rbayz_cpp", (DL_FUNC) &_BayzR_rbayz_cpp, 4},
+    {"_BayzR_rbayz_cpp", (DL_FUNC) &_BayzR_rbayz_cpp, 5},
     {NULL, NULL, 0}
 };
 
