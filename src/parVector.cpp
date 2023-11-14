@@ -3,6 +3,7 @@
 //
 
 #include "parVector.h"
+using Rsize_t = long long int;
 
 // common things for all contructors, this one is called at the end of every
 // constructor because nelem must be set.
@@ -11,12 +12,12 @@ void parVector::common_constructor_items(parsedModelTerm & modeldescr) {
    Name=modeldescr.variableString;    // R friendly version with dots, e.g. A.B.C
    size_t pos=0;
    while(Name.find_first_of(":|/",pos) != std::string::npos) {
-      Name[pos]=".";
+      Name[pos]='.';
       pos++;  // start re-search after currently replaced character
    }
    modelFunction=modeldescr.funcName;
    varianceStruct=modeldescr.varianceStruct;
-   val=parValues.data;
+   val=Values.data;
    postMean.initWith(nelem,0.0l);
    postVar.initWith(nelem,0.0l);
 }
@@ -66,20 +67,20 @@ parVector::parVector(parsedModelTerm & modeldescr, double initval, std::vector<s
 // Update cumulative means and variances
 void parVector::collecStats() {
    double olddev, newdev;
-   count_collect_stats++;
-   double n = (double)count_collect_stats;
+   this->count_collect_stats++;
+   double n = double(count_collect_stats);
    if (count_collect_stats==1) {                  // only update mean
       for(size_t i=0; i<nelem; i++) {
-         olddev = par->val[i] - postMean.data[i];
-         postMean.data[i] += olddev/n;
+         olddev = this->Values[i] - this->postMean.data[i];
+         this->postMean.data[i] += olddev/n;
       }
    }
    else {                                         // can update mean and var
       for(size_t i=0; i<nelem; i++) {
-         olddev = par->val[i] - postMean.data[i]; // deviation with old mean
-         postMean.data[i] += olddev/n;
-         newdev = par->val[i] - postMean.data[i]; // deviation with updated mean
-         postVar[i] += (olddev*newdev-postVar[i])/(n-1.0l);
+         olddev = this->Values[i] - this->postMean.data[i]; // deviation with old mean
+         this->postMean.data[i] += olddev/n;
+         newdev = this->Values[i] - this->postMean.data[i]; // deviation with updated mean
+         this->postVar.data[i] += (olddev*newdev-this->postVar.data[i])/(n-1.0l);
       }
    }
 }

@@ -3,7 +3,7 @@
 #include <Rcpp.h>
 #include <cmath>
 #include "parseFunctions.h"
-#include "dcModelTerm.h"
+#include "parsedModelTerm.h"
 #include "modelBase.h"
 #include "modelResp.h"
 #include "modelMean.h"

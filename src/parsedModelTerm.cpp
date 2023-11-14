@@ -71,10 +71,12 @@ std::vector<std::string> parseModelTerm_step1(std::string mt) {
 
 // parseModelTerm_step2: splitting / interpreting variables, options, etc.
 // This one is defined as a member function to fill object member variables
-parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string variableString, std:string optionString) {
+void parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string variableString, 
+                     std::string optionString, Rcpp::DataFrame &d) {
 
+   // Make a shortened version of the model-term as text for messages
    if(variableString.length()<=12) {
-     if(optionString=="") shortModelTerm=mt;
+     if(optionString=="") shortModelTerm=funcName+"("+variableString+")";
      else shortModelTerm=funcName+"("+variableString+",...)";
    }
    else {
@@ -82,9 +84,9 @@ parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string variable
    }
 
    // Analyse and split variableString
-   pos1 = variableString.find(':');
-   pos2 = variableString.find('/');
-   pos3 = variableString.find('|');
+   size_t pos1 = variableString.find(':');
+   size_t pos2 = variableString.find('/');
+   size_t pos3 = variableString.find('|');
    if(pos2==std::string::npos && pos3==std::string::npos)            // A, A:B, A:B:C
       variablePattern="factors";
    else if (pos3!=std::string::npos && pos2==std::string::npos       // A|B, A|B:C
@@ -95,7 +97,7 @@ parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string variable
       variablePattern="rrcovars";
    else {
       std::string s="Cannot interpret/use variable specification \'"+variableString+
-                    "\' in model-term: "+mt;
+                    "\' in model-term: "+shortModelTerm;
       throw(generalRbayzError(s));
    }
    variableNames = splitString(variableString,":|/");
@@ -232,11 +234,10 @@ parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string variable
          }
       }
    }
-
 }
 
 // constructor for handling response term with separate variance description
-parsedModelTerm::parsedModelTerm(std::string mt, std::string VEdescr, Rcpp::DataFrame &d);
+parsedModelTerm::parsedModelTerm(std::string mt, std::string VEdescr, Rcpp::DataFrame &d)
 {
    std::vector<std::string> parse_step1 = parseModelTerm_step1(mt);
    // for now not accepting functions on response, but it could be extended here to
@@ -244,13 +245,13 @@ parsedModelTerm::parsedModelTerm(std::string mt, std::string VEdescr, Rcpp::Data
    if(parse_step1[0]!="") throw(generalRbayzError("Unexpected function on response term: "+mt));
    // the next one could just be a message, but not easy here to get things in the messages list
    if(parse_step1[2]!="") throw(generalRbayzError("Unexpected options retrieved from response term: "+mt));
-   parseModelTerm_step2("", parse_step1[1], VEdescr);
+   parseModelTerm_step2("", parse_step1[1], VEdescr, d);
 }
 
 // constructor for handling RHS model terms
 parsedModelTerm::parsedModelTerm(std::string mt, Rcpp::DataFrame &d)
 {
    std::vector<std::string> parse_step1 = parseModelTerm_step1(mt);
-   parseModelTerm_step2(parse_step1[0], parse_step1[1], parse_step1[2]);
+   parseModelTerm_step2(parse_step1[0], parse_step1[1], parse_step1[2], d);
 }
 

@@ -16,7 +16,8 @@ public:
    parsedModelTerm(std::string modelTerm, Rcpp::DataFrame &d);
    parsedModelTerm(std::string variableName, std::string VEdescr, Rcpp::DataFrame &d);
    ~parsedModelTerm() { }
-   parseModelTerm_step2(std::string funcName, std::string variables, std::string options);
+   void parseModelTerm_step2(std::string funcName, std::string variables, 
+                 std::string options, Rcpp::DataFrame &d);
    std::string funcName="";
    std::string shortModelTerm="";
    std::string variableString="";

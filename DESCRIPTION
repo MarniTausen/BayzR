@@ -1,6 +1,6 @@
 Package: BayzR
 Title: R package for bayz
-Version: 0.0.7
+Version: 0.8.0
 Authors@R: c(person("Marni", "Tausen", email = "marni@birc.au.dk", role = c("aut")),person("Luc", "Janss", email = "luc.janss@mbg.au.dk", role = c("cre")),person("Maria", "Izabel", "Cavassim", "Alves", email = "mica@birc.au.dk", role = c("edt")))
 Description: What the package does (one paragraph).
 Depends: R (>= 3.5)

@@ -31,10 +31,10 @@ public:
    simpleDblVector postMean;
    simpleDblVector postVar;
    size_t count_collect_stats=0;
-   parVector(std::string parname, double initval);
-   parVector(std::string parname, Rcpp::NumericVector initval, Rcpp::CharacterVector& labels);
-   parVector(std::string parname, double initval, Rcpp::CharacterVector& labels);
-   parVector(std::string parname, double initval, std::vector<std::string>& labels);
+   parVector(parsedModelTerm & modeldescr, double initval);
+   parVector(parsedModelTerm & modeldescr, Rcpp::NumericVector initval, Rcpp::CharacterVector& labels);
+   parVector(parsedModelTerm & modeldescr, double initval, Rcpp::CharacterVector& labels);
+   parVector(parsedModelTerm & modeldescr, double initval, std::vector<std::string>& labels);
    void common_constructor_items(parsedModelTerm & modeldescr);
    void collecStats();
    

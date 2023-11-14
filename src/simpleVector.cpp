@@ -10,7 +10,7 @@ simpleIntVector::simpleIntVector(size_t n) {
    doalloc(n);
    std::fill_n(data, n, 0);
 }
-~simpleIntVector::simpleIntVector() {
+simpleIntVector::~simpleIntVector() {
    if (nelem>0) {
       delete[] data;
    }
@@ -46,7 +46,7 @@ simpleDblVector::simpleDblVector(size_t n) {
    doalloc(n);
    std::fill_n(data, n, 0.0l);
 }
-~simpleDblVector::simpleDblVector() {
+simpleDblVector::~simpleDblVector() {
    if (nelem>0) {
       delete[] data;
    }

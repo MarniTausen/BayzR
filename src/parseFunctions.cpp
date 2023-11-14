@@ -26,8 +26,8 @@ void removeSpaces(std::string &s) {
 // Returns the position of the matching closing bracket, or string::npos if failed to find it.
 size_t findClosingBrack(std::string &s, size_t fromPos) {
    char closingBrack;
-   if (s[fromPos] == '[') closingBrack == ']';
-   else if (s[fromPos] == '(' ) closingBrack == ')';
+   if (s[fromPos] == '[') closingBrack = ']';
+   else if (s[fromPos] == '(' ) closingBrack = ')';
    else
       throw(generalRbayzError("Wrong use of findClosingBrack"));
    while(s[fromPos] != closingBrack && fromPos != std::string::npos) {
