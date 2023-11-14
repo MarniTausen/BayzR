@@ -15,6 +15,7 @@
 #include "modelFactor.h"
 #include "kernelMatrix.h"
 #include "priorClasses.h"
+#include "indexTools.h"
 
 // update: ranfcor now also derive from modelFactor?
 // the matrix data here was eigenvector data, it needs to come from a variance model now.

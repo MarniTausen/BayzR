@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include "simpleVector.h"
+#include "parsedModelTerm.h"
 
 #ifndef parVector_h
 #define parVector_h
@@ -34,7 +35,7 @@ public:
    parVector(std::string parname, Rcpp::NumericVector initval, Rcpp::CharacterVector& labels);
    parVector(std::string parname, double initval, Rcpp::CharacterVector& labels);
    parVector(std::string parname, double initval, std::vector<std::string>& labels);
-   void common_constructor_items();
+   void common_constructor_items(parsedModelTerm & modeldescr);
    void collecStats();
    
 };

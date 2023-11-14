@@ -17,134 +17,45 @@
 #define simpleVector_h
 
 #include <Rcpp.h>
-#include <algorithm>
 
 class simpleIntVector {
-
 public:
-   
    simpleIntVector() : nelem(0) { }
-   
-   simpleIntVector(size_t n) {
-      doalloc(n);
-      std::fill_n(data, n, 0);
-   }
-
-   ~simpleIntVector() {
-      if (nelem>0) {
-         delete[] data;
-      }
-   }
-   
-   int& operator[](size_t i) {
-      return(data[i]);
-   }
-
-/*   void operator=(int v) {
+   simpleIntVector(size_t n);
+   ~simpleIntVector();
+   int& operator[](size_t i);    // retrieving value using [] is defined,
+/*   void operator=(int v) {     // but assigning using = not yet ...
       for(size_t i=0; i<nelem; i++)
          data[i] = v;
    }
 */
-
-   void initWith(Rcpp::IntegerVector v) {
-      doalloc(v.size());
-      for(size_t i=0; i<nelem; i++)
-         data[i] = v[i];
-   }
-
-   void initWith(size_t n, int initvalue) {
-      doalloc(n);
-      for(size_t i=0; i<nelem; i++)
-         data[i] = initvalue;
-   }
-
+   void initWith(Rcpp::IntegerVector v);
+   void initWith(size_t n, int initvalue);
    int *data;
    size_t nelem;
-   
 private:
-   void doalloc(size_t n) {
-      if (n <= 0) {
-         throw(generalRbayzError("Zero or negative size in initialisation in simpleVector"));
-      }
-      if (nelem >0) {  // already allocated!
-         throw(generalRbayzError("Cannot resize vector in simpleVector"));
-      }
-      data  = new int[n];
-      nelem = n;
-   }
-   
+   void doalloc(size_t n);
 };
 
 class simpleDblVector {
-
 public:
-   
-   simpleDblVector() { }
-   
-   simpleDblVector(size_t n) {
-      doalloc(n);
-      std::fill_n(data, n, 0.0l);
-   }
-
-   ~simpleDblVector() {
-      if (nelem>0) {
-         delete[] data;
-      }
-   }
-   
-   double& operator[](size_t i) {
-      return(data[i]);
-   }
-
+   simpleDblVector() : nelem(0) { }
+   simpleDblVector(size_t n);
+   ~simpleDblVector();
+   double& operator[](size_t i);
 /*   void operator=(double v) {
       for(size_t i=0; i<nelem; i++)
          data[i] = v;
    }
 */
-   
-   void initWith(Rcpp::NumericVector v, size_t useElem) {
-      if (useElem > unsigned(v.size())) {
-         throw(generalRbayzError("useElem is larger than actual nelem in simpleDblVector"));
-      }
-      doalloc(useElem);
-      for(size_t i=0; i<useElem; i++)
-         data[i] = v[i];
-   }
-
-   void initWith(Rcpp::NumericVector v) {
-      initWith(v, v.size());
-   }
-
-   void initWith(size_t n, double initvalue) {
-      doalloc(n);
-      for(size_t i=0; i<nelem; i++)
-         data[i] = initvalue;
-   }
-
-   void swap(simpleDblVector* other) {
-      double* olddata = this->data;
-      size_t oldnelem   = this->nelem;
-      this->data  = other->data;
-      this->nelem  = other->nelem;
-      other->data = olddata;
-      other->nelem  = oldnelem;
-   }
-
+   void initWith(Rcpp::NumericVector v, size_t useElem);
+   void initWith(Rcpp::NumericVector v);
+   void initWith(size_t n, double initvalue);
+   void swap(simpleDblVector* other);
    double *data;
    size_t nelem=0;
-
 private:
-   void doalloc(size_t n) {
-      if (n <= 0) {
-         throw(generalRbayzError("Zero or negative size in initialisation in simpleVector"));
-      }
-      if (nelem >0) {  // already allocated!
-         throw(generalRbayzError("Cannot resize vector in simpleVector"));
-      }
-      data  = new double[n];
-      nelem = n;
-   }
-
+   void doalloc(size_t n);
 };
 
 

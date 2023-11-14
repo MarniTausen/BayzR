@@ -20,8 +20,6 @@
 #include "modelCoeff.h"
 #include "dataFactor.h"
 
-void CharVec2cpp(std::vector<std::string> & labels, Rcpp::CharacterVector templabels);
-
 class modelFactor : public modelCoeff {
    
 public:

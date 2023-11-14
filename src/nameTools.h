@@ -17,6 +17,5 @@ void CharVec2cpp(std::vector<std::string> & labels, Rcpp::CharacterVector templa
 std::vector<std::string> getMatrixNames(Rcpp::NumericMatrix & mat, int dim);
 std::vector<std::string> generateLabels(std::string text, int n);
 int findDataColumn(Rcpp::DataFrame d, std::string name);
-void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, labeledMatrix *M);
 
 #endif /* nameTools_h */

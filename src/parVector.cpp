@@ -6,7 +6,7 @@
 
 // common things for all contructors, this one is called at the end of every
 // constructor because nelem must be set.
-void common_constructor_items(parsedModelTerm & modeldescr) {
+void parVector::common_constructor_items(parsedModelTerm & modeldescr) {
    variables=modeldescr.variableString;  // as original, e.g A|B:C
    Name=modeldescr.variableString;    // R friendly version with dots, e.g. A.B.C
    size_t pos=0;
@@ -88,12 +88,10 @@ void parVector::collecStats() {
 // operator<< overload must be defined as a non-member ...
 std::ostream& operator<<(std::ostream& os, const parVector& p)
 {
-    os << p.parName << "[" << p.nelem << "] ";
+    os << p.Name << "[" << p.nelem << "] ";
     size_t loopsize = (p.nelem<5)? p.nelem : 5;
     for(size_t i=0; i<loopsize; i++) os << p.val[i] << " ";
     if(p.nelem >5 ) os << "...";
     os << "\n";
     return os;
 }
-
-#endif /* parVector_h */

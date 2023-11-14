@@ -23,6 +23,7 @@
 #include "simpleVector.h"
 #include "modelCoeff.h"
 #include "nameTools.h"
+#include "indexTools.h"
 
 class modelMatrix : public modelCoeff {
    
