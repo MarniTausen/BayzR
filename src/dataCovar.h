@@ -21,14 +21,14 @@ public:
       initWith(temp);
       size_t countnoNA=0;
       double sumnoNA=0.0l;
-      for(size_t row=0; row<temp.size(); row++) {
+      for(size_t row=0; row < unsigned(temp.size()); row++) {
          if(!missing[row]) {
             sumnoNA += data[row];
             countnoNA++;
          }
       }
       offset = sumnoNA / double(countnoNA);
-      for(size_t row=0; row<temp.size(); row++) {
+      for(size_t row=0; row < unsigned(temp.size()); row++) {
          if(missing[row])
             data[row] = 0.0;
          else

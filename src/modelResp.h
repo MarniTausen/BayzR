@@ -19,21 +19,23 @@ class modelResp : public modelBase {
 public:
    
    modelResp(parsedModelTerm & modeldescr)
-            : modelBase(), fit(), Y()
+            : modelBase(), resid(), Y()
    {
-      if(resp.variableNames.size()>1) {
-         throw generalRbayzError("Multiple response variables (" + resp.variableString + ") cannot be handled this way");
+      if(modeldescr.variableNames.size()>1) {
+         throw generalRbayzError("Multiple response variables (" + modeldescr.variableString +
+                                    ") cannot be handled this way");
       }
-      if( ! (resp.variableTypes[0]==2 || resp.variableTypes[0]==3 )) {
-         throw generalRbayzError("Response variable (" + resp.variableString + ") is not an R integer or numerical vector");
+      if( ! (modeldescr.variableTypes[0]==2 || modeldescr.variableTypes[0]==3 )) {
+         throw generalRbayzError("Response variable (" + modeldescr.variableString + 
+                                    ") is not an R integer or numerical vector");
       }
-      Rcpp::NumericVector tempY = Rcpp::as<Rcpp::NumericVector>(resp.variableObjects[0]);
+      Rcpp::NumericVector tempY = Rcpp::as<Rcpp::NumericVector>(modeldescr.variableObjects[0]);
       Y.initWith(tempY);
       Rcpp::IntegerVector labels_int = Rcpp::seq_len(tempY.size());
       Rcpp::CharacterVector labels = Rcpp::as<Rcpp::CharacterVector>(labels_int);
       par=new parVector(modeldescr,tempY,labels);
 //    overwrite default naming made in modelBase constructor
-      par->parName="fval."+modeldescr.variableString;
+      par->Name="fval."+modeldescr.variableString;
       missing = Rcpp::is_na(tempY);
       for(size_t row=0; row<par->nelem; row++) {
          if(missing[row]) {
@@ -42,7 +44,7 @@ public:
          }
       }
       resid.initWith(par->nelem, 0.0l);
-      varModel = new idenVarStr(resp,this->par);
+      varModel = new idenVarStr(modeldescr,this->par);
    }
    
    ~modelResp() {
@@ -54,12 +56,12 @@ public:
       // it is possible to keep track of these modifications and collect fitted values for missing data.
       for(size_t row=0; row<par->nelem; row++) {
          if(missing[row]) {
-            par->val[row] = Y.data[row] - resid->val[row];
-            resid->val[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
-            Y.data[row] = par->val[row] + resid->val[row];
+            par->val[row] = Y.data[row] - resid.data[row];
+            resid.data[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
+            Y.data[row] = par->val[row] + resid.data[row];
          }
          else {
-            par->val[row] = Y.data[row] - resid->val[row];
+            par->val[row] = Y.data[row] - resid.data[row];
          }
       }
 /*    variance update is now moved to indepVar objects
@@ -82,8 +84,6 @@ public:
    Rcpp::LogicalVector missing;
    simpleDblVector resid;
 
-
-protected:
    simpleDblVector Y;
 
 };

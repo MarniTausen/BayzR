@@ -35,8 +35,8 @@ public:
       }
 
       par = new parVector(modeldescr, 0.0l, F->labels);
-      lhs.resize(parLabels.size(),0);
-      rhs.resize(parLabels.size(),0);
+      lhs.resize(F->labels.size(),0);
+      rhs.resize(F->labels.size(),0);
    }
    
    ~modelFactor() {
@@ -53,7 +53,7 @@ protected:
 
    void resid_correct() {
       for (size_t obs=0; obs < F->data.nelem; obs++)
-        resid[obs] -= par-val[F->data[obs]];
+        resid[obs] -= par->val[F->data[obs]];
    }
 
    void resid_decorrect() {

@@ -31,7 +31,7 @@ public:
          resid_decorrect(k);
          collect_lhs_rhs(k);   // update lhs and rhs variables
          lhs += varmodel->weights[k];
-         par[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
+         par->val[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
          resid_correct(k);
       }
    }

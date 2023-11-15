@@ -22,7 +22,7 @@ public:
       // "as if" it is a modelResp class for the hierarchical model?
       Rcpp::Rcout << "In modelCoeff cstror\n";
       respModel=rmod;
-      resid = respModel->resid->val;
+      resid = respModel->resid.data;
       if(respModel->varModel==0) Rcpp::Rcout << "!respModel->varModel pointer is zero!\n";
       residPrec = respModel->varModel->weights.data;
       Nresid = respModel->par->nelem;

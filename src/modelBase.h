@@ -12,6 +12,9 @@
 
 #include <Rcpp.h>
 #include <vector>
+#include "parVector.h"
+
+extern std::vector<parVector**> parList;
 
 class modelBase {
    

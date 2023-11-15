@@ -17,17 +17,18 @@
 #include <cmath>
 #include "modelCoeff.h"
 #include "dataCovar.h"
+#include "parsedModelTerm.h"
 
 class modelFreg : public modelCoeff {
    
 public:
    
-   modelFreg(dcModelTerm & modeldescr, modelBase * rmod)
+   modelFreg(parsedModelTerm & modeldescr, modelResp * rmod)
          : modelCoeff(modeldescr, rmod)
    {
-      if(varType[0] != 3)
-         throw generalRbayzError("Not a numeric vector input: "+varNames[0]);
-      C = new dataCovar(varObjects[0]);
+      if(modeldescr.variableTypes[0] != 3)
+         throw generalRbayzError("Not a numeric vector input: "+modeldescr.variableNames[0]);
+      C = new dataCovar(modeldescr.variableObjects[0]);
       par = new parVector(modeldescr, 0.0l);
       par->logged=1;
    }
@@ -39,25 +40,23 @@ public:
    void sample() {
       resid_decorrect();
       collect_lhs_rhs();
-      par[0] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
+      par->val[0] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
       resid_correct();
    }
 
    void accumFit(simpleDblVector & fit) {
       for (size_t obs=0; obs < C->nelem; obs++)
-        fit[obs] += par[0] * C->data[obs];
+        fit[obs] += par->val[0] * C->data[obs];
    }
-
-protected:
 
    void resid_correct() {
       for (size_t obs=0; obs < C->nelem; obs++)
-        resid[obs] -= par[0] * C->data[obs];
+        resid[obs] -= par->val[0] * C->data[obs];
    }
 
    void resid_decorrect() {
       for (size_t obs=0; obs < C->nelem; obs++)
-        resid[obs] += par[0] * C->data[obs];
+        resid[obs] += par->val[0] * C->data[obs];
    }
 
    void collect_lhs_rhs() {

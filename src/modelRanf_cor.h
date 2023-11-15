@@ -16,6 +16,7 @@
 #include "kernelMatrix.h"
 #include "priorClasses.h"
 #include "indexTools.h"
+#include "parsedModelTerm.h"
 
 // update: ranfcor now also derive from modelFactor?
 // the matrix data here was eigenvector data, it needs to come from a variance model now.
@@ -24,11 +25,9 @@ class modelRanf_cor : public modelFactor {
 
 public:
 
-   modelRanf_cor(dcModelTerm & modeldescr, modelBase * rmod)
-         : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.priorModel)
+   modelRanf_cor(parsedModelTerm & modeldescr, modelResp * rmod)
+         : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.priormodDescr)
    {
-//      hpar.initWith(1,1.0l);
-//      hparName = "var." + parName;
       // For the moment all variance objects must be kernels
       for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
          if (modeldescr.varianceObjects[i]==R_NilValue) {
@@ -46,11 +45,14 @@ public:
          throw(generalRbayzError("Not yet ready to combine more than 2 kernels for interaction"));
       }
       // Here add a vector regcoeff (size K->ncol) to hold the regresssion on eigenvectors.
-      regcoeff.initWith(K->ncol, 0.0l);
+      // It is a parVector class so that the variance object can accept and work on it.
+      regcoeff = new parVector(modeldescr, 0.0l, K->colnames);
       // obsIndex makes new level codes matching F->labels from every row in data to K->labels, it could
       // in principle replace the F->data and no need for the obsIndex vector.
       builObsIndex(obsIndex,F,K);
       fitval.initWith(F->data.nelem, 0.0l);
+      // create the variance object - may need to move out as in ranfi
+      varmodel = new idenVarStr(modeldescr, this->regcoeff);
    }
 
    ~modelRanf_cor() {
@@ -68,7 +70,7 @@ public:
          colptr = K->data[col];
          // residual de-correction for this evec column
          for (size_t obs=0; obs < F->data.nelem; obs++)
-            resid[obs] += regcoeff[col] * colptr[obsIndex[obs]];
+            resid[obs] += regcoeff->val[col] * colptr[obsIndex[obs]];
          // Make the lhs and rhs and update this column regression
          lhs = 0.0l; rhs=0.0l;
          for (size_t obs=0; obs < F->data.nelem; obs++) {
@@ -76,20 +78,22 @@ public:
             rhs += colptr[matrixrow] * residPrec[obs] * (resid[obs]-fitval[obs]);
             lhs += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
          }
-         lhs += (1.0l / ( K->weights[col] * hpar[0]) ) ;
-         regcoeff[col] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
+         lhs += (1.0l / ( K->weights[col] * varmodel->par->val[0]) ) ;
+         regcoeff->val[col] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
          // residual correction for this column with updated regression
          for (size_t obs=0; obs < F->data.nelem; obs++)
-            fitval[obs] += regcoeff[col] * colptr[obsIndex[obs]];
+            fitval[obs] += regcoeff->val[col] * colptr[obsIndex[obs]];
       }
       for (size_t obs=0; obs < F->data.nelem; obs++)
          resid[obs] -= fitval[obs];
 
+      // here need to replace with calling varmodel->sample(), but it needs
+      // the diagVar structure.
       // update hyper-par (variance) using SSQ of random effects
       double ssq=0.0;
       for(size_t col=0; col< K->ncol; col++)
-         ssq += regcoeff[col]*regcoeff[col]/K->weights[col];
-      hpar[0] = gprior.samplevar(ssq, K->ncol);
+         ssq += regcoeff->val[col]*regcoeff->val[col]/K->weights[col];
+      varmodel->par->val[0] = gprior.samplevar(ssq, K->ncol);
    }
 
    void accumFit(simpleDblVector & fit) {
@@ -100,19 +104,19 @@ public:
    // prepForOutput puts the transform to random effects in the par-vector
    void prepForOutput() {
       for(size_t row=0; row< K->nrow; row++) {
-         par[row]=0.0l;
+         par->val[row]=0.0l;
          for(size_t col=0; col<K->ncol; col++) {
-            par[row] += K->data[col][row] * regcoeff[col];
+            par->val[row] += K->data[col][row] * regcoeff->val[col];
          }
       }
    };
 
-//   correlVarStr* varmodel;
    kernelMatrix* K;
-   simpleDblVector regcoeff;
+   parVector *regcoeff;
    simpleDblVector fitval;
    std::vector<size_t> obsIndex;
    GenericPrior gprior;
+   indepVarStr* varmodel;
 
 };
 

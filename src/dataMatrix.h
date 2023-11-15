@@ -9,12 +9,8 @@
 #ifndef dataMatrix_h
 #define dataMatrix_h
 
-#include <stdio.h>
-#include <Rcpp.h>
-#include <string>
-#include <math.h>
-#include "rbayzExceptions.h"
-#include "simpleMatrix.h"
+#include <math.h>  // needed?
+#include "labeledMatrix.h"
 
 class dataMatrix : public labeledMatrix {
 

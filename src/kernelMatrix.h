@@ -42,7 +42,7 @@ public:
       double rrankpct=90;          // rrankpct not coming correctly from the modelterm now
       size_t nColUsed = 0;
       double sumeval = 0.0l;                   // only summing the positive ones!
-      for (size_t i = 0; i<eigvalues.size() && eigvalues[i] > 0; i++) sumeval += eigvalues[i];
+      for (size_t i = 0; i < unsigned(eigvalues.size()) && eigvalues[i] > 0; i++) sumeval += eigvalues[i];
       double eval_cutoff = rrankpct * sumeval / 100.0l;
       sumeval = 0.0l;
       while (sumeval < eval_cutoff) sumeval += eigvalues[nColUsed++];

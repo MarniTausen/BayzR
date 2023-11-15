@@ -42,9 +42,11 @@ void simpleMatrix::initWith(Rcpp::NumericMatrix M, size_t useCol) {
       }
    }
 }
+
 void simpleMatrix::initWith(Rcpp::NumericMatrix M) {
    initWith(M, M.ncol());
 }
+
 // Swap contents of two matrices: the contents of this-> (object itself) are
 // swapped with content of matrix pointed to by other->. 
 void simpleMatrix::swap(simpleMatrix* other) {
@@ -61,10 +63,12 @@ void simpleMatrix::swap(simpleMatrix* other) {
    other->nrow  = oldnrow;
    other->ncol  = oldncol;
 }
-~simpleMatrix::simpleMatrix() {
+
+simpleMatrix::~simpleMatrix() {
    delete[] data;
    delete[] data0;
 }
+
 // memory alloc. This may fail, but it will be caught in try-catch in main function
 void simpleMatrix::doalloc(size_t nr, size_t nc) {
    if (nr <= 0 || nc <= 0) {

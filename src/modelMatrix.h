@@ -41,7 +41,7 @@ public:
          throw generalRbayzError("variable types in rr() model are not <factor>/<matrix>");
       F = new dataFactor(modeldescr.variableObjects[0]);
       M = new dataMatrix(modeldescr.variableObjects[1], modeldescr.variableNames[1]);
-      par = new parVector(modeldescr.variableString, 0.0l, M->colnames);
+      par = new parVector(modeldescr, 0.0l, M->colnames);
       weights.initWith(M->ncol,1.0l);
       builObsIndex(obsIndex,F,M);
       lhs = 0.0l;

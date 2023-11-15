@@ -19,7 +19,7 @@ Rcpp::IntegerVector mfactor_cpp(Rcpp::List fact_list) {
    // Check lengths and class of input columns. Input columns should be factor, integer or character,
    // but it is enough to check integer or character (factor is also integer).
    size_t nr_cols = fact_list.length();
-   size_t nr_rows, l;
+   size_t nr_rows=0, l=0;
    for (size_t col=0; col<nr_cols; col++) {
       if (Rcpp::is<Rcpp::IntegerVector>(fact_list[col])) {
          Rcpp::IntegerVector v = fact_list[col];
@@ -36,8 +36,10 @@ Rcpp::IntegerVector mfactor_cpp(Rcpp::List fact_list) {
          Rcpp::stop(s);
       }
       if(col==0) nr_rows=l;
-      else if(l != nr_rows) // unequal lengths
-         Rcpp::stop("Input columns do not all have the same length\n");
+      else {
+         if(l != nr_rows) // unequal lengths
+            Rcpp::stop("Input columns do not all have the same length\n");
+      }
    }
    
    // Make a C++ vector of strings to collect all column data as c++ text strings

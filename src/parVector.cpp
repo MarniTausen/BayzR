@@ -65,7 +65,7 @@ parVector::parVector(parsedModelTerm & modeldescr, double initval, std::vector<s
 }
 
 // Update cumulative means and variances
-void parVector::collecStats() {
+void parVector::collectStats() {
    double olddev, newdev;
    this->count_collect_stats++;
    double n = double(count_collect_stats);

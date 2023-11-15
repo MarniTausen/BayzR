@@ -36,7 +36,7 @@ public:
    parVector(parsedModelTerm & modeldescr, double initval, Rcpp::CharacterVector& labels);
    parVector(parsedModelTerm & modeldescr, double initval, std::vector<std::string>& labels);
    void common_constructor_items(parsedModelTerm & modeldescr);
-   void collecStats();
+   void collectStats();
    
 };
 

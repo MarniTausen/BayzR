@@ -16,6 +16,7 @@
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
 #include "simpleVector.h"
+#include "parVector.h"
 
 class indepVarStr : public modelVar {
 public:
@@ -29,8 +30,8 @@ public:
 class idenVarStr : public indepVarStr {
 public:
     idenVarStr(parsedModelTerm & modeldescr, parVector* coefpar) : indepVarStr(modeldescr, coefpar) {
-       std::string name="var."+coefpar->parName;
-       par = new parVector(name,1.0l);
+       par = new parVector(modeldescr,1.0l);
+       par->Name = "var." + par->Name;  // it 
        par->logged=1;
     }
     void sample() {
@@ -55,8 +56,8 @@ public:
         // add sample implementation
     }
 
-    getSetOptions(modelDescr.varianceDescr);
-    modelBVS *mixmod;
+//    getSetOptions(modeldescr.varianceDescr); // not yet defined?
+//    modelBVS *mixmod;
 };
 
 class loglinVarStr : public indepVarStr {
