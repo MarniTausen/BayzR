@@ -89,3 +89,41 @@ void simpleDblVector::doalloc(size_t n) {
    data  = new double[n];
    nelem = n;
 }
+
+/*
+I tried to merge the code of simpleIntVector and simpleDblVector by using templates,
+and I got all code units compiling, but in the end the linker still complained and it
+was not clear how to resolve that.
+
+The class with templates looked like:
+template <typename T> class simpleVector {
+public:
+   simpleVector() : nelem(0) { }
+   simpleVector(size_t n);
+   ~simpleVector();
+   T& operator[](size_t i);    // retrieve and set value using []
+   void initWith(size_t n, T initvalue);
+   template <typename T2> void initWith(T2 v);
+   template <typename T2> void initWithPart(T2 v, size_t useElem);
+   void swap(simpleVector* other);
+   T *data;
+   size_t nelem;
+private:
+   void doalloc(size_t n);
+};
+
+Some of the methods looked like:
+template <typename T> T& simpleVector<T>::operator[](size_t i) {
+   return(data[i]);
+}
+template <typename T> template<typename T2> void simpleVector<T>::initWith(T2 v) {
+   doalloc(v.size());
+   for(size_t i=0; i<nelem; i++)
+      data[i] = v[i];
+}
+
+Some of the linker errors:
+undefined reference to `void simpleVector<int>::initWith<Rcpp::Vector<13, Rcpp::PreserveStorage> >(Rcpp::Vector<13, Rcpp::PreserveStorage>)'
+undefined reference to `simpleVector<int>::operator[](unsigned int)
+undefined reference to `simpleVector<int>::~simpleVector()
+*/
