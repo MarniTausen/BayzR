@@ -53,6 +53,8 @@ public:
       delete F;
    }
    
+   // methods for single-site updates: data (de)corrections for a single covariate
+   // column, and LHS and RHS statistics for a single covariate column.
    void resid_correct(size_t col) {
       double * colptr = M->data[col];
       for (size_t obs=0; obs < F->data.nelem; obs++)
@@ -75,6 +77,10 @@ public:
          lhs += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
       }
    }
+
+   // Methods for updating groups of covariates / regressions
+
+   
 
    void accumFit(simpleDblVector & fit) {
       // There is a fit vector declared in this object, but it is not filled.
