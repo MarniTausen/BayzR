@@ -1,6 +1,7 @@
-//
-//  dataFactor.h
-//  rbayz
+//  R/bayz
+//  dataFactor.h - storing one or multiple interacting factors.
+//  Interactions are recoded into a single factor with labels A1:B1:C1 etc., this is the setup
+//  that can be used in fixed effects and uncorrelated random effects.
 //
 //  Created by Luc Janss on 03/08/2018.
 //
@@ -15,9 +16,7 @@
 
 class dataFactor {
 public:
-   // 'empty' constructor, it can be filled with addVariable()
-   dataFactor() : data(), Nvar{0} { }
-   // Other constructors
+   dataFactor();
    dataFactor(Rcpp::DataFrame &d, size_t col);
    dataFactor(std::string varname);
    dataFactor(Rcpp::RObject Rcol);

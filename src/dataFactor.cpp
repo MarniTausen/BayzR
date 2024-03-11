@@ -6,11 +6,9 @@
 #include "nameTools.h"
 #include "rbayzExceptions.h"
 
-// Constructors to setup one or first factor, with three interfaces, but
-// in the end all use setupFirstVariable() with an RObject.
-// The string-interface is interpreted as passing the name of an object
-// that should be in the R environment, and names are already checked in
-// the modelBase constructor.
+// Constructors to setup empty object or object with a first factor.
+// Following factors are then appended with addVariable()
+dataFactor() : data(), Nvar{0} { }
 dataFactor::dataFactor(Rcpp::DataFrame &d, size_t col) : data() {
    Rcpp::RObject Rcol = Rcpp::as<Rcpp::RObject>(d[col]);
    setupFirstVariable(Rcol);
