@@ -23,12 +23,7 @@ public:
    simpleIntVector() : nelem(0) { }
    simpleIntVector(size_t n);
    ~simpleIntVector();
-   int& operator[](size_t i);    // retrieving value using [] is defined,
-/*   void operator=(int v) {     // but assigning using = not yet ...
-      for(size_t i=0; i<nelem; i++)
-         data[i] = v;
-   }
-*/
+   int& operator[](size_t i);    // retrieving and setting value using []
    void initWith(Rcpp::IntegerVector v);
    void initWith(size_t n, int initvalue);
    int *data;
@@ -43,11 +38,6 @@ public:
    simpleDblVector(size_t n);
    ~simpleDblVector();
    double& operator[](size_t i);
-/*   void operator=(double v) {
-      for(size_t i=0; i<nelem; i++)
-         data[i] = v;
-   }
-*/
    void initWith(Rcpp::NumericVector v, size_t useElem);
    void initWith(Rcpp::NumericVector v);
    void initWith(size_t n, double initvalue);
