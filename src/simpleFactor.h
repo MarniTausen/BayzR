@@ -1,23 +1,26 @@
 //  R/Bayz
-//  RcppFactor.h - there is no 'native' factor in Rcpp, so I created one.
+//  simpleFactor.h - there is no 'native' factor in Rcpp, so I created one for use inside
+//     the C++ code using simpleIntVector with added labels (the R 'levels').
+//     In this shape it is not exportable/useable as a proper R factor, but it could be
+//     quite easy to transform if needed.
 //
 //  Created by Luc Janss on 11/03/2024.
 //
 
-#ifndef RcppFactor_h
-#define RcppFactor_h
+#ifndef simnpleFactor_h
+#define simpleFactor_h
 
 #include <Rcpp.h>
 #include <vector>
 #include <string>
 #include "simpleVector.h"
 
-class RcppFactor {
+class simpleFactor : public simpleIntVector {
 public:
-   RcppFactor(Rcpp::RObject col);
-   ~RcppFactor();
-   SimpleIntVector level;
+   simpleFactor(Rcpp::RObject col, std::string name);
+   ~simpleFactor() {} ;
    std::vector<std::string> labels;
+   std::string name;
 };
 
-#endif /* RcppFactor_h */
+#endif /* simpleFactor_h */
