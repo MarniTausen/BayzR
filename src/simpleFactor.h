@@ -21,6 +21,7 @@ public:
    ~simpleFactor() {} ;
    std::vector<std::string> labels;
    std::string name;
+   std::vector<std::string> back2vecstring();
 };
 
 #endif /* simpleFactor_h */

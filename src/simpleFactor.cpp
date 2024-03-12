@@ -112,3 +112,11 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
    }
 }
 
+// Convert stored factor data back to the 'full' vector of strings.
+std::vector<std::string> simpleFactor::back2vecstring() {
+   std:vector<std::string> result(nelem);
+   for(size_t i=0; i<nelem; i++) {
+      result[i] = labels[data[i]];
+   }
+   return result;
+}
