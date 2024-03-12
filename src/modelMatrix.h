@@ -4,7 +4,7 @@
 //  Defines the computational methods when design matrix is a (real) matrix of covariates.
 //  Also needs a factor to make the link to data, but is not derived from modelFactor because
 //  1) modelFactor would allocate a par-vector at the wrong size; 2) modelFactor can also handle
-//  interactions, but that is not supported in modelMatrix (it would complicated linking to the data
+//  interactions, but that is not supported in modelMatrix (it would complicate linking to the data
 //  because the interaction coded in modelFactor does not exist as a single variable in the data).
 //
 //  Created by Luc Janss on 30/08/2019.
