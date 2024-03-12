@@ -80,7 +80,7 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
       std::map<std::string, int>::iterator p;
       lev=0;        // Code the merged levels in the map
       for(p=unique_levels.begin(); p != unique_levels.end(); p++) p->second = lev++;
-      initWith(Ctempvec.size(), 0.0l);
+      initWith(Ctempvec.size(), 0);
       for(size_t i=0; i<Ctempvec.size(); i++) {  // code the data
          if(missing[i])
             data[i] = lev;
