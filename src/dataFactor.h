@@ -33,6 +33,7 @@ public:
    std::vector<std::string> labels;
    int Nvar;  // The number of variables (interactions) in this factor
    std::vector<simpleFactor *> factorList;
+   size_t nelem;
 };
 
 #endif /* dataFactor_h */

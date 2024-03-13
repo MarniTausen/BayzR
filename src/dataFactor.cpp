@@ -22,27 +22,28 @@ dataFactor::dataFactor(Rcpp::RObject Rcol) : data() {
 */
 
 dataFactor::dataFactor(std::vector<Rcpp::RObject> variableObjects, std::vector<std::string> variableNames) {
-   for(size_t i=0: i<variableObjects.size(); i++)
+   for(size_t i=0; i<variableObjects.size(); i++)
       factorList.push_back(new simpleFactor(variableObjects[i],variableNames[i]));
    size_t Ndata=factorList[0]->nelem;
    for(size_t i=1; factorList.size(); i++) {  // double check that the sizes of the factors are identical
       if( factorList[i]->nelem != Ndata) {
          std::string s="Interacting factors do not have the same length:";
          for (size_t j=0; j<factorList.size(); j++) {
-            s += " " + variableNames[j] + "(" + factorList[j]->nelem + ")";
+            s += " " + variableNames[j] + "(" + std::to_string(factorList[j]->nelem) + ")";
          }
          throw generalRbayzError(s);
       }
    }
    if(factorList.size()==1) {          // for only one factor, we're done quickly ...
-      levcode = &(factorList[0]);      // shallow copy is OK
-      labels = factorList[0]->labels;  // two vector<string>, deep copy, shallow copy?
+      levcode.data = factorList[0]->data;
+      levcode.nelem = factorList[0]->nelem;
+      labels = factorList[0]->labels;
    }
    else {         // multiple interacting factors
       // first build vector of combined labels matching the data
       std::vector<std::string> new_data_labels(factorList[0]->back2vecstring());
       for(size_t i=1; i<factorList.size(); i++) {
-         std::vector<std::string> next_strings(factorList[i]->back2vecstring())
+         std::vector<std::string> next_strings(factorList[i]->back2vecstring());
          for(size_t j=0; j<Ndata; j++)
             new_data_labels[j] += "." + next_strings[j];
       }
@@ -51,7 +52,7 @@ dataFactor::dataFactor(std::vector<Rcpp::RObject> variableObjects, std::vector<s
       for(size_t i=0; i<new_data_labels.size(); i++)
             new_unique_labels[new_data_labels[i]];
       std::map<std::string, int>::iterator p;
-      lev=0;        // Code the merged levels in the map
+      size_t lev=0;        // Code the merged levels in the map
       for(p=new_unique_labels.begin(); p != new_unique_labels.end(); p++) p->second = lev++;
       levcode.initWith(Ndata, 0);
       for(size_t i=0; i<Ndata; i++) {  // code the data
@@ -63,10 +64,11 @@ dataFactor::dataFactor(std::vector<Rcpp::RObject> variableObjects, std::vector<s
       for(p=new_unique_labels.begin(); p != new_unique_labels.end(); p++) labels.push_back(p->first);
    }
    Nvar=factorList.size();
+   nelem=Ndata;
 }
 
 dataFactor::~dataFactor() {
-   for(size_t i=0: i<factorList.size(); i++)
+   for(size_t i=0; i<factorList.size(); i++)
       delete factorList[i];
 }
 

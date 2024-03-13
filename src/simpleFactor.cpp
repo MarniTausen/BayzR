@@ -37,7 +37,7 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
       if (Rcpp::sum(missing) > 0) {
          labels.push_back("NA");
          size_t last_level = labels.size()-1;
-         for(size_t row=0; row < unsigned(tempvec.size()); row++) {
+         for(size_t row=0; row < unsigned(Rtempvec.size()); row++) {
             if(missing[row]) data[row] = last_level;
          }
       }
@@ -51,7 +51,7 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
          if(!missing[i]) unique_levels[Rtempvec[i]];
       }
       std::map<int, int>::iterator p;
-      lev=0;        // Code the merged levels in the map
+      size_t lev=0;        // Code the merged levels in the map
       for(p=unique_levels.begin(); p != unique_levels.end(); p++) p->second = lev++;
       initWith(Rtempvec.size(), 0.0l);
       for(int i=0; i<Rtempvec.size(); i++) {  // code the data
@@ -66,7 +66,7 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
       labels.reserve(lev);
       for(p=unique_levels.begin(); p != unique_levels.end(); p++)
          labels.push_back(std::to_string(p->first));
-      if(sum(missing)>0) labels_push_back("NA");
+      if(sum(missing)>0) labels.push_back("NA");
    }
    else if (Rcpp::is<Rcpp::CharacterVector>(col) && !Rf_isMatrix(col)) {
       Rcpp::CharacterVector Rtempvec = Rcpp::as<Rcpp::CharacterVector>(col);
@@ -78,7 +78,7 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
          if(!missing[i]) unique_levels[Ctempvec[i]];
       }
       std::map<std::string, int>::iterator p;
-      lev=0;        // Code the merged levels in the map
+      size_t lev=0;        // Code the merged levels in the map
       for(p=unique_levels.begin(); p != unique_levels.end(); p++) p->second = lev++;
       initWith(Ctempvec.size(), 0);
       for(size_t i=0; i<Ctempvec.size(); i++) {  // code the data
@@ -92,7 +92,7 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
       // fill labels vector
       labels.reserve(lev);
       for(p=unique_levels.begin(); p != unique_levels.end(); p++) labels.push_back(p->first);
-      if(sum(missing)>0) labels_push_back("NA");
+      if(sum(missing)>0) labels.push_back("NA");
    }
    else if(Rcpp::is<Rcpp::LogicalVector>(col)  && !Rf_isMatrix(col)) {
       Rcpp::IntegerVector Rtempvec = Rcpp::as<Rcpp::IntegerVector>(col);
@@ -102,7 +102,7 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
       labels.push_back("TRUE");
       if (Rcpp::sum(missing) > 0) {
          labels.push_back("NA");
-         for(size_t row=0; row < unsigned(tempvec.size()); row++) {
+         for(size_t row=0; row < unsigned(Rtempvec.size()); row++) {
             if(missing[row]) data[row] = 2;
          }
       }
@@ -114,7 +114,7 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
 
 // Convert stored factor data back to the 'full' vector of strings.
 std::vector<std::string> simpleFactor::back2vecstring() {
-   std:vector<std::string> result(nelem);
+   std::vector<std::string> result(nelem);
    for(size_t i=0; i<nelem; i++) {
       result[i] = labels[data[i]];
    }

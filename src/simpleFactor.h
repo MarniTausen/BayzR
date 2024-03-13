@@ -7,7 +7,7 @@
 //  Created by Luc Janss on 11/03/2024.
 //
 
-#ifndef simnpleFactor_h
+#ifndef simpleFactor_h
 #define simpleFactor_h
 
 #include <Rcpp.h>

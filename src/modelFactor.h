@@ -27,13 +27,7 @@ public:
    modelFactor(parsedModelTerm & modeldescr, modelResp * rmod)
          : modelCoeff(modeldescr, rmod)
    {
-      F = new dataFactor();
-      for(size_t i=0; i<modeldescr.variableNames.size(); i++) {
-         if (modeldescr.variableTypes[i] != 1)
-            throw generalRbayzError("Variable is not a factor: "+modeldescr.variableNames[i]);
-         F->addVariable(modeldescr.variableObjects[i]);
-      }
-
+      F = new dataFactor(modeldescr.variableObjects, modeldescr.variableNames);
       par = new parVector(modeldescr, 0.0l, F->labels);
       lhs.resize(F->labels.size(),0);
       rhs.resize(F->labels.size(),0);
@@ -44,21 +38,21 @@ public:
    }
 
    void accumFit(simpleDblVector & fit) {
-      for (size_t obs=0; obs < F->data.nelem; obs++)
-        fit[obs] += par->val[F->data[obs]];
+      for (size_t obs=0; obs < F->nelem; obs++)
+        fit[obs] += par->val[F->levcode[obs]];
    }
 
    
 protected:
 
    void resid_correct() {
-      for (size_t obs=0; obs < F->data.nelem; obs++)
-        resid[obs] -= par->val[F->data[obs]];
+      for (size_t obs=0; obs < F->nelem; obs++)
+        resid[obs] -= par->val[F->levcode[obs]];
    }
 
    void resid_decorrect() {
-      for (size_t obs=0; obs < F->data.nelem; obs++)
-        resid[obs] += par->val[F->data[obs]];
+      for (size_t obs=0; obs < F->nelem; obs++)
+        resid[obs] += par->val[F->levcode[obs]];
    }
 
    void collect_lhs_rhs() {
@@ -67,8 +61,8 @@ protected:
          rhs[k] = 0.0;
          lhs[k] = 0.0;
       }
-      for (size_t obs=0; obs < F->data.nelem; obs++) {
-         k=F->data[obs];
+      for (size_t obs=0; obs < F->nelem; obs++) {
+         k=F->levcode[obs];
          rhs[k] += residPrec[obs] * resid[obs];
          lhs[k] += residPrec[obs];
       }

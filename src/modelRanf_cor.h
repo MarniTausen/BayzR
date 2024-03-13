@@ -50,7 +50,7 @@ public:
       // obsIndex makes new level codes matching F->labels from every row in data to K->labels, it could
       // in principle replace the F->data and no need for the obsIndex vector.
       builObsIndex(obsIndex,F,K);
-      fitval.initWith(F->data.nelem, 0.0l);
+      fitval.initWith(F->nelem, 0.0l);
       // create the variance object - may need to move out as in ranfi
       varmodel = new idenVarStr(modeldescr, this->regcoeff);
    }
@@ -64,16 +64,16 @@ public:
       double lhs, rhs;
       size_t matrixrow;
       double* colptr;
-      for (size_t obs=0; obs < F->data.nelem; obs++)
+      for (size_t obs=0; obs < F->nelem; obs++)
          fitval[obs] = 0.0l;
       for(size_t col=0; col < K->ncol; col++) {
          colptr = K->data[col];
          // residual de-correction for this evec column
-         for (size_t obs=0; obs < F->data.nelem; obs++)
+         for (size_t obs=0; obs < F->nelem; obs++)
             resid[obs] += regcoeff->val[col] * colptr[obsIndex[obs]];
          // Make the lhs and rhs and update this column regression
          lhs = 0.0l; rhs=0.0l;
-         for (size_t obs=0; obs < F->data.nelem; obs++) {
+         for (size_t obs=0; obs < F->nelem; obs++) {
             matrixrow = obsIndex[obs];
             rhs += colptr[matrixrow] * residPrec[obs] * (resid[obs]-fitval[obs]);
             lhs += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
@@ -81,10 +81,10 @@ public:
          lhs += (1.0l / ( K->weights[col] * varmodel->par->val[0]) ) ;
          regcoeff->val[col] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
          // residual correction for this column with updated regression
-         for (size_t obs=0; obs < F->data.nelem; obs++)
+         for (size_t obs=0; obs < F->nelem; obs++)
             fitval[obs] += regcoeff->val[col] * colptr[obsIndex[obs]];
       }
-      for (size_t obs=0; obs < F->data.nelem; obs++)
+      for (size_t obs=0; obs < F->nelem; obs++)
          resid[obs] -= fitval[obs];
 
       // here need to replace with calling varmodel->sample(), but it needs
@@ -97,7 +97,7 @@ public:
    }
 
    void accumFit(simpleDblVector & fit) {
-      for (size_t obs=0; obs < F->data.nelem; obs++)
+      for (size_t obs=0; obs < F->nelem; obs++)
         fit[obs] += fitval[obs];
    }
 

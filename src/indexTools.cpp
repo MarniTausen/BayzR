@@ -16,7 +16,7 @@ inline bool compString2Pair(const std::pair<std::string, size_t> & p, const std:
 void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, labeledMatrix *M) {
    int errors=0;
 //   Rcpp::Rcout << "Going to resize obsIndex to " << F->data.size() << "\n";
-   obsIndex.resize(F->data.nelem,0);
+   obsIndex.resize(F->nelem,0);
    // Build a sorted list of the matrix rownames paired with matrix entry-rows
    std::vector< std::pair<std::string, size_t> > matLabelsSorted;
    for(size_t i=0; i< M->rownames.size(); i++)
@@ -25,8 +25,8 @@ void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, labeledMatrix *
    // Make the index that links observations to matrix rows
    std::string s;
    std::vector< std::pair<std::string, size_t> >::iterator it;
-   for(size_t i=0; i<F->data.nelem; i++) {
-      s = F->labels[F->data[i]];
+   for(size_t i=0; i<F->nelem; i++) {
+      s = F->labels[F->levcode[i]];
       if ( (it = std::lower_bound(matLabelsSorted.begin(), matLabelsSorted.end(), s, compString2Pair)) != matLabelsSorted.end()) {
          obsIndex[i]=it->second;
       }

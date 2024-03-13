@@ -54,13 +54,13 @@ public:
    // column, and LHS and RHS statistics for a single covariate column.
    void resid_correct(size_t col) {
       double * colptr = M->data[col];
-      for (size_t obs=0; obs < F->data.nelem; obs++)
+      for (size_t obs=0; obs < F->nelem; obs++)
          resid[obs] -= par->val[col] * colptr[obsIndex[obs]];
    }
 
    void resid_decorrect(size_t col) {
       double * colptr = M->data[col];
-      for (size_t obs=0; obs < F->data.nelem; obs++)
+      for (size_t obs=0; obs < F->nelem; obs++)
          resid[obs] += par->val[col] * colptr[obsIndex[obs]];
    }
 
@@ -68,7 +68,7 @@ public:
       lhs = 0.0; rhs=0.0;
       size_t matrixrow;
       double * colptr = M->data[col];
-      for (size_t obs=0; obs < F->data.nelem; obs++) {
+      for (size_t obs=0; obs < F->nelem; obs++) {
          matrixrow = obsIndex[obs];
          rhs += colptr[matrixrow] * residPrec[obs] * resid[obs];
          lhs += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
@@ -85,7 +85,7 @@ public:
       double * colptr;
       for(size_t k=0; k < M->ncol; k++) {
          colptr = M->data[k];
-         for (size_t obs=0; obs < F->data.nelem; obs++)
+         for (size_t obs=0; obs < F->nelem; obs++)
             fit[obs] += par->val[k] * colptr[obsIndex[obs]];
       }
    }
