@@ -17,6 +17,7 @@
 #include "rbayzExceptions.h"
 #include "simpleVector.h"
 #include "parVector.h"
+#include <unistd.h>
 
 class indepVarStr : public modelVar {
 public:
@@ -28,12 +29,14 @@ public:
 };
 
 class idenVarStr : public indepVarStr {
+
 public:
     idenVarStr(parsedModelTerm & modeldescr, parVector* coefpar) : indepVarStr(modeldescr, coefpar) {
-       par = new parVector(modeldescr,1.0l);
-       par->Name = "var." + par->Name;  // it 
+       par = new parVector(modeldescr, 1.0l, "var");
        par->logged=1;
+       par->varianceStruct="IDEN";
     }
+
     void sample() {
       double ssq=0.0;
       for(size_t k=0; k < coefpar->nelem; k++)

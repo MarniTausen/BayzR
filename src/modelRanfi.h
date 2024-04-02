@@ -11,6 +11,7 @@
 #include <Rcpp.h>
 #include "modelFactor.h"
 #include "indepVarStr.h"
+//#include <unistd.h>
 
 class modelRanfi : public modelFactor {
 
@@ -35,6 +36,7 @@ public:
          par->val[k] = R::rnorm((rhs[k]/lhs[k]), sqrt(1.0/lhs[k]));
       }
       resid_correct();
+      varmodel->sample();
    }
 
    indepVarStr* varmodel;

@@ -64,7 +64,7 @@
 #' @param data    Data frame to collect data from
 #' @param VE      Model for the residual variance
 #' @param chain   Vector with length, burn-in and skip for the chain to run.
-#' @param silent  Boolean to switch on/off printing to R console
+#' @param verbose Integer to regulate printing to R console: 0(quiet), 1(some), >2(more)
 #' @param ...     Additional parameters passed onto the Model function.
 #'
 #' @return A fitted bayz model
@@ -73,7 +73,7 @@
 #'
 #' @useDynLib BayzR, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
-bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), silent=FALSE, ...){
+bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), verbose=1, ...){
 	if(!inherits(model,"formula")) {
 		stop("The first argument is not a valid formula")
 	}
@@ -87,7 +87,7 @@ bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), silent=FALSE, ...){
         VE=deparse(VE)
     }
     chain <- as.integer(chain)
-    result <- rbayz_cpp(model, VE, data, chain, silent)
+    result <- rbayz_cpp(model, VE, data, chain, verbose)
     class(result) <- "bayz"
     #result[['modelname']] <- fct()
     #result[['modelfunction']] <- deparse(substitute(fct))

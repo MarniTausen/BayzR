@@ -19,6 +19,7 @@
 #include <cmath>
 #include "modelCoeff.h"
 #include "dataFactor.h"
+//#include <unistd.h>
 
 class modelFactor : public modelCoeff {
    

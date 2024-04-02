@@ -13,6 +13,7 @@
 #include "modelBase.h"
 #include "indepVarStr.h"
 #include "simpleVector.h"
+#include "parVector.h"
 
 class modelResp : public modelBase {
    
@@ -29,22 +30,27 @@ public:
          throw generalRbayzError("Response variable (" + modeldescr.variableString + 
                                     ") is not an R integer or numerical vector");
       }
+      // The vectors in the response model are initialized as:
+      //  tempY(origdata)  Y.data par(fitted) resid
+      //         y           y        0         y  
+      //        NA           0        0         0
       Rcpp::NumericVector tempY = Rcpp::as<Rcpp::NumericVector>(modeldescr.variableObjects[0]);
       Y.initWith(tempY);
       Rcpp::IntegerVector labels_int = Rcpp::seq_len(tempY.size());
       Rcpp::CharacterVector labels = Rcpp::as<Rcpp::CharacterVector>(labels_int);
-      par=new parVector(modeldescr,tempY,labels);
-//    overwrite default naming made in modelBase constructor
-      par->Name="fval."+modeldescr.variableString;
+      par = new parVector(modeldescr,0.0l,labels,"fitv");
+      resid = new parVector(modeldescr, 0.0l, labels,"resid");
       missing = Rcpp::is_na(tempY);
       for(size_t row=0; row<par->nelem; row++) {
          if(missing[row]) {
-            par->val[row] = 0.0l;
             Y.data[row] = 0.0l;
+            resid->val[row] = 0.0l;
          }
+         else
+            resid->val[row] = Y.data[row];
       }
-      resid.initWith(par->nelem, 0.0l);
-      varModel = new idenVarStr(modeldescr,this->par);
+      // here not good. 1) idenVarstr needs a pointer to parVector. 2) it needs to use the residuals, not fitted values.
+      varModel = new idenVarStr(modeldescr,resid);
    }
    
    ~modelResp() {
@@ -56,12 +62,12 @@ public:
       // it is possible to keep track of these modifications and collect fitted values for missing data.
       for(size_t row=0; row<par->nelem; row++) {
          if(missing[row]) {
-            par->val[row] = Y.data[row] - resid.data[row];
-            resid.data[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
-            Y.data[row] = par->val[row] + resid.data[row];
+            par->val[row] = Y.data[row] - resid->val[row];
+            resid->val[row] = R::rnorm( 0.0l, sqrt(1.0/varModel->weights[row]));
+            Y.data[row] = par->val[row] + resid->val[row];
          }
          else {
-            par->val[row] = Y.data[row] - resid.data[row];
+            par->val[row] = Y.data[row] - resid->val[row];
          }
       }
 /*    variance update is now moved to indepVar objects
@@ -78,11 +84,17 @@ public:
          residPrec[obs] = temp;
 */
       varModel->sample();
+/*         Rcpp::Rcout << "resid";
+         for(size_t i=0; i<10; i++) Rcpp::Rcout << " " << resid.data[i];
+         Rcpp::Rcout << "\n";
+         Rcpp::Rcout << "fitv";
+         for(size_t i=0; i<10; i++) Rcpp::Rcout << " " << par->val[i];
+         Rcpp::Rcout << "\n";*/
    }
 
    indepVarStr* varModel;
    Rcpp::LogicalVector missing;
-   simpleDblVector resid;
+   parVector* resid;
 
    simpleDblVector Y;
 

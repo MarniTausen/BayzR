@@ -36,7 +36,7 @@ public:
       // would know how to convert them (e.g. integer vector to factor, dataframe to matrix).
       if( ! (modeldescr.variableTypes[0]==1 && modeldescr.variableTypes[1]==6) )
          throw generalRbayzError("variable types in rr() model are not <factor>/<matrix>");
-      F = new dataFactor(modeldescr.variableObjects[0]);
+      F = new dataFactor(modeldescr.variableObjects[0], modeldescr.variableNames[0]);
       M = new dataMatrix(modeldescr.variableObjects[1], modeldescr.variableNames[1]);
       par = new parVector(modeldescr, 0.0l, M->colnames);
       weights.initWith(M->ncol,1.0l);

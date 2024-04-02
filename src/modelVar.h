@@ -12,13 +12,15 @@
 #include "modelBase.h"
 #include "priorClasses.h"
 #include "parsedModelTerm.h"
+//#include <unistd.h>
 
 class modelVar : public modelBase {
    
 public:
 
    modelVar(parsedModelTerm & modeldescr)
-      : modelBase(), gprior(modeldescr.priormodDescr) { }
+      : modelBase(), gprior(modeldescr.priormodDescr) {
+   }
 
    virtual ~modelVar() { }
    

@@ -21,11 +21,21 @@ dataFactor::dataFactor(Rcpp::RObject Rcol) : data() {
 }
 */
 
+dataFactor::dataFactor(Rcpp::RObject oneVarObject, std::string OneVarName) {
+   std::vector<Rcpp::RObject> temp_var_objects = {oneVarObject};
+   std::vector<std::string> temp_var_names = {OneVarName};
+   run_constructor(temp_var_objects, temp_var_names);
+}
+
 dataFactor::dataFactor(std::vector<Rcpp::RObject> variableObjects, std::vector<std::string> variableNames) {
+   run_constructor(variableObjects, variableNames);
+}
+
+void dataFactor::run_constructor(std::vector<Rcpp::RObject> variableObjects, std::vector<std::string> variableNames) {
    for(size_t i=0; i<variableObjects.size(); i++)
       factorList.push_back(new simpleFactor(variableObjects[i],variableNames[i]));
    size_t Ndata=factorList[0]->nelem;
-   for(size_t i=1; factorList.size(); i++) {  // double check that the sizes of the factors are identical
+   for(size_t i=1; i<factorList.size(); i++) {  // double check that the sizes of the factors are identical
       if( factorList[i]->nelem != Ndata) {
          std::string s="Interacting factors do not have the same length:";
          for (size_t j=0; j<factorList.size(); j++) {

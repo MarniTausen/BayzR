@@ -17,19 +17,25 @@
 #include "simpleVector.h"
 #include "modelVar.h"
 #include "indepVarStr.h"
+#include <unistd.h>
 
 // [[Rcpp::plugins("cpp11")]]
 
-// !Global variable! Vector to collect pointers to all par-vectors pointers in the model-objects.
-// I thought this was too annoying to pass around between all constructors, now the modelBase class
-// takes care that these pointers are collected.
+// !Global variable! Vector to collect pointers to all par-vector pointers in the model-objects.
+// The modelBase class is collecting these pointers, and it can only access it if parList is a global
+// variable, OR all model objects should be updated to pass it around in the constructor.
+// There is also a problem with the global variable that it was persisting between function calls,
+// therefore it needed a parList.clear() at the start of main().
+// Still consider to put it in the model-objects constructor interfaces? Or is there another way?
 std::vector<parVector**> parList;
 
 // [[Rcpp::export]]
 Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputData,
-                     Rcpp::IntegerVector chain, int silent)
+                     Rcpp::IntegerVector chain, int verbose)
 //                   note VE must be a string, it will be converted below
 {
+
+   parList.clear();
 
    // Vectors for messages defined outside the try-block, so it remains available in catch() part.
    Rcpp::CharacterVector Messages;
@@ -45,13 +51,14 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
                                     // response will be modelTerms[0]
                                     // intercept is inserted as mn(0) or mn(1)
       lastDone="Parsing model";
-      if (silent==9) Rcpp::Rcout << "Parsing model done\n";
+      if (verbose > 1) Rcpp::Rcout << "Parsing model done\n";
 
       // build response object - including response variance structure
       std::string VEstr =  Rcpp::as<std::string>(VE);
       parsedModelTerm parsedResponseVariable(modelTerms[0], VEstr, inputData);
       // here still need to add selecting different response objects based on variance structure
       modelResp* modelR = new modelResp(parsedResponseVariable);   
+      if (verbose > 1) Rcpp::Rcout << "Response model-object done\n";
 
       // Build vector of modelling objects from RHS terms (loop from term=1)
       std::vector<modelBase *> model;
@@ -60,7 +67,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          if(pmt.funcName=="mn") model.push_back(new modelMean(pmt, modelR));
          else if(pmt.funcName=="fx") model.push_back(new modelFixf(pmt, modelR));
          else if(pmt.funcName=="rn") {
-            if(pmt.varianceStruct=="iden")
+            if(pmt.varianceStruct=="iden" || pmt.varianceStruct=="notgiven")
                model.push_back(new modelRanFacIden(pmt, modelR));
             else
                throw generalRbayzError("There is no class to model rn(...) with Variance structure " + pmt.varianceDescr);
@@ -70,7 +77,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          }
       } // end for(term ...) to build model
       lastDone="Model building";
-      if (silent==9) Rcpp::Rcout << "Model building done\n";
+      if (verbose>1) Rcpp::Rcout << "Model building done\n";
 
       // compute number of residuals (data points) and number of parameters in the model.
       // Response object is built first and parList[0] has residuals/fitted values.
@@ -78,8 +85,20 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       size_t nParameters = 0;
       for(size_t i=1; i<parList.size(); i++)
          nParameters += (*(parList[i]))->nelem;
-      if(!silent) Rcpp::Rcout << "Model built with " << nResiduals << " data points (incl NA) and "
+      if(verbose > 0) Rcpp::Rcout << "Model built with " << nResiduals << " data points (incl NA) and "
                               << nParameters << " parameters\n";
+
+      if(verbose > 2) {
+         Rcpp::Rcout << "Model-object overview (#, Name, Size, Logged, first Labels) after model building:\n";
+         for(size_t i=0; i<parList.size(); i++) {
+            Rcpp::Rcout << i << " " << (*(parList[i]))->Name << " " << (*(parList[i]))->nelem << 
+                    " " << (*(parList[i]))->logged;
+            Rcpp::Rcout << " " << (*(parList[i]))->Labels[0];
+            if((*(parList[i]))->nelem > 1) Rcpp::Rcout << " " << (*(parList[i]))->Labels[1];
+            if((*(parList[i]))->nelem > 2) Rcpp::Rcout << " ...";
+            Rcpp::Rcout << "\n";
+         }
+      }
 
       // Make parameter name disambiguation - this skips residuals (parList[0])
       {
@@ -92,11 +111,11 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          for(int i=0; i < name_matches.size(); i++) {
             if(name_matches[i] != (i+1))  {  // the i'th name matches (name_matches[i]-1)'th name in the list
                if(numb_matches[name_matches[i]-1] == 0) {
-                  parNames[name_matches[i]-1] += "1";
+                  parNames[name_matches[i]-1] += ".1";
                   numb_matches[name_matches[i]-1]++; 
                }
                numb_matches[name_matches[i]-1]++;
-               parNames[i] += std::to_string(numb_matches[name_matches[i]-1]);
+               parNames[i] += "." + std::to_string(numb_matches[name_matches[i]-1]);
             }
             found_duplicates=TRUE;
          }
@@ -125,33 +144,37 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
 
       // Find the number of traced parameters and set-up matrix to store samples of traced parameters
       size_t nTracedParam=0;
-      if(!silent) Rcpp::Rcout << "Saving full traces for:";
+      if(verbose>0) Rcpp::Rcout << "Saving full traces for:";
       for(size_t i=0; i<parList.size(); i++) {
          if( (*(parList[i]))->logged ) {
             nTracedParam += (*(parList[i]))->nelem;
-            if(!silent) {
+            if(verbose>0) {
                for(size_t j=0; j< (*(parList[i]))->nelem; j++) Rcpp::Rcout << " " << (*(parList[i]))->Labels[j];
             }
          }
       }
-      if(!silent) Rcpp::Rcout << "\n";
+      if(verbose>0) Rcpp::Rcout << "\n";
       Rcpp::NumericMatrix tracedSamples(nSamples,nTracedParam);
 
       // to show convergence set "nShow" interval and make vector to hold previously shown solutions
       int nShow = chain[0]/10;
+      if( nShow < 1) nShow=1;
       Rcpp::NumericVector prevShowConv(int(nTracedParam), 1.0l);
       lastDone="Preparing to run MCMC";
-      if (silent==9) Rcpp::Rcout << "Preparing to run MCMC done\n";
+      if (verbose>1) Rcpp::Rcout << "Preparing to run MCMC done\n";
 
       // Run the MCMC chain
       // ------------------
 
-      if(!silent) {
-         Rcpp::Rcout << "Cycle, cumulative postMeans for traced parameters and [convergence]\n:";
+      if(verbose>0) {
+         Rcpp::Rcout << "Cycle, cumulative postMeans for traced parameters and [convergence]\n";
       }
       for (int cycle=1, save=0, showconv=0; cycle <= chain[0]; cycle++) {
-         for(size_t mt=0; mt<model.size(); mt++)
-            model[mt]->sample();
+         modelR->sample();
+         for(size_t mt=0; mt<model.size(); mt++) model[mt]->sample();
+/*         for(size_t i=0; i<parList.size(); i++)
+            Rcpp::Rcout << " " << (*(parList[i]))->val[0];
+         Rcpp::Rcout << "\n";*/
          // At the 'skip' intervals (and after burn-in): 1) update posterior statistics using
          // collectStats(); 2) save MCMC samples for the 'traced' parameters 
          if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {  // save cycle
@@ -166,7 +189,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
             }
             save++;  // save is counter for output (saved) cycles
          }
-         if (cycle % nShow == 0 && !silent) {  // show convergence
+         if (cycle % nShow == 0 && verbose>0) {  // show convergence
             Rcpp::Rcout << cycle;
             double conv_change=0.0l, postmean;
             for(size_t i=0, col=0; i<parList.size(); i++) {
@@ -181,6 +204,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
                      col++;
                   }
                }
+
             }
             conv_change /= double(nTracedParam);
             // do not show conv_change the first time
@@ -190,17 +214,17 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          }
       } // end for(cycle ...)
       lastDone="Finished running MCMC";
-      if (silent==9) Rcpp::Rcout << "Finished running MCMC\n";
+      if (verbose>1) Rcpp::Rcout << "Finished running MCMC\n";
 
       // Build tables to go in the output:
       // ---------------------------------
 
-      // 1. "Parameter" information table (this is not including residuals)
+      // 1. "Parameter" information table
       Rcpp::CharacterVector parNames, parModelFunc, parVariables, parVarStruct;
       Rcpp::IntegerVector parSizes, parEstFirst, parEstLast, parLogged;
-      for(size_t i=1, row=1; i<parList.size(); i++) {
+      for(size_t i=0, row=1; i<parList.size(); i++) {
          parNames.push_back((*(parList[i]))->Name);
-         parModelFunc.push_back((*(parList[i]))->Name);
+         parModelFunc.push_back((*(parList[i]))->modelFunction);
          parVariables.push_back((*(parList[i]))->variables);
          parVarStruct.push_back((*(parList[i]))->varianceStruct);
          parSizes.push_back((*(parList[i]))->nelem);
@@ -210,11 +234,11 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          parLogged.push_back((*(parList[i]))->logged);
       }
       Rcpp::DataFrame parInfo = Rcpp::DataFrame::create
-               (Rcpp::Named("Model")=parModelFunc, Rcpp::Named("Variables")=parVariables, 
-                Rcpp::Named("Variance")=parVarStruct,
+               (Rcpp::Named("ModelTerm")=parModelFunc, Rcpp::Named("Variables")=parVariables, 
+                Rcpp::Named("Param")=parNames,Rcpp::Named("Variance")=parVarStruct,
                 Rcpp::Named("Size")=parSizes, Rcpp::Named("Start")=parEstFirst,
                 Rcpp::Named("End")=parEstLast, Rcpp::Named("Logged")=parLogged);
-      parInfo.attr("row.names") = parNames;
+//      parInfo.attr("row.names") = parNames;
 
       // 2. "Estimates" table with parName, parLabels, postMean and postSD
       Rcpp::CharacterVector allParNames(nParameters);
@@ -250,8 +274,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
             }
          }
       }
-            Rcpp::colnames(tracedSamples) = sampleColNames;
-            Rcpp::rownames(tracedSamples) = sampleRowNames; 
+      Rcpp::colnames(tracedSamples) = sampleColNames;
+      Rcpp::rownames(tracedSamples) = Rcpp::as<Rcpp::CharacterVector>(outputCycleNumbers); 
       /* I couldn't get this colnames() and rownames() working, it gives a compiler error that the Rcpp::NumericMatrix
          can't be conveted to SEXP object - but online examples show this should work ...
          */
@@ -284,7 +308,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       result.push_back(residuals,"Residuals");
       result.push_back(chain,"Chain");
       lastDone="Filling return list";
-      if (silent==9) Rcpp::Rcout << "Ready filling return list\n";
+      if (verbose>1) Rcpp::Rcout << "Ready filling return list\n";
 
       // normal termination
       // ------------------
@@ -311,7 +335,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
    Rcpp::List result = Rcpp::List::create();
    result.push_back(Messages.size(),"nError");
    result.push_back(Messages,"Errors");
-   Rcpp::Rcout << "Bayz finished with errors - use summary() or check $Errors" << std::endl;
+   Rcpp::Rcout << "Bayz finished with error: " << Messages[Messages.size()-1] << std::endl;
+   Rcpp::Rcout << "There may be more messages or errors - use summary() or check <output>$Errors to see all" << std::endl;
    return(result);
 
 }  // end rbayz_cpp main function

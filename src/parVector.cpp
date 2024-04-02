@@ -7,16 +7,19 @@ using Rsize_t = long long int;
 
 // common things for all contructors, this one is called at the end of every
 // constructor because nelem must be set.
-void parVector::common_constructor_items(parsedModelTerm & modeldescr) {
-   variables=modeldescr.variableString;  // as original, e.g A|B:C
-   Name=modeldescr.variableString;    // R friendly version with dots, e.g. A.B.C
+void parVector::common_constructor_items(parsedModelTerm & modeldescr, std::string namePrefix) {
+   variables=modeldescr.variableString;        // as original, e.g A|B:C
+   if(namePrefix=="")                          // Name will be made R friendly below replacing :/| with dots
+      Name = modeldescr.variableString;
+   else
+      Name=namePrefix + "." + modeldescr.variableString;
    size_t pos=0;
-   while(Name.find_first_of(":|/",pos) != std::string::npos) {
+   while( (pos=Name.find_first_of(":|/",pos)) != std::string::npos) {
       Name[pos]='.';
       pos++;  // start re-search after currently replaced character
    }
    modelFunction=modeldescr.funcName;
-   varianceStruct=modeldescr.varianceStruct;
+   varianceStruct="-";
    val=Values.data;
    postMean.initWith(nelem,0.0l);
    postVar.initWith(nelem,0.0l);
@@ -27,18 +30,25 @@ parVector::parVector(parsedModelTerm & modeldescr, double initval) : Values() {
    nelem=1;
    Values.initWith(1, initval);
    Labels.push_back(modeldescr.variableString);
-   common_constructor_items(modeldescr);
+   common_constructor_items(modeldescr, "");
 }
 
-// response model needs a constructor with a vector of values and vector of labels
-parVector::parVector(parsedModelTerm & modeldescr, Rcpp::NumericVector initval, Rcpp::CharacterVector& inplabels)
-          : Values() {
+parVector::parVector(parsedModelTerm & modeldescr, double initval, std::string namePrefix) : Values() {
+   nelem=1;
+   Values.initWith(1, initval);
+   Labels.push_back(namePrefix + "." + modeldescr.variableString);
+   common_constructor_items(modeldescr, namePrefix);
+}
+
+// response model needs a constructor with a vector of values and vector of labels, and also uses namePrefix
+parVector::parVector(parsedModelTerm & modeldescr, double initval, Rcpp::CharacterVector& inplabels,
+            std::string namePrefix) : Values() {
    nelem = inplabels.size();
-   Values.initWith(initval);
+   Values.initWith(nelem, initval);
    Labels.resize(inplabels.size());
    for(Rsize_t i=0; i<inplabels.size(); i++)
       Labels[i]=inplabels[i];
-   common_constructor_items(modeldescr);
+   common_constructor_items(modeldescr, namePrefix);
 }
 
 // many other model objects can initialize from a single scalar value and labels, the size
@@ -50,7 +60,7 @@ parVector::parVector(parsedModelTerm & modeldescr, double initval, Rcpp::Charact
    Labels.resize(inplabels.size());
    for(Rsize_t i=0; i<inplabels.size(); i++)
       Labels[i]=inplabels[i];
-   common_constructor_items(modeldescr);
+   common_constructor_items(modeldescr,"");
 }
 
 // nearly the same but labels is a vector<string>
@@ -61,7 +71,7 @@ parVector::parVector(parsedModelTerm & modeldescr, double initval, std::vector<s
    Labels.resize(inplabels.size());
    for(size_t i=0; i<inplabels.size(); i++)
       Labels[i]=inplabels[i];
-   common_constructor_items(modeldescr);
+   common_constructor_items(modeldescr,"");
 }
 
 // Update cumulative means and variances

@@ -31,11 +31,13 @@ public:
    std::vector<std::string> varianceParams;
    std::vector<std::string> varianceNames;
    std::vector<Rcpp::RObject> varianceObjects;
-   std::vector<int> varianceKernelType;
+   std::vector<std::string> varianceType;
    int hierarchType; // 0=no, 1=simplified form index/matrix, 2=genuine
    std::string priormodDescr="";
    std::string hierarchModel="";
    std::string logging="";
 };
+
+std::ostream& operator<<(std::ostream& os, const parsedModelTerm& p);
 
 #endif /* parsedModelTerm */

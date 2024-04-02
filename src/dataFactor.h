@@ -18,16 +18,9 @@
 
 class dataFactor {
 public:
-   // the following constructors are only useful if there is only one factor in the model-term:
-   dataFactor(Rcpp::DataFrame &d, size_t col);
-   dataFactor(std::string varname);
-   dataFactor(Rcpp::RObject Rcol);
-   // for multiple interacting factors in the model-term (A:B:C) use this one:
+   dataFactor(Rcpp::RObject variableObject, std::string variableName);
    dataFactor(std::vector<Rcpp::RObject> variableObjects, std::vector<std::string> variableNames);
-//   void setupFirstVariable(Rcpp::RObject col);
-//   void addVariable(Rcpp::DataFrame &d, size_t col);
-//   void addVariable(std::string varname);
-//   void addVariable(Rcpp::RObject Rcol);
+   void run_constructor(std::vector<Rcpp::RObject> variableObjects, std::vector<std::string> variableNames);
    ~dataFactor();
    simpleIntVector levcode;  // coded level info
    std::vector<std::string> labels;

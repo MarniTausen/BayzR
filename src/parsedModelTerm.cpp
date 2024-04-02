@@ -60,7 +60,7 @@ std::vector<std::string> parseModelTerm_step1(std::string mt) {
    // 3. optionString: if pos2 is on a comma there are options upto closing parenthesis
    if(mt[pos2]==',') {
       retrieve_length = mt.size()-pos2-2;
-      result[2]=mt.substr(pos2,retrieve_length);
+      result[2]=mt.substr((pos2+1),retrieve_length);
    }
    else
       result[2]="";
@@ -71,22 +71,25 @@ std::vector<std::string> parseModelTerm_step1(std::string mt) {
 
 // parseModelTerm_step2: splitting / interpreting variables, options, etc.
 // This one is defined as a member function to fill object member variables
-void parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string variableString, 
-                     std::string optionString, Rcpp::DataFrame &d) {
+void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrString, 
+                     std::string optString, Rcpp::DataFrame &d) {
+
+   funcName = fnName;
+   variableString = vrString;
 
    // Make a shortened version of the model-term as text for messages
-   if(variableString.length()<=12) {
-     if(optionString=="") shortModelTerm=funcName+"("+variableString+")";
-     else shortModelTerm=funcName+"("+variableString+",...)";
+   if(vrString.length()<=12) {
+     if(optString=="") shortModelTerm=funcName+"("+vrString+")";
+     else shortModelTerm=funcName+"("+vrString+",...)";
    }
    else {
-     shortModelTerm=funcName+"("+variableString.substr(0,12)+"...)";
+     shortModelTerm=funcName+"("+vrString.substr(0,12)+"...)";
    }
 
-   // Analyse and split variableString
-   size_t pos1 = variableString.find(':');
-   size_t pos2 = variableString.find('/');
-   size_t pos3 = variableString.find('|');
+   // Analyse and split vrString
+   size_t pos1 = vrString.find(':');
+   size_t pos2 = vrString.find('/');
+   size_t pos3 = vrString.find('|');
    if(pos2==std::string::npos && pos3==std::string::npos)            // A, A:B, A:B:C
       variablePattern="factors";
    else if (pos3!=std::string::npos && pos2==std::string::npos       // A|B, A|B:C
@@ -96,11 +99,11 @@ void parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string var
                   && pos3==std::string::npos)                        // patterns allowed with /
       variablePattern="rrcovars";
    else {
-      std::string s="Cannot interpret/use variable specification \'"+variableString+
+      std::string s="Cannot interpret/use variable specification \'"+vrString+
                     "\' in model-term: "+shortModelTerm;
       throw(generalRbayzError(s));
    }
-   variableNames = splitString(variableString,":|/");
+   variableNames = splitString(vrString,":|/");
 
    // For every variable get an RObject pointing to it (whether it is from the data frame
    // or from R environment), and also store the type (factor, numeric, etc.) of the variable.
@@ -127,26 +130,26 @@ void parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string var
    // 'open_close_brack_balance'. A proper splitting comma is a comma where open_close_brack_balance==0. 
    // The split options are directly checked for being one of the know options (so far only V= and prior=)
    // and store the string after '=' in varianceDescr and priormodDescr.
-   if (optionString!="") {
+   if (optString!="") {
       pos1=-1;                          // start of first option, it will move up 1 at the start of the loop
       pos2=0;                           // will move to comma after first option, or end of string
-      pos3=optionString.size()-1;       // position of last character in optionString
+      pos3=optString.size()-1;          // position of last character in optString
       int open_close_brack_balance=0;
       std::string tmpstring;
       do {
          pos1++;                        // for proper continuation: after processing an option,
                                         // pos1 will be left standing on the splitting comma.
-         while( !(open_close_brack_balance==0 && optionString[pos2]==',') && pos2<pos3) {
-            if(optionString[pos2]=='(' || optionString[pos2]=='[')
+         while( !(open_close_brack_balance==0 && optString[pos2]==',') && pos2<pos3) {
+            if(optString[pos2]=='(' || optString[pos2]=='[')
                open_close_brack_balance++;
-            if(optionString[pos2]==')' || optionString[pos2]==']')
+            if(optString[pos2]==')' || optString[pos2]==']')
                open_close_brack_balance--;
             pos2++;
          }
          if(pos2==pos3)         // pos2 on the last character
-            tmpstring=optionString.substr(pos1,(pos2-pos1+1));
+            tmpstring=optString.substr(pos1,(pos2-pos1+1));
          else                   // pos2 is after the last character (of piece to extract)
-            tmpstring=optionString.substr(pos1,(pos2-pos1));
+            tmpstring=optString.substr(pos1,(pos2-pos1));
          if(tmpstring.substr(0,2)=="V=") {
             varianceDescr=tmpstring.substr(2,(tmpstring.size()-2));
          }
@@ -157,19 +160,24 @@ void parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string var
             priormodDescr=tmpstring.substr(6,(tmpstring.size()-6));
          }
          else {
-               std::string s="Unknown option in " + funcName + "(" + variableString +
+               std::string s="Unknown option in " + funcName + "(" + vrString +
                 "...) : " + tmpstring;
                 throw(generalRbayzError(s));
          }
-         if(pos2==',') pos1=pos2;  // the while will continue for a next option
+         if(optString[pos2]==',') {    // the while will continue for a next option
+            pos1=pos2;
+            pos2++;
+         }
       }
-      while (optionString[pos1]==',');
+      while (optString[pos1]==',');
    }
 
    // Split and analyse the variance description. This writes in varianceStruct a string
    // that allows to select the right object class in main.
+   // [!] This default "iden" is not very good choice here, it now comes in the Parameter info
+   //     table for all model terms, also fixed ones where it makes no sense.
    if (varianceDescr=="") {
-      varianceStruct="iden";
+      varianceStruct="notgiven";
    }
    else {
       if (varianceDescr[0]=='~') {
@@ -200,13 +208,18 @@ void parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string var
             varianceNames.push_back(name);
             varianceParams.push_back(params);
          }
-         // fill the varianceObjects vector (pointers to R objects)
-         // all the elements with known bayz variance structure keywords get R_NilValue
+         // Fill the varianceObjects and varianceType vectors.
+         // The Type is one of keywords IDEN, VCOV etc. OR "kernel";
+         // The Objects will be R_NilValue for the keywords, or point to the kernel (matrix) object.
+         // If a variance is not one of the keywords and also not an R object that can be a kernel, that's an error.
+         size_t nKernels=0, nVCOV=0;  // extend to also count the others ...
          for(size_t i=0; i<varianceElements.size(); i++) {
             std::string name=varianceNames[i];
             if(name=="IDEN" || name=="MIXT" || name=="VCOV" || name=="WGHT" || name=="DIAG"
                     || name=="LLIN") {
                varianceObjects.push_back(R_NilValue);
+               varianceType.push_back(name);
+               if(name=="VCOV") nVCOV++;
             }
             else {
                varianceObjects.push_back(getVariableObject(d,name));
@@ -214,24 +227,25 @@ void parsedModelTerm::parseModelTerm_step2(std::string funcName, std::string var
                   throw generalRbayzError("Variance/kernel object not found in the R Environment: "
                        +varianceNames[i]);
                }
+               varianceType.push_back("kernel");
+               nKernels++;
             }
          }
-         // and finally analyse the names and set varianceStruct to indicate what variance
-         // class to use for the modelling ... but there are multiple terms and combinations ...
-         if(varianceElements.size() == 1) {
-            std::string name1=varianceNames[0];
-            if(name1=="IDEN") varianceStruct="iden";
-            else if(name1=="MIXT") varianceStruct="mixt";
-            else if(name1=="WGHT") varianceStruct="wght";
-            else if(name1=="DIAG") varianceStruct="diag";
-            else if(name1=="VCOV") varianceStruct="vcov"; // only 1 VCOV unusual?
-            else if(name1=="LLIN") varianceStruct="llin"; // needs fixing to handle it the same as V=~...
-            else
-               varianceStruct="kernel";
-         }
+         // Determine the combination of variance-structures and set varianceStruct to indicate what
+         // variance class to use for the modelling ... more work to be done here ...
+         size_t nVarparts=varianceElements.size();
+         if(nKernels==nVarparts)
+            varianceStruct="kernels";
+         else if (nKernels==(nVarparts-1) && nVCOV==1)
+            varianceStruct="kernels-1vcov";
          else {
             throw generalRbayzError("Cannot handle this variance pattern: "+varianceDescr);
          }
+         // possible other cases to consider:
+         // nkernels>0 && nVCOV>0 && (nKernels+nVCOV)==nVarparts:  kernels and multiple VCOV structures
+         // cases with nKernels==0 and MIXT
+         // cases with IDEN?
+         // ...
       }
    }
 }
@@ -255,3 +269,34 @@ parsedModelTerm::parsedModelTerm(std::string mt, Rcpp::DataFrame &d)
    parseModelTerm_step2(parse_step1[0], parse_step1[1], parse_step1[2], d);
 }
 
+std::ostream& operator<<(std::ostream& os, const parsedModelTerm& p)
+{
+    os << p.shortModelTerm << ": funcName" << "[" << p.funcName << "] ";
+    os << "variableString" << "[" << p.variableString << "] ";
+    os << "varianceDescr" << "[" << p.varianceDescr << "] ";
+    os << "varianceStruct" << "[" << p.varianceStruct << "] ";
+    os << "priormodDescr" << "[" << p.priormodDescr << "] ";
+    os << "\n";
+    return os;
+}
+
+/* variables that are in parsedModelTerm:
+   std::string funcName="";
+   std::string shortModelTerm="";
+   std::string variableString="";
+   std::string variablePattern="";
+   std::vector<std::string> variableNames;
+   std::vector<Rcpp::RObject> variableObjects;
+   std::vector<int> variableTypes;
+   std::string varianceDescr="";
+   std::string varianceStruct="";
+   std::string varianceLinMod="";
+   std::vector<std::string> varianceParams;
+   std::vector<std::string> varianceNames;
+   std::vector<Rcpp::RObject> varianceObjects;
+   std::vector<int> varianceKernelType;
+   int hierarchType; // 0=no, 1=simplified form index/matrix, 2=genuine
+   std::string priormodDescr="";
+   std::string hierarchModel="";
+   std::string logging="";
+*/
