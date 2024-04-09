@@ -1,7 +1,7 @@
 // correlVarStr.h --- Classes of correlated variance structures.
 // Right now, there is only one type storing the eigendecomposition and in case of multiple kernels
 // making the eigendecomposition of the kronecker product.
-// Note: work in progress! Objects like ranf_cor do not yet interface with a generic correlVarStr
+// Note: work in progress! Objects like ranfc do not yet interface with a generic correlVarStr
 // like ranfi does, needs more work to develop.... this code still copy from indepVarStr....
 
 #ifndef correlVarStr_h

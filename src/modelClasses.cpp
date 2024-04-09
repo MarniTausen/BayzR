@@ -5,7 +5,7 @@
 #include "modelRanfc.h"
 #include "indexTools.h"
 
-/* ---- from modelRanfc
+/* ---- modelRanfc
 */
 
 // old code that could only run cases with all known kernels up to max 2, and where for 2 kernels
@@ -37,6 +37,10 @@ void modelRanfc::modelRanfc_old(parsedModelTerm & modeldescr, modelResp * rmod)
    fitval.initWith(F->nelem, 0.0l);
    // create the variance object - may need to move out as in ranfi
    varmodel = new idenVarStr(modeldescr, this->regcoeff);
+}
+
+void modelRanfc::modelRanfc_new(parsedModelTerm & modeldescr, modelResp * rmod)
+{
 }
 
 void modelRanf::sample() {
