@@ -1,15 +1,15 @@
-//  BayzR --- modelRanf_cor.hpp
-//  Computational class to to model random effect with correlation matrix (from using rn(..., V=K)).
+//  BayzR --- modelRanfc.hpp
+//  Computational class to to model random effect with correlations (from using rn(..., V=K)).
 //  Now also works with interactions and multiple kernels, but code now accepting ony max two kernels. 
 //  Derives from modelFactor which sets-up the (interacting) factor data, the computational methods
 //  though are more like modelMatrix and therefore parts of code are now same between modelMatrix and
-//  ranf_cor. It would need multiple and virtual inheritance to re-use the modelMatrix methods here too.
+//  ranfc. It would need multiple and virtual inheritance to re-use the modelMatrix methods here too.
 //
 //  Created by Luc Janss on 03/08/2018.
 //
 
-#ifndef modelRanf_cor_h
-#define modelRanf_cor_h
+#ifndef modelRanfc_h
+#define modelRanfc_h
 
 #include <Rcpp.h>
 #include "modelFactor.h"
@@ -21,12 +21,16 @@
 // update: ranfcor now also derive from modelFactor?
 // the matrix data here was eigenvector data, it needs to come from a variance model now.
 
-class modelRanf_cor : public modelFactor {
+class modelRanfc : public modelFactor {
 
 public:
 
-   modelRanf_cor(parsedModelTerm & modeldescr, modelResp * rmod)
-         : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.priormodDescr)
+   modelRanf_cor(parsedModelTerm & modeldescr, modelResp * rmod, std::string algorithm) 
+        : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.priormodDescr) {
+
+   }
+
+   void modelRanfc_old(parsedModelTerm & modeldescr, modelResp * rmod)
    {
       // For the moment all variance objects must be kernels
       for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
@@ -55,7 +59,7 @@ public:
       varmodel = new idenVarStr(modeldescr, this->regcoeff);
    }
 
-   ~modelRanf_cor() {
+   ~modelRanfc() {
    }
    
    void sample() {
@@ -120,4 +124,4 @@ public:
 
 };
 
-#endif /* modelRanf_cor_h */
+#endif /* modelRanfc_h */
