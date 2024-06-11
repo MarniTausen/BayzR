@@ -23,8 +23,8 @@
 
 // !Global variable! Vector to collect pointers to all par-vector pointers in the model-objects.
 // The modelBase class is collecting these pointers, and it can only access it if parList is a global
-// variable, OR all model objects should be updated to pass it around in the constructor.
-// There is also a problem with the global variable that it was persisting between function calls,
+// variable, OR all model objects should be updated to pass it around in all constructors.
+// There is also a problem with the global variable that it was persisting between calls from R,
 // therefore it needed a parList.clear() at the start of main().
 // Still consider to put it in the model-objects constructor interfaces? Or is there another way?
 std::vector<parVector**> parList;
