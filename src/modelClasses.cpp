@@ -41,6 +41,18 @@ void modelRanfc::modelRanfc_old(parsedModelTerm & modeldescr, modelResp * rmod)
 
 void modelRanfc::modelRanfc_new(parsedModelTerm & modeldescr, modelResp * rmod)
 {
+   // For the moment all variance objects must be kernels
+   for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
+      if (modeldescr.varianceObjects[i]==R_NilValue) {
+         throw(generalRbayzError("Mixing kernels with IDEN or other indep structures not yet possible"));
+      }
+   }
+   for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
+      kernelList.push_back(new kernelMatrix(modeldescr.varianceObjects[i], modeldescr.varianceNames[i]));
+   }
+   // the kernelMatrix objects now by default store eigenvectors that capture 90% of the variance, but we could
+   // consider a second filtering to not use all of them in the interaction model. 
+
 }
 
 void modelRanf::sample() {
