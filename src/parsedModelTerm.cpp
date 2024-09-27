@@ -136,6 +136,7 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
       pos3=optString.size()-1;          // position of last character in optString
       int open_close_brack_balance=0;
       std::string tmpstring;
+      size_t pos4;
       do {
          pos1++;                        // for proper continuation: after processing an option,
                                         // pos1 will be left standing on the splitting comma.
@@ -150,6 +151,13 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
             tmpstring=optString.substr(pos1,(pos2-pos1+1));
          else                   // pos2 is after the last character (of piece to extract)
             tmpstring=optString.substr(pos1,(pos2-pos1));
+         pos4 = tmpstring.find("=");  // locate equal sign in option string
+         if(pos4 == std:string::npos) {
+            throw generalRbayzError("Error: option [" + tmpstring + "] is not <keyword>=<value> in " + shortModelTerm);
+         }
+         user_options[tmpstring.substr(0,pos4)]=tmpstring.substr(pos4+1,std::string::npos);
+
+         // ---- code that could become depracted if objects get their options directly from user_options (after checking)
          if(tmpstring.substr(0,2)=="V=") {
             varianceDescr=tmpstring.substr(2,(tmpstring.size()-2));
          }
@@ -164,6 +172,8 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
                 "...) : " + tmpstring;
                 throw(generalRbayzError(s));
          }
+         // -------
+
          if(optString[pos2]==',') {    // the while will continue for a next option
             pos1=pos2;
             pos2++;

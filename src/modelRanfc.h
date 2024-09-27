@@ -24,15 +24,8 @@ class modelRanfc : public modelFactor {
 
 public:
 
-   // Ranfc can run both old and new code by adding "old" or "new" in the contructor
-   modelRanfc(parsedModelTerm & modeldescr, modelResp * rmod, std::string algorithm) 
-        : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.priormodDescr) {
-      if(algorithm=="old") modelRanfc_old(parsedModelTerm & modeldescr, modelResp * rmod);
-      else modelRanfc_new(parsedModelTerm & modeldescr, modelResp * rmod);
-   }
-   void modelRanfc_old(parsedModelTerm & modeldescr, modelResp * rmod);
-   void modelRanfc_new(parsedModelTerm & modeldescr, modelResp * rmod);
-   ~modelRanfc();
+   modelRanfc(parsedModelTerm & modeldescr, modelResp * rmod);
+   ~modelRanfc() {}
    void sample();
    void accumFit(simpleDblVector & fit);
    void prepForOutput();

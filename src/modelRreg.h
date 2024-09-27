@@ -34,6 +34,7 @@ public:
          par->val[k] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
          resid_correct(k);
       }
+      varmodel->sample();
    }
 
    indepVarStr* varmodel;
@@ -41,7 +42,8 @@ public:
 };
 
 // Here can start working on defining different variance structures for modelRreg
-
+// For the moment, Rreg is only designed to accept variance models in the "indepVarStr" class, but this
+// can include LASSO, BVS, DIAG / weighted, log-linear ...
 class modelRregIden : public modelRreg {
 public:
    modelRregIden(parsedModelTerm & pmdescr, modelResp * rmod)

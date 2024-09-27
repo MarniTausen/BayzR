@@ -5,12 +5,14 @@
 #include "modelRanfc.h"
 #include "indexTools.h"
 
-/* ---- modelRanfc
+/* ------------------------- modelRanfc
 */
 
 // old code that could only run cases with all known kernels up to max 2, and where for 2 kernels
 // the kernels were merged in one combined kernel. The kernelList vector therefore remains size 1.
-void modelRanfc::modelRanfc_old(parsedModelTerm & modeldescr, modelResp * rmod)
+// It could be revived allowing for an option mergeKernels that merges known kernels in memory.
+/*  old constructor
+Ranfc_old(parsedModelTerm & modeldescr, modelResp * rmod)
 {
    // For the moment all variance objects must be kernels
    for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
@@ -38,9 +40,10 @@ void modelRanfc::modelRanfc_old(parsedModelTerm & modeldescr, modelResp * rmod)
    // create the variance object - may need to move out as in ranfi
    varmodel = new idenVarStr(modeldescr, this->regcoeff);
 }
+*/
 
-void modelRanfc::modelRanfc_new(parsedModelTerm & modeldescr, modelResp * rmod)
-{
+modelRanfc::modelRanfc(parsedModelTerm & modeldescr, modelResp * rmod)
+           : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.priormodDescr) {
    // For the moment all variance objects must be kernels
    for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
       if (modeldescr.varianceObjects[i]==R_NilValue) {
@@ -50,19 +53,11 @@ void modelRanfc::modelRanfc_new(parsedModelTerm & modeldescr, modelResp * rmod)
    for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
       kernelList.push_back(new kernelMatrix(modeldescr.varianceObjects[i], modeldescr.varianceNames[i]));
    }
-   // the kernelMatrix objects now by default store eigenvectors that capture 90% of the variance, but we could
-   // consider a second filtering to not use all of them in the interaction model. 
-
 }
 
-void modelRanf::sample() {
-   if(kernelList.size()==1) modelRanf::sample1();
-   else modelRanf::sample2();
-}
-
-// sample1() is old code for 1 kernel, or a interaction kernel that is merged in memory.
-// can see later if it is useful to keep this as special case.
-void modelRanfc::sample1() {
+// sample method from old code
+/*
+Ranfc_old_sample() {
    // Update regressions on the eigenvectors
    double lhs, rhs;
    size_t matrixrow;
@@ -98,6 +93,14 @@ void modelRanfc::sample1() {
       ssq += regcoeff->val[col]*regcoeff->val[col]/K->weights[col];
    varmodel->par->val[0] = gprior.samplevar(ssq, K->ncol);
 }
+*/
+
+// New sample() method with optimized scheme to compute statistics in blocks
+void modelRanfc::sample() {
+//   if(kernelList.size()==1) modelRanf::sample1();
+//   else modelRanf::sample2();
+
+}
 
 void modelRanfc::accumFit(simpleDblVector & fit) {
    for (size_t obs=0; obs < F->nelem; obs++)
@@ -108,7 +111,7 @@ void modelRanfc::accumFit(simpleDblVector & fit) {
 // [!] this now only for 1, or 1 merged, kernel.
 // Also: is this not the same as the fitted value??
 void modelRanfc::prepForOutput() {
-   kernelMatrix K = kernelList[0];
+   kernelMatrix* K = kernelList[0];                  // kernelList is a std::vector<kernelMatrix*>
    for(size_t row=0; row< K->nrow; row++) {
       par->val[row]=0.0l;
       for(size_t col=0; col<K->ncol; col++) {

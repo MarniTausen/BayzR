@@ -10,6 +10,7 @@
 #include <Rcpp.h>
 #include <vector>
 #include <string>
+#include <map>
 
 class parsedModelTerm {
 public:
@@ -25,6 +26,7 @@ public:
    std::vector<std::string> variableNames;
    std::vector<Rcpp::RObject> variableObjects;
    std::vector<int> variableTypes;
+   std:map<std::string, std::string> user_options;  // could possibly replace varianceDescr and priormodDescr
    std::string varianceDescr="";
    std::string varianceStruct="";
    std::string varianceLinMod="";
