@@ -14,6 +14,8 @@
 #include "modelMatrix.h"
 #include "indepVarStr.h"
 #include "dataMatrix.h"
+#include "parseFunctions.h"
+#include "rbayzExceptions.h"
 
 class modelRreg : public modelMatrix {
 
@@ -21,7 +23,10 @@ public:
 
    modelRreg(parsedModelTerm & modeldescr, modelResp * rmod)
          : modelMatrix(modeldescr, rmod)   {
-      
+      if(checkOptions(modeldescr.options, "V prior pvals")>0) {
+         throw(generalRbayzError("ERROR: options are not recognized in "+modeldescr.shortModelTerm));
+      }
+      if(modeldescr.options["pvals"]=="TRUE") comp_frequentist_pvals=true;
    }
 
    ~modelRreg() {
@@ -39,6 +44,7 @@ public:
    }
 
    indepVarStr* varmodel;
+   comp_frequentist_pvals=false;
 
 };
 
