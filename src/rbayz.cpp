@@ -21,13 +21,15 @@
 
 // [[Rcpp::plugins("cpp11")]]
 
-// !Global variable! Vector to collect pointers to all par-vector pointers in the model-objects.
-// The modelBase class is collecting these pointers, and it can only access it if parList is a global
-// variable, OR all model objects should be updated to pass it around in all constructors.
-// There is also a problem with the global variable that it was persisting between calls from R,
-// therefore it needed a parList.clear() at the start of main().
-// Still consider to put it in the model-objects constructor interfaces? Or is there another way?
+// A few global variables are used! Otherwise it would need to pass these around in many functions
+// and constructors.
+// parList: is accessed in modelBase constructor (top of hierarchy) to collect vector of model parameters
+// Messages and needStop: can be used in any (helper) function finding errors. When functions not immediately
+// throwing an exception, higher level code should check needStop and eventually throw an exception.
+// Note: the global variables appear to persist between R calls, they need to be cleared at the start of main().
 std::vector<parVector**> parList;
+std::vector<std::string> Messages;
+bool needStop=false;
 
 // [[Rcpp::export]]
 Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputData,
@@ -35,10 +37,12 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
 //                   note VE must be a string, it will be converted below
 {
 
+   // clearing global variables
    parList.clear();
+   Messages.clear();
+   needStop=false;
 
-   // Vectors for messages defined outside the try-block, so it remains available in catch() part.
-   Rcpp::CharacterVector Messages;
+   // rbayz retains a small string of last executed code that is sometimes added in errors
    std::string lastDone;
 
    try {     // normal execution builds a return list at the end of try{}, in case of
