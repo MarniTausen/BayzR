@@ -59,7 +59,7 @@ public:
         // add sample implementation
     }
 
-//    getSetOptions(modeldescr.varianceDescr); // not yet defined?
+//    getSetOptions(modeldescr.options["V"]); // not yet defined?
 //    modelBVS *mixmod;
 };
 

@@ -21,6 +21,7 @@ public:
 
    modelRreg(parsedModelTerm & modeldescr, modelResp * rmod)
          : modelMatrix(modeldescr, rmod)   {
+      
    }
 
    ~modelRreg() {

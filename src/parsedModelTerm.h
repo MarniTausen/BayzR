@@ -26,8 +26,7 @@ public:
    std::vector<std::string> variableNames;
    std::vector<Rcpp::RObject> variableObjects;
    std::vector<int> variableTypes;
-   std:map<std::string, std::string> user_options;  // could possibly replace varianceDescr and priormodDescr
-   std::string varianceDescr="";
+   std:map<std::string, std::string> options; 
    std::string varianceStruct="";
    std::string varianceLinMod="";
    std::vector<std::string> varianceParams;
@@ -35,7 +34,6 @@ public:
    std::vector<Rcpp::RObject> varianceObjects;
    std::vector<std::string> varianceType;
    int hierarchType; // 0=no, 1=simplified form index/matrix, 2=genuine
-   std::string priormodDescr="";
    std::string hierarchModel="";
    std::string logging="";
 };

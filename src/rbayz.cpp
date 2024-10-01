@@ -74,13 +74,13 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
             if(pmt.varianceStruct=="iden" || pmt.varianceStruct=="notgiven")
                model.push_back(new modelRanFacIden(pmt, modelR));
             else
-               throw generalRbayzError("There is no class to model rn(...) with Variance structure " + pmt.varianceDescr);
+               throw generalRbayzError("There is no class to model rn(...) with Variance structure " + pmt.options["V"]);
          }
          else if (pmt.funcName=="rr") {
             if(pmt.varianceStruct=="iden" || pmt.varianceStruct=="notgiven")
                model.push_back(new modelRregIden(pmt, modelR));
             else
-               throw generalRbayzError("There is no class to model rr(...) with Variance structure " + pmt.varianceDescr);
+               throw generalRbayzError("There is no class to model rr(...) with Variance structure " + pmt.options["V"]);
          }
          else {
            throw generalRbayzError("Unknown model-function \'" + pmt.funcName + "\' at "+pmt.shortModelTerm);
