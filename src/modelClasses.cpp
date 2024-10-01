@@ -43,7 +43,7 @@ Ranfc_old(parsedModelTerm & modeldescr, modelResp * rmod)
 */
 
 modelRanfc::modelRanfc(parsedModelTerm & modeldescr, modelResp * rmod)
-           : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.priormodDescr) {
+           : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.options["prior"]) {
    // For the moment all variance objects must be kernels
    for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
       if (modeldescr.varianceObjects[i]==R_NilValue) {

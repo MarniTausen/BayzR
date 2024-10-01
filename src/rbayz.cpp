@@ -229,6 +229,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       // Build tables to go in the output:
       // ---------------------------------
 
+      // OBS: with pvals option in rr() model, there is need to introduce another post-processing step.
+
       // 1. "Parameter" information table
       Rcpp::CharacterVector parNames, parModelFunc, parVariables, parVarStruct;
       Rcpp::IntegerVector parSizes, parEstFirst, parEstLast, parLogged;

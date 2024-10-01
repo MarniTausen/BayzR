@@ -24,9 +24,15 @@ public:
    modelRreg(parsedModelTerm & modeldescr, modelResp * rmod)
          : modelMatrix(modeldescr, rmod)   {
       if(checkOptions(modeldescr.options, "V prior pvals")>0) {
-         throw(generalRbayzError("ERROR: options are not recognized in "+modeldescr.shortModelTerm));
+         throw(generalRbayzError("ERROR: unrecognized option(s) in "+modeldescr.shortModelTerm));
       }
       if(modeldescr.options["pvals"]=="TRUE") comp_frequentist_pvals=true;
+      // if pvals asked:
+      // 1. may need to open a file to store sample info
+      // 2. do we want a parVector to store pvalues? Can work well to get it in output, but this
+      // requires a new model object, and if it is defined before chain is run, main() will
+      // run sample(), parVector.collectStats() etc. on it.
+
    }
 
    ~modelRreg() {
@@ -41,6 +47,9 @@ public:
          resid_correct(k);
       }
       varmodel->sample();
+      // need some thinking how to store sample info in file; likely every "saved" cycle.
+      // main runs prepForOutput, and on a parVector main runs collectStats at the save intervals,
+      // or it needs a new mechanism to switch on saving samples from output (which can be generic feature).
    }
 
    indepVarStr* varmodel;
