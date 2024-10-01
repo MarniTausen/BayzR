@@ -7,11 +7,15 @@
 #include <Rcpp.h>
 #include <vector>
 #include <string>
+#include <map>
+#include <sstream>
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
 #include "nameTools.h"
 
 using Rsize_t = long long int;
+extern std::vector<std::string> Messages;
+extern bool needStop;
 
 void removeSpaces(std::string &s) {
    size_t pos;
@@ -294,4 +298,22 @@ std::string getOptionText(std::string modelTerm, std::string text) {
    pos2 = modelTerm.find_first_of("),",pos1);
    std::string temp = modelTerm.substr(pos1+text.length(),pos2-pos1-1);
    return temp;
+}
+
+// Check if keywords in user-specified options (stored in a map of (key,value) pairs) matches allowed
+// list of options. Errors are stored in Messages list, but higher level needs to throw exception.
+// Returns 0 for success, 1 for failure.
+int checkOptions(std::map<std::string,std:string> userOpts, std::string allowedOpts) {
+   std::istringstream(allowedOpts);
+   std::map<std::string, int> allowedOptsMap;
+   std::string s;                    
+   while(ss >> s) allowedOptsMap[s];            // make a map of allowed options to search in it
+   std::map<std::string, int>::iterator f;
+   for(std::map<std::string,std:string>::iterator p = userOpts.begin(); p!= userOpts.end(); ++p) {
+      if( (f=allowedOptsMap.find(p.first)) == allowedOptsMap.end()) {
+         Messages.push_back(" - Option not recognized (misspelled or not used here): " + p.first);
+         needStop=true;
+      }
+   }
+   if(needStop) return 1; else return 0;
 }

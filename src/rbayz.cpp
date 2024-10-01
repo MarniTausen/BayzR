@@ -25,7 +25,7 @@
 // and constructors.
 // parList: is accessed in modelBase constructor (top of hierarchy) to collect vector of model parameters
 // Messages and needStop: can be used in any (helper) function finding errors. When functions not immediately
-// throwing an exception, higher level code should check needStop and eventually throw an exception.
+// throw an exception, higher level code should check needStop and throw an exception.
 // Note: the global variables appear to persist between R calls, they need to be cleared at the start of main().
 std::vector<parVector**> parList;
 std::vector<std::string> Messages;
