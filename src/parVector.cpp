@@ -18,6 +18,7 @@ void parVector::common_constructor_items(parsedModelTerm & modeldescr, std::stri
       Name[pos]='.';
       pos++;  // start re-search after currently replaced character
    }
+   // Move disambiguation of parameter Name here??
    modelFunction=modeldescr.funcName;
    varianceStruct="-";
    val=Values.data;

@@ -33,8 +33,8 @@ bool needStop=false;
 
 // [[Rcpp::export]]
 Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputData,
-                     Rcpp::IntegerVector chain, int verbose)
-//                   note VE must be a string, it will be converted below
+                     Rcpp::IntegerVector chain, SEXP method, Rcpp::List initVals, int verbose)
+//                   note VE and method are strings, it will be converted below
 {
 
    // clearing global variables
@@ -230,6 +230,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       // ---------------------------------
 
       // OBS: with pvals option in rr() model, there is need to introduce another post-processing step.
+      // It looks OK to create a new model object after running MCMC, which will allow to store an extra
+      // parameter vector, and use that to compute pvalues, but then it is not connected to the rr-model object?
 
       // 1. "Parameter" information table
       Rcpp::CharacterVector parNames, parModelFunc, parVariables, parVarStruct;

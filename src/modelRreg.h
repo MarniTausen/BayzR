@@ -26,7 +26,11 @@ public:
       if(checkOptions(modeldescr.options, "V prior pvals")>0) {
          throw(generalRbayzError("ERROR: unrecognized option(s) in "+modeldescr.shortModelTerm));
       }
-      if(modeldescr.options["pvals"]=="TRUE") comp_frequentist_pvals=true;
+      if(modeldescr.options["pvals"]=="TRUE") {
+         comp_frequentist_pvals = true;
+         saveSamples = true;
+         samplesFile = fopen();
+      }
       // if pvals asked:
       // 1. may need to open a file to store sample info
       // 2. do we want a parVector to store pvalues? Can work well to get it in output, but this

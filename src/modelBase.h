@@ -12,6 +12,7 @@
 
 #include <Rcpp.h>
 #include <vector>
+#include <stdio.h>
 #include "parVector.h"
 //#include <unistd.h>
 
@@ -33,6 +34,13 @@ public:
    // prepForOutput is for model classes that need to make a transform of
    // parameters for output, the base class defines an 'empty' version.
    virtual void prepForOutput() { };
+
+   // saveSamples saves MCMC samples in a file, it will kick in when the constructor
+   // has set save_samples=true. There is a definition in modelClasses.cpp file.
+   virtual int openSamplesFile();
+   virtual void saveSamples();
+   bool saveSamples = false;
+   FILE* samplesFile;
 
    parVector* par=0;
 

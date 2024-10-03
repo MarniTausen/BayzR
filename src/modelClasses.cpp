@@ -5,6 +5,17 @@
 #include "modelRanfc.h"
 #include "indexTools.h"
 
+/* ------------------------- modelBase
+*/
+
+void modelBase::saveSamples() {
+
+}
+
+int modelBase::openSamplesFile() {
+
+}
+
 /* ------------------------- modelRanfc
 */
 
