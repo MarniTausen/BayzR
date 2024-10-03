@@ -64,6 +64,9 @@
 #' @param data    Data frame to collect data from
 #' @param VE      Model for the residual variance
 #' @param chain   Vector with length, burn-in and skip for the chain to run.
+#' @param method  String to indicate analysis method: "Bayes" (full Bayesian), "BLUPMC"
+#'                (BLUE/BLUP solutions with Monte Carlo to get SD/SE), "BLUP" (BLUE/BLUP solutions)
+#' @param init    Chain initialisation/starting values: supply output from a previous bayz run.
 #' @param verbose Integer to regulate printing to R console: 0(quiet), 1(some), >2(more)
 #' @param ...     Additional parameters passed onto the Model function.
 #'
@@ -73,12 +76,14 @@
 #'
 #' @useDynLib BayzR, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
-bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), verbose=1, ...){
+bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", init=NULL, verbose=1, ...){
 	if(!inherits(model,"formula")) {
 		stop("The first argument is not a valid formula")
 	}
     if( !(class(VE)=="character" | class(VE)=="formula") ) {
         stop("VE must be given as a string or formula")
+    if( class(method)!="character" ) {
+        stop("method must be given as a string")
     }
     if (is.null(data)){
         stop("The data= argument is missing")
@@ -86,8 +91,11 @@ bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), verbose=1, ...){
     if(class(VE)=="formula") {
         VE=deparse(VE)
     }
+    if(is.null(method)) {
+        method="Bayes"
+    }
     chain <- as.integer(chain)
-    result <- rbayz_cpp(model, VE, data, chain, verbose)
+    result <- rbayz_cpp(model, VE, data, chain, method, init, verbose)
     class(result) <- "bayz"
     #result[['modelname']] <- fct()
     #result[['modelfunction']] <- deparse(substitute(fct))
