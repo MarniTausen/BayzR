@@ -37,6 +37,8 @@ public:
       resid_correct();
    }
 
+   void sampleHpars() {}
+
 };
 
 #endif /* modelFixf_h */

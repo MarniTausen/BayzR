@@ -36,6 +36,9 @@ public:
          par->val[k] = R::rnorm((rhs[k]/lhs[k]), sqrt(1.0/lhs[k]));
       }
       resid_correct();
+   }
+
+   void sampleHpars() {
       varmodel->sample();
    }
 

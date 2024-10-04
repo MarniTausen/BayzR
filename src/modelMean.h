@@ -50,6 +50,8 @@ public:
         fit[obs] += par->val[0];
    }
 
+   void sampleHpars() {}
+
 private:
 };
 

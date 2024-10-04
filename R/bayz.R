@@ -7,7 +7,6 @@
 #' explanatory (right-hand-side) terms wrapped by a function to specify how to fit
 #' the explanatory variables in the model. This may look like Yield ~ fx(Year) + rn(Variety)
 #' to fit Yield with Year as a fixed factor and Variety as a random factor. 
-#' The equivalent lme4 model would be Yield ~ factor(Year) + (1|Variety). 
 #' The list of model functions currently available is:
 #' fx() (fixed factors), rn() (random factors), rg()
 #' (fixed regressions), and rr() (random regressions). 
@@ -46,10 +45,10 @@
 #' row-names matching Variety levels. In both cases, such kernel or covariate matrices
 #' must have unique levels, but the main data may have repeated levels and in different order.
 #' If one has repeated metabolite data on each Variety, for instance at multiple time-points,
-#' then consider that Variety is not the appropriate link to the data, but Variety:Time is.
+#' then Variety is not the appropriate link to the data, but Variety:Time is.
 #'
 #' For random effects a variance-covariance structure can be specified using a
-#' V= option within the model-term function, for example rn(Variety, V=KG).
+#' V= option within the model-term function, for example rn(Variety, V=myGmat).
 #' When the fit is for an interaction of factors, the variance specification should
 #' expand to include one term for each variable, separated by stars (which should
 #' be read as Kronecker products). The variance structure
@@ -57,16 +56,17 @@
 #' kernel matrices and predefined acronyms IDEN, DIAG and VCOV that indicate parameterized
 #' matrices (with parameters to be estimated from the data). 
 #' Alternatively, the variance structure can be specified as a linear model using V=~, 
-#' which is interpreted as a use of a log-linear model for the variances. 
+#' which is interpreted as use of a log-linear model for the variances. 
 #'
 #'
 #' @param model   A formula describing the model to be fitted
 #' @param data    Data frame to collect data from
 #' @param VE      Model for the residual variance
 #' @param chain   Vector with length, burn-in and skip for the chain to run.
-#' @param method  String to indicate analysis method: "Bayes" (full Bayesian), "BLUPMC"
+#' @param method  String to indicate analysis method: "Bayes" (full Bayesian, default), "BLUPMC"
 #'                (BLUE/BLUP solutions with Monte Carlo to get SD/SE), "BLUP" (BLUE/BLUP solutions)
-#' @param init    Chain initialisation/starting values: supply output from a previous bayz run.
+#' @param init    Initialisation/starting values: supply output from a previous bayz run and bayz
+#'                will pick up estimates from a previous run to start a new chain.
 #' @param verbose Integer to regulate printing to R console: 0(quiet), 1(some), >2(more)
 #' @param ...     Additional parameters passed onto the Model function.
 #'

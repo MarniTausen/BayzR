@@ -2,7 +2,7 @@
 //  BayzR -- modelFreg.h
 //  Computational class defining methods to work on one covariate.
 //  - the parameter vector has length 1, and no levelNames.
-//  - hpar is not used.
+//  - no hyper parameters - sampleHpar is empty.
 //  - also defines sample(). So far only one model-object that uses one
 //    covariate, so it is combining all de/correction, lhs/rhs statistics
 //    and sample code.
@@ -43,6 +43,8 @@ public:
       par->val[0] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
       resid_correct();
    }
+
+   void sampleHpars() {}
 
    void accumFit(simpleDblVector & fit) {
       for (size_t obs=0; obs < C->nelem; obs++)
