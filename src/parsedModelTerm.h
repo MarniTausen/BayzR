@@ -26,7 +26,7 @@ public:
    std::vector<std::string> variableNames;
    std::vector<Rcpp::RObject> variableObjects;
    std::vector<int> variableTypes;
-   std:map<std::string, std::string> options; 
+   std::map<std::string, std::string> options; 
    std::string varianceStruct="";
    std::string varianceLinMod="";
    std::vector<std::string> varianceParams;
@@ -38,6 +38,6 @@ public:
    std::string logging="";
 };
 
-std::ostream& operator<<(std::ostream& os, const parsedModelTerm& p);
+std::ostream& operator<<(std::ostream& os, parsedModelTerm& p);
 
 #endif /* parsedModelTerm */

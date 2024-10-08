@@ -82,14 +82,16 @@ public:
       double temp = 1.0/hpar[0];
       for (obs=0; obs<Nresid; obs++)
          residPrec[obs] = temp;
-*/
-      varModel->sample();
-/*         Rcpp::Rcout << "resid";
+         Rcpp::Rcout << "resid";
          for(size_t i=0; i<10; i++) Rcpp::Rcout << " " << resid.data[i];
          Rcpp::Rcout << "\n";
          Rcpp::Rcout << "fitv";
          for(size_t i=0; i<10; i++) Rcpp::Rcout << " " << par->val[i];
          Rcpp::Rcout << "\n";*/
+   }
+
+   void sampleHpars() {
+      varModel->sample();
    }
 
    indepVarStr* varModel;

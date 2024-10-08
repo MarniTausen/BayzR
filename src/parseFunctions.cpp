@@ -303,15 +303,15 @@ std::string getOptionText(std::string modelTerm, std::string text) {
 // Check if keywords in user-specified options (stored in a map of (key,value) pairs) matches allowed
 // list of options. Errors are stored in Messages list, but higher level needs to throw exception.
 // Returns 0 for success, 1 for failure.
-int checkOptions(std::map<std::string,std:string> userOpts, std::string allowedOpts) {
-   std::istringstream(allowedOpts);
+int checkOptions(std::map<std::string,std::string> userOpts, std::string allowedOpts) {
+   std::istringstream ss(allowedOpts);
    std::map<std::string, int> allowedOptsMap;
    std::string s;                    
-   while(ss >> s) allowedOptsMap[s];            // make a map of allowed options to search in it
-   std::map<std::string, int>::iterator f;
-   for(std::map<std::string,std:string>::iterator p = userOpts.begin(); p!= userOpts.end(); ++p) {
-      if( (f=allowedOptsMap.find(p.first)) == allowedOptsMap.end()) {
-         Messages.push_back(" - Option not recognized (misspelled or not used here): " + p.first);
+   while(ss >> s) allowedOptsMap[s];            // make a map of allowed options to search in it, but maybe
+   std::map<std::string, int>::iterator f;      // regular find in unsorted vector<string> is also OK here
+   for(std::map<std::string,std::string>::iterator p = userOpts.begin(); p!= userOpts.end(); ++p) {
+      if( (f=allowedOptsMap.find(p->first)) == allowedOptsMap.end()) {
+         Messages.push_back(" - Option not recognized (misspelled or not used here): " + p->first);
          needStop=true;
       }
    }

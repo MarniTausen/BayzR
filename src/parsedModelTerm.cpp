@@ -151,7 +151,7 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
          else                   // pos2 is after the last character (of piece to extract)
             tmpstring=optString.substr(pos1,(pos2-pos1));
          pos4 = tmpstring.find("=");  // locate equal sign in option string
-         if(pos4 == std:string::npos) {
+         if(pos4 == std::string::npos) {
             throw generalRbayzError("Error: option [" + tmpstring + "] is not <keyword>=<value> in " + shortModelTerm);
          }
          options[tmpstring.substr(0,pos4)]=tmpstring.substr(pos4+1,std::string::npos);
@@ -259,7 +259,7 @@ parsedModelTerm::parsedModelTerm(std::string mt, Rcpp::DataFrame &d)
    parseModelTerm_step2(parse_step1[0], parse_step1[1], parse_step1[2], d);
 }
 
-std::ostream& operator<<(std::ostream& os, const parsedModelTerm& p)
+std::ostream& operator<<(std::ostream& os, parsedModelTerm& p)
 {
     os << p.shortModelTerm << ": funcName" << "[" << p.funcName << "] ";
     os << "variableString" << "[" << p.variableString << "] ";

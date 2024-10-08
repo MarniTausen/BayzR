@@ -82,6 +82,7 @@ bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", init=NULL, 
 	}
     if( !(class(VE)=="character" | class(VE)=="formula") ) {
         stop("VE must be given as a string or formula")
+    }
     if( class(method)!="character" ) {
         stop("method must be given as a string")
     }

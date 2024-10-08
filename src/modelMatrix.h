@@ -37,12 +37,17 @@ public:
       if( ! (modeldescr.variableTypes[0]==1 && modeldescr.variableTypes[1]==6) )
          throw generalRbayzError("variable types in rr() model are not <factor>/<matrix>");
       F = new dataFactor(modeldescr.variableObjects[0], modeldescr.variableNames[0]);
+      Rcpp::Rcout << "3a\n";
       M = new dataMatrix(modeldescr.variableObjects[1], modeldescr.variableNames[1]);
+      Rcpp::Rcout << "3b\n";
       par = new parVector(modeldescr, 0.0l, M->colnames);
+      Rcpp::Rcout << "3c\n";
       weights.initWith(M->ncol,1.0l);
+      Rcpp::Rcout << "3d\n";
       builObsIndex(obsIndex,F,M);
       lhs = 0.0l;
       rhs = 0.0l;
+      Rcpp::Rcout << "3\n";
    }
    
    ~modelMatrix() {

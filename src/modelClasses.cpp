@@ -8,12 +8,12 @@
 /* ------------------------- modelBase
 */
 
-void modelBase::saveSamples() {
+void modelBase::writeSamples() {
 
 }
 
 int modelBase::openSamplesFile() {
-
+   return 0;
 }
 
 /* ------------------------- modelRanfc

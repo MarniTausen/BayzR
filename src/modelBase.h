@@ -42,7 +42,7 @@ public:
    // saveSamples saves MCMC samples in a file, it will kick in when the constructor
    // has set save_samples=true. There is a definition in modelClasses.cpp file.
    virtual int openSamplesFile();
-   virtual void saveSamples();
+   virtual void writeSamples();
    bool saveSamples = false;
    FILE* samplesFile;
 

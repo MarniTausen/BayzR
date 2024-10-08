@@ -28,6 +28,7 @@ public:
       par->Name="mean";       // a little repair because the
       par->Labels[0]="mean";  // constructor has not set it right
       par->logged=1;
+      Rcpp::Rcout << "1\n";
    }
 
    ~modelMean() {

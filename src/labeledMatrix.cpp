@@ -15,7 +15,7 @@ void labeledMatrix::addRowColNames(Rcpp::NumericMatrix M, std::string & name) {
       throw generalRbayzError("No rownames on matrix " + name + "\n");
    }
    colnames = getMatrixNames(M, 2);
-   if (rownames.size()==0) { // colnames empty, fill auto colnames
+   if (colnames.size()==0) { // colnames empty, fill auto colnames
       colnames = generateLabels("col",M.ncol());
    }
 }

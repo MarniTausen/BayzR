@@ -28,6 +28,6 @@ std::string getVarNames(std::string modelTerm);
 std::string getVarDescr(std::string modelTerm);
 std::string getPriorDescr(std::string modelTerm);
 std::string getOptionText(std::string modelTerm, std::string text);
-int checkOptions(std::map<std::string,std:string), std::string);
+int checkOptions(std::map<std::string,std::string>, std::string);
 
 #endif /* parseFunctions_h */
