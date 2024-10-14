@@ -13,7 +13,7 @@
 #include "rbayzExceptions.h"
 #include "nameTools.h"
 
-using Rsize_t = long long int;
+using Rsize_t = long int;
 extern std::vector<std::string> Messages;
 extern bool needStop;
 

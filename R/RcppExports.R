@@ -5,7 +5,7 @@ mfactor_cpp <- function(fact_list) {
     .Call(`_BayzR_mfactor_cpp`, fact_list)
 }
 
-rbayz_cpp <- function(modelFormula, VE, inputData, chain, method, initVals, verbose) {
-    .Call(`_BayzR_rbayz_cpp`, modelFormula, VE, inputData, chain, method, initVals, verbose)
+rbayz_cpp <- function(modelFormula, VE, inputData, chain, methodArg, verbose, initVals_ = NULL) {
+    .Call(`_BayzR_rbayz_cpp`, modelFormula, VE, inputData, chain, methodArg, verbose, initVals_)
 }
 

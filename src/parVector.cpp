@@ -3,7 +3,7 @@
 //
 
 #include "parVector.h"
-using Rsize_t = long long int;
+using Rsize_t = long int;
 
 // common things for all contructors, this one is called at the end of every
 // constructor because nelem must be set.

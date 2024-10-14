@@ -26,7 +26,6 @@ public:
       if(respModel->varModel==0) Rcpp::Rcout << "!respModel->varModel pointer is zero!\n";
       residPrec = respModel->varModel->weights.data;
       Nresid = respModel->resid->nelem;
-      Rcpp::Rcout << "2\n";
    }
 
    virtual ~modelCoeff() {

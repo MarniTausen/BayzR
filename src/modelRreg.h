@@ -26,7 +26,6 @@ public:
       if(checkOptions(modeldescr.options, "V prior pvals")>0) {
          throw(generalRbayzError("ERROR: unrecognized option(s) in "+modeldescr.shortModelTerm));
       }
-      Rcpp::Rcout << "4\n";
    }
 
    ~modelRreg() {

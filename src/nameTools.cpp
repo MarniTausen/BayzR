@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <map>
 
-using Rsize_t = long long int;
+using Rsize_t = long int;
 
 // Transform R CharacterVector to the c++ equivalent vector<string>
 // Note: the C++ vector should be empty, the algorithm uses push_back;

@@ -76,7 +76,7 @@
 #'
 #' @useDynLib BayzR, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
-bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", init=NULL, verbose=1, ...){
+bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", verbose=1, init=NULL, ...){
 	if(!inherits(model,"formula")) {
 		stop("The first argument is not a valid formula")
 	}
@@ -92,11 +92,11 @@ bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", init=NULL, 
     if(class(VE)=="formula") {
         VE=deparse(VE)
     }
-    if(is.null(method)) {
+    if(method="") {
         method="Bayes"
     }
     chain <- as.integer(chain)
-    result <- rbayz_cpp(model, VE, data, chain, method, init, verbose)
+    result <- rbayz_cpp(model, VE, data, chain, method, verbose, init)
     class(result) <- "bayz"
     #result[['modelname']] <- fct()
     #result[['modelfunction']] <- deparse(substitute(fct))

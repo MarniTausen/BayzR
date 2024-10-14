@@ -23,7 +23,7 @@
 
 // A few global variables are used! Otherwise it would need to pass these around in many functions
 // and constructors.
-// parList: is accessed in modelBase constructor (top of hierarchy) to collect vector of model parameters
+// parList: is accessed in modelBase constructor (top of hierarchy) to collect vector of model parameters.
 // Messages and needStop: can be used in any (helper) function finding errors. When functions not immediately
 // throw an exception, higher level code should check needStop and throw an exception.
 // Note: the global variables appear to persist between R calls, they need to be cleared at the start of main().
@@ -33,8 +33,12 @@ bool needStop=false;
 
 // [[Rcpp::export]]
 Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputData,
-                     Rcpp::IntegerVector chain, SEXP method, Rcpp::List initVals, int verbose)
+                     Rcpp::IntegerVector chain, SEXP methodArg, int verbose,
+                     Rcpp::Nullable<Rcpp::List> initVals_ = R_NilValue
+                     )
 //                   note VE and method are strings, it will be converted below
+//                   note2: compiler also wants default values for any arguments placed after the
+//                          Nullable initVals list, therefore the Nullable<list> comes last ...
 {
 
    // clearing global variables
@@ -45,15 +49,14 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
    // rbayz retains a small string of last executed code that is sometimes added in errors
    std::string lastDone;
 
-   try {     // normal execution builds a return list at the end of try{}, in case of
-             // errors, catch() builds a return list with the messages vector defined above.
+   try {     // normal execution builds a return list at the end of try{}; in case of
+             // errors catch() builds a return list with the messages vector defined above.
 
       // split the modelFormula in a list of response (LHS) and explanatory (RHS) terms.
       std::string formulaAsCppstring = convertFormula(modelFormula);
       removeSpaces(formulaAsCppstring);
-      std::vector<std::string> modelTerms = splitModelTerms(formulaAsCppstring);
-                                    // response will be modelTerms[0]
-                                    // intercept is inserted as mn(0) or mn(1)
+      std::vector<std::string> modelTerms      
+         = splitModelTerms(formulaAsCppstring);  // response will be modelTerms[0]
       lastDone="Parsing model";
       if (verbose > 1) Rcpp::Rcout << "Parsing model done\n";
 
@@ -93,11 +96,11 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       // Response object is built first and parList[0] has residuals/fitted values.
       size_t nResiduals = (*(parList[0]))->nelem;
       size_t nParameters = 0;
+      size_t nNAs = sum(modelR->missing);
       for(size_t i=1; i<parList.size(); i++)
          nParameters += (*(parList[i]))->nelem;
-      if(verbose > 0) Rcpp::Rcout << "Model built with " << nResiduals << " data points (incl NA) and "
-                              << nParameters << " parameters\n";
-
+      if(verbose > 0) Rcpp::Rcout << "Model built with " << nResiduals << " data points (incl " <<
+                            nNAs << " NAs) and "<< nParameters << " parameters\n";
       if(verbose > 2) {
          Rcpp::Rcout << "Model-object overview (#, Name, Size, Logged, first Labels) after model building:\n";
          for(size_t i=0; i<parList.size(); i++) {
@@ -111,6 +114,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       }
 
       // Make parameter name disambiguation - this skips residuals (parList[0])
+      // I considered this can move to parVector where names are set.
       {
          Rcpp::CharacterVector parNames;
          for(size_t i=1; i<parList.size(); i++)
@@ -133,6 +137,43 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
             for(int i=0; i<parNames.size(); i++)
                (*(parList[i+1]))->Name = parNames[i];
          }
+      }
+
+      // Load initial values if given. An easy start is to only allow init-values from a run
+      // with the same model - so that parameter-names and sizes all align.
+      if(initVals_.isNotNull()) {
+         Rcpp::List initVals(initVals_);
+         Rcpp::Rcout << "initVals is supplied\n";
+         Rcpp::DataFrame old_parameters = initVals["Parameters"];
+         Rcpp::CharacterVector old_par_names = old_parameters["Param"];
+         Rcpp::IntegerVector old_par_sizes = old_parameters["Size"];
+         Rcpp::Rcout << old_par_names << "\n";
+         Rcpp::Rcout << old_par_sizes << "\n";
+         // check alignment of names and sizes between old and current build model
+         bool match=true;
+         if((size_t) old_par_sizes.size() == parList.size()){
+            for(size_t i=0; i<parList.size(); i++) {
+               if( ! (old_par_names[i] == (*(parList[i]))->Name && 
+                        (size_t) old_par_sizes[i] == (*(parList[i]))->nelem) ) match=false;
+            }
+         }
+         else
+            match=false;
+         if(match) {
+            Rcpp::List old_estimates = initVals["Estimates"];
+            Rcpp::Rcout << old_estimates.size() << "\n";
+            Rcpp::Rcout << parList.size() << "\n";
+            for(size_t par=0; par<parList.size(); par++) {       // for now loading fitted values from Estimates list,
+               Rcpp::DataFrame par_data = old_estimates[par];    // but they are also stored in Residuals. 
+               Rcpp::NumericVector par_pm = par_data["PostMean"];
+               for(size_t row=0; row < (*(parList[par]))->nelem; row++)
+                  (*(parList[par]))->val[row] = par_pm[row];
+            }
+            modelR->readjResid();  // residuals need to be reset to match loaded fitted values.
+         }
+         else {  // no match
+            throw (generalRbayzError("Initialisation values cannot be used because names or sizes don't match"));
+         }      // this could also be a warning, but there is no nice way to count and handle warnings
       }
 
       // Check the chain settings and find number of output samples by making list of output cycle-numbers.
@@ -169,69 +210,73 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       // to show convergence set "nShow" interval and make vector to hold previously shown solutions
       int nShow = chain[0]/10;
       if( nShow < 1) nShow=1;
-      Rcpp::NumericVector prevShowConv(int(nTracedParam), 1.0l);
+      Rcpp::NumericVector prevShowConv(int(nTracedParam), 0.5l);
       lastDone="Preparing to run MCMC";
       if (verbose>1) Rcpp::Rcout << "Preparing to run MCMC done\n";
 
-      // Run the MCMC chain
+      // Run the MCMC chain for method "Bayes" and "BLUPMC"
       // ------------------
 
-      if(verbose>0) {
-         Rcpp::Rcout << "Cycle, cumulative postMeans for traced parameters and [convergence]\n";
+      std::string method = Rcpp::as<std::string>(methodArg);
+      if (method=="Bayes" || method=="BLUPMC") {
+         if(verbose>0) {
+            Rcpp::Rcout << "Cycle, cumulative postMeans for traced parameters and [convergence]\n";
+         }
+         for (int cycle=1, save=0; cycle <= chain[0]; cycle++) {
+            modelR->sample();
+            for(size_t mt=0; mt<model.size(); mt++) model[mt]->sample();
+            if(method=="Bayes") {
+               modelR->sampleHpars();
+               for(size_t mt=0; mt<model.size(); mt++) model[mt]->sampleHpars();
+            }
+   /*         for(size_t i=0; i<parList.size(); i++)
+               Rcpp::Rcout << " " << (*(parList[i]))->val[0];
+            Rcpp::Rcout << "\n";*/
+            // At the 'skip' intervals (and after burn-in): 1) update posterior statistics using
+            // collectStats(); 2) save MCMC samples for the 'traced' parameters 
+            if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {  // save cycle
+               for(size_t mt=0; mt<model.size(); mt++) model[mt]->prepForOutput();
+               for(size_t i=0; i<parList.size(); i++) (*(parList[i]))->collectStats();
+               for(size_t i=0, col=0; i<parList.size(); i++) {
+                  if( (*(parList[i]))->logged ) {
+                     for(size_t j=0; j< (*(parList[i]))->nelem; j++) {
+                        tracedSamples(save,col) = (*(parList[i]))->val[j]; col++;
+                     }
+                  }
+               }
+               save++;  // save is counter for output (saved) cycles
+            }
+            if (cycle % nShow == 0 && verbose>0) {  // show convergence
+               Rcpp::Rcout << cycle;
+               double conv_change=0.0l, postmean;
+               for(size_t i=0, col=0; i<parList.size(); i++) {
+                  if( (*(parList[i]))->logged ) {
+                     for(size_t j=0; j< (*(parList[i]))->nelem; j++) {
+                        if (save==0) postmean = (*(parList[i]))->val[j];  // if nothing saved yet, using sampled
+                        else postmean = (*(parList[i]))->postMean[j];     // value instead of postmean.
+                        Rcpp::Rcout << " " << postmean;
+                        conv_change = abs( (prevShowConv[col] - postmean) / prevShowConv[col] );
+                        prevShowConv[col] = postmean;
+                        col++;
+                     }
+                  }
+               }
+               conv_change /= double(nTracedParam);
+               Rcpp::Rcout << " [" << conv_change << "]";
+               Rcpp::Rcout << "\n";
+            }
+         } // end for(cycle ...)
       }
-      for (int cycle=1, save=0, showconv=0; cycle <= chain[0]; cycle++) {
-         modelR->sample();
-         for(size_t mt=0; mt<model.size(); mt++) model[mt]->sample();
-/*         for(size_t i=0; i<parList.size(); i++)
-            Rcpp::Rcout << " " << (*(parList[i]))->val[0];
-         Rcpp::Rcout << "\n";*/
-         // At the 'skip' intervals (and after burn-in): 1) update posterior statistics using
-         // collectStats(); 2) save MCMC samples for the 'traced' parameters 
-         if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {  // save cycle
-            for(size_t mt=0; mt<model.size(); mt++) model[mt]->prepForOutput();
-            for(size_t i=0; i<parList.size(); i++) (*(parList[i]))->collectStats();
-            for(size_t i=0, col=0; i<parList.size(); i++) {
-               if( (*(parList[i]))->logged ) {
-                  for(size_t j=0; j< (*(parList[i]))->nelem; j++) {
-                     tracedSamples(save,col) = (*(parList[i]))->val[j]; col++;
-                  }
-               }
-            }
-            save++;  // save is counter for output (saved) cycles
-         }
-         if (cycle % nShow == 0 && verbose>0) {  // show convergence
-            Rcpp::Rcout << cycle;
-            double conv_change=0.0l, postmean;
-            for(size_t i=0, col=0; i<parList.size(); i++) {
-               if( (*(parList[i]))->logged ) {
-                  for(size_t j=0; j< (*(parList[i]))->nelem; j++) {
-                     postmean = (*(parList[i]))->postMean[j];
-                     Rcpp::Rcout << " " << postmean;
-                     // compute relative change compared to previously stored values, ...
-                     conv_change = abs( (prevShowConv[col] - postmean) / prevShowConv[col] );
-                     // and keep this postmean for the next convergence showing
-                     prevShowConv[col] = postmean;
-                     col++;
-                  }
-               }
 
-            }
-            conv_change /= double(nTracedParam);
-            // do not show conv_change the first time
-            if(showconv>0) Rcpp::Rcout << " [" << conv_change << "]";
-            else showconv=1;
-            Rcpp::Rcout << "\n";
-         }
-      } // end for(cycle ...)
+/*    else if (method=="BLUP") {     // insert here BLUP version
+      }
+*/
+
       lastDone="Finished running MCMC";
       if (verbose>1) Rcpp::Rcout << "Finished running MCMC\n";
 
       // Build tables to go in the output:
       // ---------------------------------
-
-      // OBS: with pvals option in rr() model, there is need to introduce another post-processing step.
-      // It looks OK to create a new model object after running MCMC, which will allow to store an extra
-      // parameter vector, and use that to compute pvalues, but then it is not connected to the rr-model object?
 
       // 1. "Parameter" information table
       Rcpp::CharacterVector parNames, parModelFunc, parVariables, parVarStruct;
@@ -254,26 +299,25 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
                 Rcpp::Named("End")=parEstLast, Rcpp::Named("Logged")=parLogged);
 //      parInfo.attr("row.names") = parNames;
 
-      // 2. "Estimates" table with parName, parLabels, postMean and postSD
-      Rcpp::CharacterVector allParNames(nParameters);
-      Rcpp::CharacterVector allParLabels(nParameters);
-      Rcpp::CharacterVector allPostMeans(nParameters);
-      Rcpp::CharacterVector allPostSDs(nParameters);
-      for(size_t i=1, row=0; i < parList.size(); i++) {
-         for(size_t j=0; j< (*(parList[i]))->nelem; j++) {
-            allParNames[row] = (*(parList[i]))->Name;
-            allParLabels[row] = (*(parList[i]))->Labels[j];
-            allPostMeans[row] = (*(parList[i]))->postMean[j];
-            allPostSDs[row] = sqrt( (*(parList[i]))->postVar[j] );
-            row++;
+      // 2. "Estimates": now a list with data frames for each parameter
+      Rcpp::List estimates = Rcpp::List::create();
+      for(size_t i=0; i < parList.size(); i++) {    // For the moment including fitv from parList[0], because init
+         size_t nr = (*(parList[i]))->nelem;        // values reads it from there, but they are also stored in "Residuals" ...
+         Rcpp::CharacterVector rcpp_labels(nr);
+         Rcpp::NumericVector rcpp_postmeans(nr);
+         Rcpp::NumericVector rcpp_postSDs(nr);
+         for(size_t row=0; row<nr; row++) {
+            rcpp_labels[row] = (*(parList[i]))->Labels[row];
+            rcpp_postmeans[row] = (*(parList[i]))->postMean[row];
+            rcpp_postSDs[row] = sqrt( (*(parList[i]))->postVar[row] );
          }
+         Rcpp::DataFrame thispar_estimates = Rcpp::DataFrame::create
+              (Rcpp::Named("Level")=rcpp_labels, Rcpp::Named("PostMean")=rcpp_postmeans,
+              Rcpp::Named("PostSD")=rcpp_postSDs);
+         estimates.push_back(thispar_estimates,(*(parList[i]))->Name);
       }
       lastDone="Computing postMeans and PostSDs";
-      Rcpp::DataFrame estimates = Rcpp::DataFrame::create
-              (Rcpp::Named("Param")=allParNames, Rcpp::Named("Level")=allParLabels,
-               Rcpp::Named("postMean")=allPostMeans, Rcpp::Named("postSD")=allPostSDs);
-//      estimates.attr("row.names") = estimNames;  // no longer rownames??
-      lastDone="Setting up estimates dataframe";
+      lastDone="Setting up estimates list";
 
       // 3. "Samples" table (this is the matrix tracedSamples with row and col-names added)
       Rcpp::CharacterVector sampleRowNames = Rcpp::wrap(modelR->par->Labels);

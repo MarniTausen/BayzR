@@ -31,9 +31,11 @@ public:
                                     ") is not an R integer or numerical vector");
       }
       // The vectors in the response model are initialized as:
-      //  tempY(origdata)  Y.data par(fitted) resid
+      //  tempY(origdata)  Y.data par(fitv)   resid
       //         y           y        0         y  
       //        NA           0        0         0
+      // Note: the parameter vector that comes in the output has the fitted values, this gives more
+      // complete information than the residuals would do for NAs. Residuals are in a member vector.
       Rcpp::NumericVector tempY = Rcpp::as<Rcpp::NumericVector>(modeldescr.variableObjects[0]);
       Y.initWith(tempY);
       Rcpp::IntegerVector labels_int = Rcpp::seq_len(tempY.size());
@@ -54,6 +56,14 @@ public:
    }
    
    ~modelResp() {
+   }
+
+   // readjust residuals to current fitted values.
+   void readjResid() {
+      for(size_t row=0; row<par->nelem; row++) {
+         if(missing[row]) resid->val[row] = 0.0l;
+         else resid->val[row] = Y.data[row] - par->val[row];
+      }
    }
 
    void sample() {
