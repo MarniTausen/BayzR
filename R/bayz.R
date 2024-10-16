@@ -92,7 +92,7 @@ bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", verbose=1, 
     if(class(VE)=="formula") {
         VE=deparse(VE)
     }
-    if(method="") {
+    if(method=="") {
         method="Bayes"
     }
     chain <- as.integer(chain)

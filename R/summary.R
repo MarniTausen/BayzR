@@ -24,16 +24,17 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
         return(new_object)
     }
 
-    # Main estimates table
+    # Main coefficient estimates
     par <- object$Parameters
     par_select = ( par$Hyper==FALSE & par$ModelTerm!="rp" & par$Size <= maxLevel & substr(rownames(par),0,3)!="var")
     par_not_shown = ( par$Hyper==FALSE & par$ModelTerm!="rp" & par$Size > maxLevel & substr(rownames(par),0,3)!="var")
-    estim_select = c()
-    for(i in 1:nrow(par)) {
-        if(par_select[i]) estim_select = c(estim_select,par$EstStart[i]:par$EstEnd[i])
-    }
-    new_object[['Estimates']] = object$Estimates[estim_select,]
-    new_object[['Estimates_notShown']] = rownames(par)[par_not_shown]
+    par_select_names = object$Parameters[par_select, "Param"]
+    coeff_select = c()
+#    for(i in 1:nrow(par)) {
+#        if(par_select[i]) estim_select = c(estim_select,par$EstStart[i]:par$EstEnd[i])
+#    }
+#    new_object[['Estimates']] = object$Estimates[estim_select,]
+#    new_object[['Estimates_notShown']] = rownames(par)[par_not_shown]
 
 
     # 'logged' parameters analysis with convergence diagnostics and HPD intervals
@@ -57,20 +58,6 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
     convergence_status = 0                                # success
     new_object[['Convergence']] = convergence_table
     new_object[['ConvergenceStatus']] = convergence_status
-
-    # Proportions of variances.
-    varnames = ( substr(colnames(object$Samples),0,3)=="var" )
-    variance_table = data.frame()
-    if (sum(varnames)>1) {   # if <= 1 variances the variance_table remains an empty data frame
-       var_samples = as.matrix(object$Samples[,varnames])
-       var_proportions = t(apply(var_samples,1,function(x){x/sum(x)}))
-       postMeans =  apply(var_proportions,2,mean)
-       postSDs  = apply(var_proportions,2,sd)
-       HPDs = HPDbayz(var_proportions,prob=HPDprob, bound="prob")
-       variance_table = data.frame(postMeans,postSDs,HPDs)
-       colnames(variance_table) = c("postMean","postSD","HPDleft","HPDright")
-    }
-    new_object[['variance_table']] = variance_table
 
     new_object[['HPDprob']] = HPDprob
 

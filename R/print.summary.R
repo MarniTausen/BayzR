@@ -30,7 +30,7 @@ print.summarybayz <- function(x, ...){
         }
         cat("\n")
 
-        cat("Estimates and HPD intervals for hyper-parameters and other 'logged' parameters:\n")
+        cat("Estimates and HPD intervals for 'traced' parameters:\n")
         if(x$ConvergenceStatus == 1) {
             cat("*** This table is not printed because there are fewer than 10 output samples ***\n")
         }
@@ -39,7 +39,7 @@ print.summarybayz <- function(x, ...){
         }
         cat("\n")
 
-        cat("Convergence diagnostics on 'logged' parameters:\n")
+        cat("Convergence diagnostics on 'traced' parameters:\n")
         if (x$ConvergenceStatus == 2) {
             cat("*** This table is not printed because the coda package is not installed ***\n")
         }
@@ -48,8 +48,5 @@ print.summarybayz <- function(x, ...){
         }
         cat("\n")
 
-        cat("Estimates for explained variances (variances as proportions of total):\n")
-        if (nrow(object$variance_table) > 0) print(object$variance_table)
-        else cat("*** This table is not printed because there is only one variance in the model\n")
     }
 }
