@@ -143,12 +143,9 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       // with the same model - so that parameter-names and sizes all align.
       if(initVals_.isNotNull()) {
          Rcpp::List initVals(initVals_);
-         Rcpp::Rcout << "initVals is supplied\n";
          Rcpp::DataFrame old_parameters = initVals["Parameters"];
          Rcpp::CharacterVector old_par_names = old_parameters["Param"];
          Rcpp::IntegerVector old_par_sizes = old_parameters["Size"];
-         Rcpp::Rcout << old_par_names << "\n";
-         Rcpp::Rcout << old_par_sizes << "\n";
          // check alignment of names and sizes between old and current build model
          bool match=true;
          if((size_t) old_par_sizes.size() == parList.size()){
@@ -174,6 +171,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          else {  // no match
             throw (generalRbayzError("Initialisation values cannot be used because names or sizes don't match"));
          }      // this could also be a warning, but there is no nice way to count and handle warnings
+         Rcpp::Rcout << "Chain has been initialized with previous estimates\n";
       }
 
       // Check the chain settings and find number of output samples by making list of output cycle-numbers.
@@ -280,26 +278,22 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
 
       // 1. "Parameter" information table
       Rcpp::CharacterVector parNames, parModelFunc, parVariables, parVarStruct;
-      Rcpp::IntegerVector parSizes, parEstFirst, parEstLast, parLogged;
-      for(size_t i=0, row=1; i<parList.size(); i++) {
+      Rcpp::IntegerVector parSizes, parTraced;
+      for(size_t i=0; i<parList.size(); i++) {
          parNames.push_back((*(parList[i]))->Name);
          parModelFunc.push_back((*(parList[i]))->modelFunction);
          parVariables.push_back((*(parList[i]))->variables);
          parVarStruct.push_back((*(parList[i]))->varianceStruct);
          parSizes.push_back((*(parList[i]))->nelem);
-         parEstFirst.push_back(row);
-         parEstLast.push_back(row+(*(parList[i]))->nelem-1);
-         row += (*(parList[i]))->nelem;
-         parLogged.push_back((*(parList[i]))->logged);
+         parTraced.push_back((*(parList[i]))->logged);
       }
       Rcpp::DataFrame parInfo = Rcpp::DataFrame::create
                (Rcpp::Named("ModelTerm")=parModelFunc, Rcpp::Named("Variables")=parVariables, 
                 Rcpp::Named("Param")=parNames,Rcpp::Named("Variance")=parVarStruct,
-                Rcpp::Named("Size")=parSizes, Rcpp::Named("Start")=parEstFirst,
-                Rcpp::Named("End")=parEstLast, Rcpp::Named("Logged")=parLogged);
+                Rcpp::Named("Size")=parSizes, Rcpp::Named("Traced")=parTraced);
 //      parInfo.attr("row.names") = parNames;
 
-      // 2. "Estimates": now a list with data frames for each parameter
+      // 2. "Estimates": now a list with a data frame for each parameter-vector
       Rcpp::List estimates = Rcpp::List::create();
       for(size_t i=0; i < parList.size(); i++) {    // For the moment including fitv from parList[0], because init
          size_t nr = (*(parList[i]))->nelem;        // values reads it from there, but they are also stored in "Residuals" ...
@@ -341,21 +335,20 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
 //      Rcpp::List tracedSamplesNames = Rcpp::List::create(sampleRowNames,sampleColNames);
 //      tracedSamples.attr("dimnames") = tracedSamplesNames;
 
-      // 4. "Residuals" table: this is now postMean of fitted value (from par-vector in modelR) and residuals
-      // computed from difference with data (Y, also still stored in modelR). If missing value, residual is NA.
+      // 4. "Residuals" table: compute residuals from Y.data and fitted value (par-vector in modelR).
+      // The 'resid' in modelR cannot be used because that one is a sampled state, not a posterior mean.
       // Need to think about modifications for non-linear models, then residual may also need to be stored
-      // and averaged because it is more difficult to computer from the Y.
+      // and averaged because it is more difficult to computer from the Y and fitted value?
       Rcpp::NumericVector fitval(nResiduals);
       Rcpp::NumericVector resid(nResiduals);
       for(size_t i=0; i<nResiduals; i++) {
          fitval[i] = modelR->par->postMean[i];
-         if(modelR->missing[i]) resid[i] = NA_REAL;
+         if(modelR->missing[i]) resid[i] = NA_REAL;  // residual NA for missing data, but fitval exists!
          else resid[i] = modelR->Y.data[i] - modelR->par->postMean[i];
       }
-      Rcpp::DataFrame residuals = Rcpp::DataFrame::create
-              (Rcpp::Named("Fitval")=fitval, Rcpp::Named("Residual")=resid);
+      Rcpp::NumericVector residuals(resid);
       Rcpp::CharacterVector residRowNames = Rcpp::wrap(modelR->par->Labels);
-      residuals.attr("row.names") = residRowNames;
+      residuals.names() = residRowNames;
 
       // Build the final return list
       Rcpp::List result = Rcpp::List::create();

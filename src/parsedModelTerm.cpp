@@ -247,9 +247,10 @@ parsedModelTerm::parsedModelTerm(std::string mt, std::string VEdescr, Rcpp::Data
    // for now not accepting functions on response, but it could be extended here to
    // allow e.g. log(Y), probit(Y), etc
    if(parse_step1[0]!="") throw(generalRbayzError("Unexpected function on response term: "+mt));
-   // the next one could just be a message, but not easy here to get things in the messages list
+   // [workHere] the next one could just be a message
    if(parse_step1[2]!="") throw(generalRbayzError("Unexpected options retrieved from response term: "+mt));
-   parseModelTerm_step2("", parse_step1[1], VEdescr, d);
+   // here not inserted "rp" as funcName and residual variance description as ony possible option
+   parseModelTerm_step2("rp", parse_step1[1], VEdescr, d);
 }
 
 // constructor for handling RHS model terms
