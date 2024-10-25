@@ -1,12 +1,10 @@
-#' Summary of bayz model fit
+#' Summary of traced parameters from bayz model fit
 #'
-#' Produced summary statistics of the bayz object and returns a summarybayz object.
+#' Posterior summary statistics including HPD interval and convergence diagnostics of traced parameters
+#'     from a bayz model fit, returns a summarybayz object.
 #'
 #' @param object    bayz output object
-#' @param maxLevel  controls the inclusion of estimates in the "Main estimates" table by selecting
-#'                  only the model-terms with less <= maxlevel coefficients
-#' @param HPDprob   the probability for the Highest Posterior Density intervals reported in the
-#'                  table "Convergence diagnostics"
+#' @param HPDprob   probability for the Highest Posterior Density intervals (default 0.95)
 #' @param ...       additional parameters
 #'
 #' @return summarybayz object
@@ -37,7 +35,8 @@ summary.bayz <- function(object, maxLevel=10, HPDprob=0.95, ...){
 #    new_object[['Estimates_notShown']] = rownames(par)[par_not_shown]
 
 
-    # 'logged' parameters analysis with convergence diagnostics and HPD intervals
+    # This summary now only lists the "traced" parameters with HPD intervals and convergence diagnostics, but the
+    # tracing has been somewhat expanded to also include low-level (fixed) factors, and can be user-toggled.
     output_cycles = as.numeric(rownames(object$Samples))
     if(length(output_cycles)<10) convergence_status = 1       # fail because too few output
     convergence_table = data.frame()

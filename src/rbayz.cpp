@@ -102,10 +102,10 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       if(verbose > 0) Rcpp::Rcout << "Model built with " << nResiduals << " data points (incl " <<
                             nNAs << " NAs) and "<< nParameters << " parameters\n";
       if(verbose > 2) {
-         Rcpp::Rcout << "Model-object overview (#, Name, Size, Logged, first Labels) after model building:\n";
+         Rcpp::Rcout << "Model-object overview (#, Name, Size, Traced, first Labels) after model building:\n";
          for(size_t i=0; i<parList.size(); i++) {
             Rcpp::Rcout << i << " " << (*(parList[i]))->Name << " " << (*(parList[i]))->nelem << 
-                    " " << (*(parList[i]))->logged;
+                    " " << (*(parList[i]))->traced;
             Rcpp::Rcout << " " << (*(parList[i]))->Labels[0];
             if((*(parList[i]))->nelem > 1) Rcpp::Rcout << " " << (*(parList[i]))->Labels[1];
             if((*(parList[i]))->nelem > 2) Rcpp::Rcout << " ...";
@@ -193,7 +193,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       size_t nTracedParam=0;
       if(verbose>0) Rcpp::Rcout << "Saving full traces for:";
       for(size_t i=0; i<parList.size(); i++) {
-         if( (*(parList[i]))->logged ) {
+         if( (*(parList[i]))->traced ) {
             nTracedParam += (*(parList[i]))->nelem;
             if(verbose>0) {
                for(size_t j=0; j< (*(parList[i]))->nelem; j++) Rcpp::Rcout << " " << (*(parList[i]))->Labels[j];
@@ -234,7 +234,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
                for(size_t mt=0; mt<model.size(); mt++) model[mt]->prepForOutput();
                for(size_t i=0; i<parList.size(); i++) (*(parList[i]))->collectStats();
                for(size_t i=0, col=0; i<parList.size(); i++) {
-                  if( (*(parList[i]))->logged ) {
+                  if( (*(parList[i]))->traced ) {
                      for(size_t j=0; j< (*(parList[i]))->nelem; j++) {
                         tracedSamples(save,col) = (*(parList[i]))->val[j]; col++;
                      }
@@ -246,7 +246,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
                Rcpp::Rcout << cycle;
                double conv_change=0.0l, postmean;
                for(size_t i=0, col=0; i<parList.size(); i++) {
-                  if( (*(parList[i]))->logged ) {
+                  if( (*(parList[i]))->traced ) {
                      for(size_t j=0; j< (*(parList[i]))->nelem; j++) {
                         if (save==0) postmean = (*(parList[i]))->val[j];  // if nothing saved yet, using sampled
                         else postmean = (*(parList[i]))->postMean[j];     // value instead of postmean.
@@ -281,7 +281,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          parVariables.push_back((*(parList[i]))->variables);
          parVarStruct.push_back((*(parList[i]))->varianceStruct);
          parSizes.push_back((*(parList[i]))->nelem);
-         parTraced.push_back((*(parList[i]))->logged);
+         parTraced.push_back((*(parList[i]))->traced);
       }
       Rcpp::DataFrame parInfo = Rcpp::DataFrame::create
                (Rcpp::Named("ModelTerm")=parModelFunc, Rcpp::Named("Variables")=parVariables, 
@@ -291,7 +291,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
 
       // 2. "Estimates": now a list with a data frame for each parameter-vector
       Rcpp::List estimates = Rcpp::List::create();
-      for(size_t i=0; i < parList.size(); i++) {    // For the moment including fitv from parList[0], because init
+      for(size_t i=0; i < parList.size(); i++) {    // For the moment including fitval from parList[0], because init
          size_t nr = (*(parList[i]))->nelem;        // values reads it from there, but they are also stored in "Residuals" ...
          Rcpp::CharacterVector rcpp_labels(nr);
          Rcpp::NumericVector rcpp_postmeans(nr);
@@ -313,7 +313,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       Rcpp::CharacterVector sampleRowNames = Rcpp::wrap(modelR->par->Labels);
       Rcpp::CharacterVector sampleColNames;
       for(size_t i=0; i<parList.size(); i++) {
-         if( (*(parList[i]))->logged ) {
+         if( (*(parList[i]))->traced ) {
             if( (*(parList[i]))->nelem==1) sampleColNames.push_back( (*(parList[i]))->Name);
             else {
                std::string s = (*(parList[i]))->Name;

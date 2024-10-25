@@ -33,7 +33,7 @@ class idenVarStr : public indepVarStr {
 public:
     idenVarStr(parsedModelTerm & modeldescr, parVector* coefpar) : indepVarStr(modeldescr, coefpar) {
        par = new parVector(modeldescr, 1.0l, "var");
-       par->logged=1;
+       par->traced=1;
        par->varianceStruct="IDEN";
     }
 

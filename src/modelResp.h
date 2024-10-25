@@ -31,7 +31,7 @@ public:
                                     ") is not an R integer or numerical vector");
       }
       // The vectors in the response model are initialized as:
-      //  tempY(origdata)  Y.data par(fitv)   resid
+      //  tempY(origdata)  Y.data par(fitval)   resid
       //         y           y        0         y  
       //        NA           0        0         0
       // Note: the parameter vector that comes in the output has the fitted values, this gives more
@@ -40,7 +40,7 @@ public:
       Y.initWith(tempY);
       Rcpp::IntegerVector labels_int = Rcpp::seq_len(tempY.size());
       Rcpp::CharacterVector labels = Rcpp::as<Rcpp::CharacterVector>(labels_int);
-      par = new parVector(modeldescr,0.0l,labels,"fitv");
+      par = new parVector(modeldescr,0.0l,labels,"fitval");
       resid = new parVector(modeldescr, 0.0l, labels,"resid");
       missing = Rcpp::is_na(tempY);
       for(size_t row=0; row<par->nelem; row++) {
@@ -95,7 +95,7 @@ public:
          Rcpp::Rcout << "resid";
          for(size_t i=0; i<10; i++) Rcpp::Rcout << " " << resid.data[i];
          Rcpp::Rcout << "\n";
-         Rcpp::Rcout << "fitv";
+         Rcpp::Rcout << "fitval";
          for(size_t i=0; i<10; i++) Rcpp::Rcout << " " << par->val[i];
          Rcpp::Rcout << "\n";*/
    }

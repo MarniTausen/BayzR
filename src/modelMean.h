@@ -27,7 +27,7 @@ public:
       par = new parVector(modeldescr, 0.0l);
       par->Name="mean";       // a little repair because the
       par->Labels[0]="mean";  // constructor has not set it right
-      par->logged=1;
+      par->traced=1;
    }
 
    ~modelMean() {

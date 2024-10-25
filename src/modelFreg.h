@@ -30,7 +30,7 @@ public:
          throw generalRbayzError("Not a numeric vector input: "+modeldescr.variableNames[0]);
       C = new dataCovar(modeldescr.variableObjects[0]);
       par = new parVector(modeldescr, 0.0l);
-      par->logged=1;
+      par->traced=1;
    }
    
    ~modelFreg() {
