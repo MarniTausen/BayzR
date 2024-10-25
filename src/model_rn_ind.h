@@ -1,27 +1,27 @@
-// BayzR -- modelRanfi.h
+// BayzR -- model_rn_ind.h
 // Model class for RANdom Factor with Indep variance structures.
 // Derives from modelFactor and has pointer to IndepVarStr object to model the variance.
 //
 //  Created by Luc Janss on 03/08/2018.
 //
 
-#ifndef modelRanfi_h
-#define modelRanfi_h
+#ifndef model_rn_ind_h
+#define model_rn_ind_h
 
 #include <Rcpp.h>
 #include "modelFactor.h"
 #include "indepVarStr.h"
 //#include <unistd.h>
 
-class modelRanfi : public modelFactor {
+class model_rn_ind : public modelFactor {
 
 public:
 
-   modelRanfi(parsedModelTerm & modeldescr, modelResp * rmod)
+   model_rn_ind(parsedModelTerm & modeldescr, modelResp * rmod)
       : modelFactor(modeldescr, rmod) {
    }
 
-   ~modelRanfi() {
+   ~model_rn_ind() {
       delete varmodel;
    }
 
@@ -46,13 +46,13 @@ public:
 
 };
 
-class modelRanFacIden : public modelRanfi {
+class model_rn_ind_iden : public model_rn_ind {
 public:
-   modelRanFacIden(parsedModelTerm & pmdescr, modelResp * rmod)
-      : modelRanfi(pmdescr, rmod) {
+   model_rn_ind_iden(parsedModelTerm & pmdescr, modelResp * rmod)
+      : model_rn_ind(pmdescr, rmod) {
       varmodel = new idenVarStr(pmdescr, this->par);
    }
 };
 
 
-#endif /* modelRanfi_h */
+#endif /* model_rn_ind_h */
