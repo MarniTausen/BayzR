@@ -33,7 +33,6 @@ public:
    parVector *regcoeff;
    simpleDblVector fitval;
    std::vector<size_t> obsIndex;
-   GenericPrior gprior;
    indepVarStr* varmodel;
 
 };

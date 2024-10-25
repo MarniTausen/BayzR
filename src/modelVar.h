@@ -24,8 +24,8 @@ public:
 
    virtual ~modelVar() { }
 
-   void sampleHpars() {}                 // variance usually don't have higher levels of hyper-pars that need
-                                    // updating and there is a default empty sampleHpars here for all var-objects.
+   void sampleHpars() { }
+
 protected:
    GenericPrior gprior;
    parVector* coefpar=0;

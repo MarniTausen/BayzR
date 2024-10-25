@@ -2,7 +2,7 @@
 //
 
 #include <Rcpp.h>
-#include "modelRanfc.h"
+#include "model_rn_cor.h"
 #include "indexTools.h"
 
 /* ------------------------- modelBase
@@ -23,6 +23,7 @@ int modelBase::openSamplesFile() {
 // rn_cor_k0 can run 1 kernel or multiple kennels with "mergedKernel" appraoach - however, at the
 // moment no option in the interface to toggle merging kernels or not.
 model_rn_cor_k0::model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod)
+      : modelFactor(modeldescr, rmod)
 {
    // for rn_cor_k0 all variance objects must be kernels
    for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
@@ -42,16 +43,16 @@ model_rn_cor_k0::model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod)
    }
    // Here add a vector regcoeff (size K->ncol) to hold the regresssion on eigenvectors.
    // It is a parVector class so that the variance object can accept and work on it.
-   regcoeff = new parVector(modeldescr, 0.0l, K->colnames);
+   regcoeff = new parVector(modeldescr, 0.0l, kernelList[0]->colnames);
    // obsIndex makes new level codes matching F->labels from every row in data to K->labels, it could
    // in principle replace the F->data and no need for the obsIndex vector.
-   builObsIndex(obsIndex,F,K);
+   builObsIndex(obsIndex,F,kernelList[0]);
    fitval.initWith(F->nelem, 0.0l);
    // create the variance object - may need to move out as in ranfi
    varmodel = new idenVarStr(modeldescr, this->regcoeff);
 }
 
-void model_rn_cor_k0:sample() {
+void model_rn_cor_k0::sample() {
    // Update regressions on the eigenvectors
    double lhs, rhs;
    size_t matrixrow;
@@ -79,8 +80,11 @@ void model_rn_cor_k0:sample() {
    }
    for (size_t obs=0; obs < F->nelem; obs++)
       resid[obs] -= fitval[obs];
-   varmodel->sample();
 }
+
+void model_rn_cor_k0::sampleHpars(
+   varmodel->sample();
+)
 
 void model_rn_cor_k0::accumFit(simpleDblVector & fit) {
    for (size_t obs=0; obs < F->nelem; obs++)
