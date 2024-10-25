@@ -1,5 +1,5 @@
-//  BayzR --- modelRanfc.h
-//  Computational class to to model random effect with correlations (from using rn(..., V=K)).
+//  BayzR --- model_rn_cor.h
+//  Computational classes to model random effect with correlations (from using rn(..., V=K)).
 //  Now also works with interactions and multiple kernels, but code now accepting ony max two kernels. 
 //  Derives from modelFactor which sets-up the (interacting) factor data, the computational methods
 //  though are more like modelMatrix and therefore parts of code are now same between modelMatrix and
@@ -8,8 +8,8 @@
 //  Created by Luc Janss on 03/08/2018.
 //
 
-#ifndef modelRanfc_h
-#define modelRanfc_h
+#ifndef model_rn_cor_h
+#define model_rn_cor_h
 
 #include <Rcpp.h>
 #include "modelFactor.h"
@@ -20,12 +20,12 @@
 // update: ranfcor now also derive from modelFactor?
 // the matrix data here was eigenvector data, it needs to come from a variance model now.
 
-class modelRanfc : public modelFactor {
+class model_rn_cor_k0 : public modelFactor {
 
 public:
 
-   modelRanfc(parsedModelTerm & modeldescr, modelResp * rmod);
-   ~modelRanfc() {}
+   model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod);
+   ~model_rn_cor_k0() {}
    void sample();
    void accumFit(simpleDblVector & fit);
    void prepForOutput();
@@ -38,4 +38,6 @@ public:
 
 };
 
-#endif /* modelRanfc_h */
+
+
+#endif /* model_rn_cor_h */

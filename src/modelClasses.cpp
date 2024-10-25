@@ -16,19 +16,18 @@ int modelBase::openSamplesFile() {
    return 0;
 }
 
-/* ------------------------- modelRanfc
-*/
+/* *********************** model_rn_cor classes ***************************/
 
-// old code that could only run cases with all known kernels up to max 2, and where for 2 kernels
-// the kernels were merged in one combined kernel. The kernelList vector therefore remains size 1.
-// It could be revived allowing for an option mergeKernels that merges known kernels in memory.
-/*  old constructor
-Ranfc_old(parsedModelTerm & modeldescr, modelResp * rmod)
+// ---- model_ran_cor_k0
+
+// rn_cor_k0 can run 1 kernel or multiple kennels with "mergedKernel" appraoach - however, at the
+// moment no option in the interface to toggle merging kernels or not.
+model_rn_cor_k0::model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod)
 {
-   // For the moment all variance objects must be kernels
+   // for rn_cor_k0 all variance objects must be kernels
    for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
       if (modeldescr.varianceObjects[i]==R_NilValue) {
-         throw(generalRbayzError("Mixing kernels with IDEN or other indep structures not yet possible"));
+         throw(generalRbayzError("Attempting to run rn_cor_k0 with some special kernels"));
       }
    }
    // Get the first kernel and then add (making kronecker products) with second etc., if available
@@ -51,24 +50,8 @@ Ranfc_old(parsedModelTerm & modeldescr, modelResp * rmod)
    // create the variance object - may need to move out as in ranfi
    varmodel = new idenVarStr(modeldescr, this->regcoeff);
 }
-*/
 
-modelRanfc::modelRanfc(parsedModelTerm & modeldescr, modelResp * rmod)
-           : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.options["prior"]) {
-   // For the moment all variance objects must be kernels
-   for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
-      if (modeldescr.varianceObjects[i]==R_NilValue) {
-         throw(generalRbayzError("Mixing kernels with IDEN or other indep structures not yet possible"));
-      }
-   }
-   for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
-      kernelList.push_back(new kernelMatrix(modeldescr.varianceObjects[i], modeldescr.varianceNames[i]));
-   }
-}
-
-// sample method from old code
-/*
-Ranfc_old_sample() {
+void model_rn_cor_k0:sample() {
    // Update regressions on the eigenvectors
    double lhs, rhs;
    size_t matrixrow;
@@ -96,24 +79,10 @@ Ranfc_old_sample() {
    }
    for (size_t obs=0; obs < F->nelem; obs++)
       resid[obs] -= fitval[obs];
-   // here need to replace with calling varmodel->sample(), but it needs
-   // the diagVar structure.
-   // update hyper-par (variance) using SSQ of random effects
-   double ssq=0.0;
-   for(size_t col=0; col< K->ncol; col++)
-      ssq += regcoeff->val[col]*regcoeff->val[col]/K->weights[col];
-   varmodel->par->val[0] = gprior.samplevar(ssq, K->ncol);
-}
-*/
-
-// New sample() method with optimized scheme to compute statistics in blocks
-void modelRanfc::sample() {
-//   if(kernelList.size()==1) modelRanf::sample1();
-//   else modelRanf::sample2();
-
+   varmodel->sample();
 }
 
-void modelRanfc::accumFit(simpleDblVector & fit) {
+void model_rn_cor_k0::accumFit(simpleDblVector & fit) {
    for (size_t obs=0; obs < F->nelem; obs++)
      fit[obs] += fitval[obs];
 }
@@ -121,7 +90,7 @@ void modelRanfc::accumFit(simpleDblVector & fit) {
 // prepForOutput puts the transform to random effects in the par-vector
 // [!] this now only for 1, or 1 merged, kernel.
 // Also: is this not the same as the fitted value??
-void modelRanfc::prepForOutput() {
+void model_rn_cor_k0::prepForOutput() {
    kernelMatrix* K = kernelList[0];                  // kernelList is a std::vector<kernelMatrix*>
    for(size_t row=0; row< K->nrow; row++) {
       par->val[row]=0.0l;
@@ -130,3 +99,21 @@ void modelRanfc::prepForOutput() {
       }
    }
 };
+
+// ----- model_ran_cor_k1
+
+/* start on making the "non-merged" approach where kernels remain individually in a list
+model_rn_cor_k1::model_rn_cor_k1(parsedModelTerm & modeldescr, modelResp * rmod)
+           : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.options["prior"]) {
+   // For the moment all variance objects must be kernels
+   for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
+      if (modeldescr.varianceObjects[i]==R_NilValue) {
+         throw(generalRbayzError("Mixing kernels with IDEN or other indep structures not yet possible"));
+      }
+   }
+   for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
+      kernelList.push_back(new kernelMatrix(modeldescr.varianceObjects[i], modeldescr.varianceNames[i]));
+   }
+}
+*/
+
