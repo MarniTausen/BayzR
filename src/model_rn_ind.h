@@ -54,5 +54,6 @@ public:
    }
 };
 
+// futher extensions with indep structures can inclue diag, weighted, mixed?
 
 #endif /* model_rn_ind_h */

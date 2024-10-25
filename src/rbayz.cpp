@@ -75,9 +75,9 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          else if(pmt.funcName=="fx") model.push_back(new modelFixf(pmt, modelR));
          else if(pmt.funcName=="rn") {
             if(pmt.varianceStruct=="iden" || pmt.varianceStruct=="notgiven")
-               model.push_back(new modelRanFacIden(pmt, modelR));
-//            else if () // insert rn() with kernel variance structure
-//               ...
+               model.push_back(new model_rn_ind_iden(pmt, modelR));
+            else if (pmt.varianceStruct=="kernels")
+               model.push_back(new model_rn_cor_k0(pmt, modelR));
             else
                throw generalRbayzError("There is no class to model rn(...) with Variance structure " + pmt.options["V"]);
          }
@@ -85,7 +85,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
             if(pmt.varianceStruct=="iden" || pmt.varianceStruct=="notgiven")
                model.push_back(new modelRregIden(pmt, modelR));
             else if (pmt.varianceStruct=="kernels")
-               
+
             else
                throw generalRbayzError("There is no class to model rr(...) with Variance structure " + pmt.options["V"]);
          }
