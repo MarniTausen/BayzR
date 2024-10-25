@@ -20,6 +20,7 @@ public:
    
    modelFixf(parsedModelTerm & modeldescr, modelResp * rmod)
       : modelFactor(modeldescr, rmod) {
+         if(par->nelem < 5) par->traced=1;
    }
 
    ~modelFixf() {
