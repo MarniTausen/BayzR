@@ -90,13 +90,15 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
    size_t pos1 = vrString.find(':');
    size_t pos2 = vrString.find('/');
    size_t pos3 = vrString.find('|');
-   if(pos2==std::string::npos && pos3==std::string::npos)            // A, A:B, A:B:C
-      variablePattern="factors";
+   if(pos2==std::string::npos && pos3==std::string::npos) {          // A, A:B, A:B:C
+      if(pos1==std::string::npos) variablePattern="onevar";          // single variable, can be anything
+      else variablePattern="intfactors";                             // A:B, A:B:C, must be interacting factors
+   }
    else if (pos3!=std::string::npos && pos2==std::string::npos       // A|B, A|B:C
-                  && (pos1==std::string::npos || pos2>pos3))         // but not A:B|C
-      variablePattern="nestreg";
-   else if (pos2!=std::string::npos && pos1==std::string::npos       // A/B but no other
-                  && pos3==std::string::npos)                        // patterns allowed with /
+                  && (pos1==std::string::npos || pos2>pos3))         // but not A:B|C (not allowed)
+      variablePattern="nestedreg";
+   else if (pos2!=std::string::npos && pos1==std::string::npos       // A/B but no other patterns
+                  && pos3==std::string::npos)                        // with | or : allowed with /
       variablePattern="rrcovars";
    else {
       std::string s="Cannot interpret/use variable specification \'"+vrString+
