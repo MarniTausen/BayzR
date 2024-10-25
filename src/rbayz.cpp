@@ -76,6 +76,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          else if(pmt.funcName=="rn") {
             if(pmt.varianceStruct=="iden" || pmt.varianceStruct=="notgiven")
                model.push_back(new modelRanFacIden(pmt, modelR));
+//            else if () // insert rn() with kernel variance structure
+//               ...
             else
                throw generalRbayzError("There is no class to model rn(...) with Variance structure " + pmt.options["V"]);
          }
@@ -84,6 +86,14 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
                model.push_back(new modelRregIden(pmt, modelR));
             else
                throw generalRbayzError("There is no class to model rr(...) with Variance structure " + pmt.options["V"]);
+         }
+         else if (pmt.funcName=="rg") {    // work on adding rg()
+            if(pmt.variablePattern=="onevar")
+               model.push_back(new modelFreg(pmt, modelR));
+//            else if (pmt.variablePattern="nestedreg")
+//             need a new model object for the nested regression
+            else
+               throw generalRbayzError("Regression with the variable syntax " + pmt.variableString + "not supported\n");
          }
          else {
            throw generalRbayzError("Unknown model-function \'" + pmt.funcName + "\' at "+pmt.shortModelTerm);
