@@ -45,7 +45,6 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
    else if (Rcpp::is<Rcpp::IntegerVector>(col) && !Rf_isMatrix(col)) {
       Rcpp::IntegerVector Rtempvec = Rcpp::as<Rcpp::IntegerVector>(col);
       Rcpp::LogicalVector missing = Rcpp::is_na(Rtempvec);
-      initWith(Rtempvec);
       std::map<int, int> unique_levels;
       for(int i=0; i<Rtempvec.size(); i++) {  // build map with non-NA values
          if(!missing[i]) unique_levels[Rtempvec[i]];

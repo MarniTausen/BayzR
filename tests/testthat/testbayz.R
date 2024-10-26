@@ -12,7 +12,7 @@ test_that("Chain missing warning", {
 
     my_data <- data.frame(x=1:20, y=20:1)
 
-    expect_warning(bayz(y ~ fx(x), data=my_data, silent=TRUE))
+    expect_warning(bayz(y ~ fx(x), data=my_data, chain=c(5,1,1),silent=TRUE))
     #expect_error(bayz(x ~ y, chain=c(10000, 100, 10)))
 
 })

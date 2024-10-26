@@ -34,7 +34,7 @@ void simpleIntVector::doalloc(size_t n) {
       throw(generalRbayzError("Zero or negative size in initialisation in simpleVector"));
    }
    if (nelem >0) {  // already allocated!
-      throw(generalRbayzError("Cannot resize vector in simpleVector"));
+      throw(generalRbayzError("Attempting realloc in simpleVector not supported"));
    }
    data  = new int[n];
    nelem = n;
@@ -84,7 +84,7 @@ void simpleDblVector::doalloc(size_t n) {
       throw(generalRbayzError("Zero or negative size in initialisation in simpleVector"));
    }
    if (nelem >0) {  // already allocated!
-      throw(generalRbayzError("Cannot resize vector in simpleVector"));
+      throw(generalRbayzError("Attempting realloc in simpleVector not supported"));
    }
    data  = new double[n];
    nelem = n;
