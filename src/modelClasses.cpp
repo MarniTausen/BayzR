@@ -57,7 +57,7 @@ void model_rn_cor_k0::sample() {
    double lhs, rhs;
    size_t matrixrow;
    double* colptr;
-   kernelMatrix K = kernelList[0];
+   kernelMatrix* K = kernelList[0];
    for (size_t obs=0; obs < F->nelem; obs++)
       fitval[obs] = 0.0l;
    for(size_t col=0; col < K->ncol; col++) {
@@ -82,9 +82,9 @@ void model_rn_cor_k0::sample() {
       resid[obs] -= fitval[obs];
 }
 
-void model_rn_cor_k0::sampleHpars(
+void model_rn_cor_k0::sampleHpars() {
    varmodel->sample();
-)
+}
 
 void model_rn_cor_k0::accumFit(simpleDblVector & fit) {
    for (size_t obs=0; obs < F->nelem; obs++)

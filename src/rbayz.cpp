@@ -84,8 +84,6 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          else if (pmt.funcName=="rr") {
             if(pmt.varianceStruct=="iden" || pmt.varianceStruct=="notgiven")
                model.push_back(new modelRregIden(pmt, modelR));
-            else if (pmt.varianceStruct=="kernels")
-
             else
                throw generalRbayzError("There is no class to model rr(...) with Variance structure " + pmt.options["V"]);
          }

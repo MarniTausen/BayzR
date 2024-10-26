@@ -27,6 +27,7 @@ public:
    model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod);
    ~model_rn_cor_k0() {}
    void sample();
+   void sampleHpars();
    void accumFit(simpleDblVector & fit);
    void prepForOutput();
    std::vector<kernelMatrix*> kernelList;

@@ -11,11 +11,11 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
    processing and handling NAs differs somewhat dependent on input type. I always
    keep NA as the last level.
    - if input is R factor, it is directly convertable to integer vector that can be
-     copied in the 'data' using unitWith, but NAs become a large negative number and are
+     copied in the 'data' using initWith, but NAs become a large negative number and are
      repaired later.
    - if input is an R character vector, converting to strings would convert NAs to string "NA",
      but I avoid that by building a map with the input strings that are not NA. Then later
-     NA is added as last level, and it's level-codes are inserted as the last 'lev' counter value.
+     NA is added as last level, and it's level-codes are inserted as the last 'lev' value.
    - if input is an R integer vector I build a map of <int,int> so the sorting is nicer (as
      strings it would give the ugly sorting with "10" before "2"); treatment of NAs is like for
      a character vector.
@@ -42,7 +42,7 @@ simpleFactor::simpleFactor (Rcpp::RObject col, std::string inp_name)  : simpleIn
          }
       }
    }
-   else if (Rcpp::is<Rcpp::NumericVector>(col) && !Rf_isMatrix(col)) {
+   else if (Rcpp::is<Rcpp::IntegerVector>(col) && !Rf_isMatrix(col)) {
       Rcpp::IntegerVector Rtempvec = Rcpp::as<Rcpp::IntegerVector>(col);
       Rcpp::LogicalVector missing = Rcpp::is_na(Rtempvec);
       initWith(Rtempvec);
