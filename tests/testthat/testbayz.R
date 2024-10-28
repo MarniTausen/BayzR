@@ -1,76 +1,78 @@
 context("bayz.interface")
 
-test_that("Invalid formula", {
+test_that("Missing or invalid formula", {
 
-    my_data <- data.frame(x=1:20, y=20:1)
+    my_data <- data.frame(x=rep(1:2,10), y=20:1)
 
-    expect_error(bayz("noformula", data=my_data, silent=TRUE))
+    expect_error(bayz("noformula", data=my_data, verbose=0))
 
 })
+
+test_that("Missing data argument", {
+
+    my_data <- data.frame(x=rep(1:2,10), y=20:1)
+
+    expect_error(bayz(y ~ fx(x), chain=c(10, 1, 1), verbose=0))
+
+})
+
 
 test_that("Chain missing warning", {
 
-    my_data <- data.frame(x=1:20, y=20:1)
+    my_data <- data.frame(x=rep(1:2,10), y=20:1)
 
-    expect_warning(bayz(y ~ fx(x), data=my_data, chain=c(5,1,1),silent=TRUE))
-    #expect_error(bayz(x ~ y, chain=c(10000, 100, 10)))
+    expect_warning(bayz(y ~ fx(x), data=my_data, verbose=0))
+
+})
+
+test_that("Chain setting too few elements", {
+
+    my_data <- data.frame(x=rep(1:2,10), y=20:1)
+
+    expect_error(bayz(y ~ fx(x), data=my_data, chain=c(10,2), verbose=0))
 
 })
 
-#test_that("Chain missing settings", {
-#
-#    my_data <- data.frame(x=as.factor(1:20), y=20:1)
-#
-#    expect_error(bayz(y ~ fx(x), data=my_data, chain=c(10,2), silent=TRUE))
-#
-#})
+test_that("Chain wrong settings", {
 
-#test_that("Chain wrong settings", {
-#
-#    my_data <- data.frame(x=as.factor(1:20), y=20:1)
-#
-#    expect_error(bayz(y ~ fx(x), data=my_data, chain=c(10,-1,-1), silent=TRUE))
-#
-#})
+    my_data <- data.frame(x=rep(1:2,10), y=20:1)
 
-
-#test_that("Missing data input", {
-#
-#    my_data <- data.frame(x=as.factor(1:20), y=20:1)
-#
-#    expect_error(bayz(y ~ fx(x), chain=c(10000, 100, 10), silent=TRUE))
-#
-#})
-
-#test_that("Missing model-function", {
-#
-#    my_data <- data.frame(x=1:20, y=20:1)
-#
-#    expect_error(bayz(y ~ x, data=my_data, chain=c(10000, 100, 10), silent=TRUE))
-#
-#})
-
-#test_that("Wrong input", {
-#
-#    my_data <- data.frame(x=1:20, y=20:1)
-#    expect_error(bayz(y ~ x, data=my_data, chain=c(10000,100,10)))
-#
-#    fit <- bayz(y ~ fx(x), data=my_data, chain=c(10000,100,10), silent=TRUE)
-#    ## Run print
-#    capture.output(print(fit))
-#})
-
-# test below gives error: variable is not a factor, when removing as.factor() for x
-
-test_that("Working run with fx()", {
-
-    my_data <- data.frame(x=as.factor(1:20), y=20:1)
-
-    expect_equal(bayz(y ~ fx(x), data=my_data, chain=c(100,10,5), silent=TRUE)$nError, 0)
-
-    capture.output(print(bayz(y ~ fx(x), data=my_data, chain=c(100,10,5), silent=TRUE)))
+    expect_error(bayz(y ~ fx(x), data=my_data, chain=c(10,-1,-1), verbose=0))
 
 })
+
+test_that("Chain no output", {
+
+    my_data <- data.frame(x=rep(1:2,10), y=20:1)
+
+    expect_error(bayz(y ~ fx(x), data=my_data, chain=c(10,20,1), verbose=0))
+
+})
+test_that("Unknown function on response", {
+
+    my_data <- data.frame(x=rep(1:2,10), y=20:1)
+
+    expect_error(bayz(log(y) ~ fx(x), data=my_data, chain=c(10, 1, 1), verbose=0))
+
+})
+
+test_that("Missing model-function", {
+
+    my_data <- data.frame(x=rep(1:2,10), y=20:1)
+
+    expect_error(bayz(y ~ x, data=my_data, chain=c(10, 1, 1), verbose=0))
+
+})
+
+test_that("Unknown model-function", {
+
+    my_data <- data.frame(x=rep(1:2,10), y=20:1)
+
+    expect_error(bayz(y ~ bla(x), data=my_data, chain=c(10, 1, 1), verbose=0))
+
+})
+
+# There can be more tests on different data inputs (Integer, Numeric, matrix) for different model functions
 
 #test_that("Plotting", {
 #

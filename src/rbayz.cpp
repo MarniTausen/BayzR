@@ -206,7 +206,11 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          if( (*(parList[i]))->traced ) {
             nTracedParam += (*(parList[i]))->nelem;
             if(verbose>0) {
-               for(size_t j=0; j< (*(parList[i]))->nelem; j++) Rcpp::Rcout << " " << (*(parList[i]))->Labels[j];
+               if((*(parList[i]))->nelem == 1) Rcpp::Rcout << " " << (*(parList[i]))->Labels[0];
+               else {
+                  for(size_t j=0; j< (*(parList[i]))->nelem; j++)
+                     Rcpp::Rcout << " " << (*(parList[i]))->Name << "." << (*(parList[i]))->Labels[j];
+               }
             }
          }
       }
@@ -226,7 +230,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       std::string method = Rcpp::as<std::string>(methodArg);
       if (method=="Bayes" || method=="BLUPMC") {
          if(verbose>0) {
-            Rcpp::Rcout << "Running chain ... at cycle and convergence ...\n";
+            Rcpp::Rcout << "Running chain at cycle ... convergence\n";
          }
          for (int cycle=1, save=0; cycle <= chain[0]; cycle++) {
             modelR->sample();
