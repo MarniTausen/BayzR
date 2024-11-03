@@ -23,9 +23,9 @@ public:
          if(par->nelem < 5) par->traced=1;
    }
 
-   ~modelFixf() {
-   }
+   // no need for destructor here because parent class destructor is doing all that's needed
 
+   // [ToDo] Heterogeneous residual var not implemented here??
    void sample() {
       resid_decorrect();
       collect_lhs_rhs();

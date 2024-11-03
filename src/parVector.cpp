@@ -18,23 +18,26 @@ void parVector::common_constructor_items(parsedModelTerm & modeldescr, std::stri
       Name[pos]='.';
       pos++;  // start re-search after currently replaced character
    }
-   // Move disambiguation of parameter Name here??
+   // [ToDo] Move disambiguation of parameter Name here??
    modelFunction=modeldescr.funcName;
    varianceStruct="-";
    val=Values.data;
    postMean.initWith(nelem,0.0l);
    postVar.initWith(nelem,0.0l);
+   // [ToDo] parVector could also check the modeldescr for user-set 'traced' option
 }
 
 // contructor for par-vector with single element where the "variableString" is also used for the label
-parVector::parVector(parsedModelTerm & modeldescr, double initval) : Values() {
+parVector::parVector(parsedModelTerm & modeldescr, double initval)
+      : Values(), postMean(), postVar() {
    nelem=1;
    Values.initWith(1, initval);
    Labels.push_back(modeldescr.variableString);
    common_constructor_items(modeldescr, "");
 }
 
-parVector::parVector(parsedModelTerm & modeldescr, double initval, std::string namePrefix) : Values() {
+parVector::parVector(parsedModelTerm & modeldescr, double initval, std::string namePrefix)
+      : Values(), postMean(), postVar() {
    nelem=1;
    Values.initWith(1, initval);
    Labels.push_back(namePrefix + "." + modeldescr.variableString);
@@ -43,7 +46,7 @@ parVector::parVector(parsedModelTerm & modeldescr, double initval, std::string n
 
 // response model needs a constructor with a vector of values and vector of labels, and also uses namePrefix
 parVector::parVector(parsedModelTerm & modeldescr, double initval, Rcpp::CharacterVector& inplabels,
-            std::string namePrefix) : Values() {
+            std::string namePrefix) : Values(), postMean(), postVar() {
    nelem = inplabels.size();
    Values.initWith(nelem, initval);
    Labels.resize(inplabels.size());
@@ -55,7 +58,7 @@ parVector::parVector(parsedModelTerm & modeldescr, double initval, Rcpp::Charact
 // many other model objects can initialize from a single scalar value and labels, the size
 // needed is taken from labels size.
 parVector::parVector(parsedModelTerm & modeldescr, double initval, Rcpp::CharacterVector& inplabels)
-          : Values() {
+          : Values(), postMean(), postVar() {
    nelem = inplabels.size();
    Values.initWith(nelem, initval);
    Labels.resize(inplabels.size());
@@ -66,7 +69,7 @@ parVector::parVector(parsedModelTerm & modeldescr, double initval, Rcpp::Charact
 
 // nearly the same but labels is a vector<string>
 parVector::parVector(parsedModelTerm & modeldescr, double initval, std::vector<std::string>& inplabels)
-  : Values() {
+  : Values(), postMean(), postVar() {
    nelem = inplabels.size();
    Values.initWith(nelem, initval);
    Labels.resize(inplabels.size());

@@ -38,6 +38,7 @@ public:
    parVector(parsedModelTerm & modeldescr, double initval, std::vector<std::string>& labels);
    void common_constructor_items(parsedModelTerm & modeldescr, std::string namePrefix);
    void collectStats();
+   ~parVector() {   }
    
 };
 

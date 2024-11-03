@@ -6,50 +6,40 @@
 #include "nameTools.h"
 #include "rbayzExceptions.h"
 
-/* Constructors for a single factor.
-dataFactor::dataFactor(Rcpp::DataFrame &d, size_t col) : data() {
-   Rcpp::RObject Rcol = Rcpp::as<Rcpp::RObject>(d[col]);
-   setupFirstVariable(Rcol);
-}
-dataFactor::dataFactor(std::string varname) : data() {
-   Rcpp::Environment Renv;
-   Rcpp::RObject Rcol = Renv[varname];
-   setupFirstVariable(Rcol);
-}
-dataFactor::dataFactor(Rcpp::RObject Rcol) : data() {
-   setupFirstVariable(Rcol);
-}
-*/
-
-dataFactor::dataFactor(Rcpp::RObject oneVarObject, std::string OneVarName) {
+dataFactor::dataFactor(Rcpp::RObject oneVarObject, std::string OneVarName) :
+      levcode() {
    std::vector<Rcpp::RObject> temp_var_objects = {oneVarObject};
    std::vector<std::string> temp_var_names = {OneVarName};
    run_constructor(temp_var_objects, temp_var_names);
 }
 
-dataFactor::dataFactor(std::vector<Rcpp::RObject> variableObjects, std::vector<std::string> variableNames) {
+dataFactor::dataFactor(std::vector<Rcpp::RObject> variableObjects, std::vector<std::string> variableNames) :
+      levcode() {
    run_constructor(variableObjects, variableNames);
 }
 
 void dataFactor::run_constructor(std::vector<Rcpp::RObject> variableObjects, std::vector<std::string> variableNames) {
-   for(size_t i=0; i<variableObjects.size(); i++)
-      factorList.push_back(new simpleFactor(variableObjects[i],variableNames[i]));
-   size_t Ndata=factorList[0]->nelem;
-   for(size_t i=1; i<factorList.size(); i++) {  // double check that the sizes of the factors are identical
-      if( factorList[i]->nelem != Ndata) {
-         std::string s="Interacting factors do not have the same length:";
-         for (size_t j=0; j<factorList.size(); j++) {
-            s += " " + variableNames[j] + "(" + std::to_string(factorList[j]->nelem) + ")";
-         }
-         throw generalRbayzError(s);
-      }
-   }
-   if(factorList.size()==1) {          // for only one factor, we're done quickly ...
-      levcode.data = factorList[0]->data;
-      levcode.nelem = factorList[0]->nelem;
-      labels = factorList[0]->labels;
+   if(variableObjects.size()==1) {                                         // for only one factor use 'onefactor' to allocate a
+      onefactor = new simpleFactor(variableObjects[0],variableNames[0]);   // simpleFactor object and make levcode a wrapper.
+      levcode.data = onefactor->data;                                      //  ... but it's tricky for clean-up (see destructor)
+      levcode.nelem = onefactor->nelem;
+      labels = onefactor->labels;                                          // this make a copy? - so here some double memory use
+      Nvar = 1;
+      nelem = levcode.nelem;
    }
    else {         // multiple interacting factors
+      for(size_t i=0; i<variableObjects.size(); i++)
+         factorList.push_back(new simpleFactor(variableObjects[i],variableNames[i]));
+      size_t Ndata=factorList[0]->nelem;
+      for(size_t i=1; i<factorList.size(); i++) {  // double check that the sizes of the factors are identical
+         if( factorList[i]->nelem != Ndata) {
+            std::string s="Interacting factors do not have the same length:";
+            for (size_t j=0; j<factorList.size(); j++) {
+               s += " " + variableNames[j] + "(" + std::to_string(factorList[j]->nelem) + ")";
+            }
+            throw generalRbayzError(s);
+         }
+      }
       // first build vector of combined labels matching the data
       std::vector<std::string> new_data_labels(factorList[0]->back2vecstring());
       for(size_t i=1; i<factorList.size(); i++) {
@@ -72,14 +62,20 @@ void dataFactor::run_constructor(std::vector<Rcpp::RObject> variableObjects, std
       // fill labels vector
       labels.reserve(lev);
       for(p=new_unique_labels.begin(); p != new_unique_labels.end(); p++) labels.push_back(p->first);
+      Nvar=factorList.size();
+      nelem=Ndata;
    }
-   Nvar=factorList.size();
-   nelem=Ndata;
 }
 
 dataFactor::~dataFactor() {
-   for(size_t i=0; i<factorList.size(); i++)
-      delete factorList[i];
+   if(Nvar==1) {                   // levcode vector was used as 'wrapper'
+      delete onefactor;
+      levcode.nelem=0;             // this avoids triggering clean-up in levcode
+   }
+   else {
+      for(size_t i=0; i<factorList.size(); i++)
+         delete factorList[i];
+   }
 }
 
 /*

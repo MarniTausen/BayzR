@@ -22,7 +22,8 @@ public:
       : modelBase(), gprior(modeldescr.options["prior"]) {
    }
 
-   virtual ~modelVar() { }
+   virtual ~modelVar() {
+    }
 
    void sampleHpars() { }
 

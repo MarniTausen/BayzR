@@ -63,6 +63,36 @@ std::vector<std::string> splitString(std::string text, std::string splitchar) {
    return parts;
 }
 
+// wrappers around stoi (integer) and stod (double) handling catching errors
+// to allow get better context info in Rbayz messages list.
+// Because return value cannot be used to flag errors, the only way is for
+// calling function to check needStop setting.
+int str2int(std::string s, std::string context) {
+   int retval;
+   try {
+      retval = std::stoi(s);
+   }
+   catch (std::exception& e) {
+      Messages.push_back("Error reading value (not an integer number?) from <" + context + "> at <" + s + ">");
+      needStop=true;
+      return 0;
+   }
+   return retval;
+}
+
+double str2dbl(std::string s, std::string context) {
+   double retval;
+   try {
+      retval = std::stod(s);
+   }
+   catch (std::exception& e) {
+      Messages.push_back("Error reading value (not a number?) from <" + context + "> at <" + s + ">");
+      needStop=true;
+      return 0;
+   }
+   return retval;
+}
+
 // Transform R model formula to a string
 // Deparse can make multiple strings! 
 std::string convertFormula(Rcpp::Formula f) {

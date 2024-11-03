@@ -35,6 +35,7 @@ public:
    
    ~modelFreg() {
       delete C;
+      delete par;
    }
    
    void sample() {

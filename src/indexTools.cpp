@@ -31,8 +31,8 @@ void builObsIndex(std::vector<size_t> & obsIndex, dataFactor *F, labeledMatrix *
          obsIndex[i]=it->second;
       }
       else {
-         // error
-         Rcpp::Rcout << "ID " << s << "is not available in similarity/kernel matrix\n";
+         // error [ToDo] can be nicer in messages list
+         Rcpp::Rcout << "ID " << s << " is not available in similarity/kernel matrix\n";
          errors++;
       }
    }

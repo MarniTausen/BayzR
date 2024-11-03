@@ -32,7 +32,7 @@ public:
 
    void swap(simpleMatrix* other);
 
-   ~simpleMatrix();
+   virtual ~simpleMatrix();
 
    double* data0;
    double** data;

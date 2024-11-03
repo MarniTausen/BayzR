@@ -26,6 +26,7 @@ public:
    std::vector<std::string> labels;
    int Nvar;  // The number of variables (interactions) in this factor
    std::vector<simpleFactor *> factorList;
+   simpleFactor* onefactor=0;
    size_t nelem;
 };
 

@@ -28,13 +28,13 @@ model_rn_cor_k0::model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod)
    // for rn_cor_k0 all variance objects must be kernels
    for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
       if (modeldescr.varianceObjects[i]==R_NilValue) {
-         throw(generalRbayzError("Attempting to run rn_cor_k0 with some special kernels"));
+         throw(generalRbayzError("Attempting to run rn_cor_k0 with parameterised kernels"));
       }
    }
    // Get the first kernel and then add (making kronecker products) with second etc., if available
-   kernelList.push_back(new kernelMatrix(modeldescr.varianceObjects[0], modeldescr.varianceNames[0]));
+   kernelList.push_back(new kernelMatrix(modeldescr.varianceObjects[0], modeldescr.varianceNames[0],modeldescr.options));
    if (modeldescr.varianceNames.size()==2) {  // combine with a second kernel if present
-      kernelMatrix* K2 = new kernelMatrix(modeldescr.varianceObjects[1], modeldescr.varianceNames[1]);
+      kernelMatrix* K2 = new kernelMatrix(modeldescr.varianceObjects[1], modeldescr.varianceNames[1],modeldescr.options);
       kernelList[0]->addKernel(K2);
       delete K2;
    }
@@ -48,9 +48,18 @@ model_rn_cor_k0::model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod)
    // in principle replace the F->data and no need for the obsIndex vector.
    builObsIndex(obsIndex,F,kernelList[0]);
    fitval.initWith(F->nelem, 0.0l);
-   // create the variance object - may need to move out as in ranfi
+   // [ToDo] create the variance object - may need to move out as in ranfi
    varmodel = new idenVarStr(modeldescr, this->regcoeff);
 }
+
+
+model_rn_cor_k0::~model_rn_cor_k0() {
+   for(size_t i=0; i< kernelList.size(); i++)
+      delete kernelList[i];
+   delete regcoeff;
+   delete varmodel;
+}
+
 
 void model_rn_cor_k0::sample() {
    // Update regressions on the eigenvectors
@@ -87,8 +96,10 @@ void model_rn_cor_k0::sampleHpars() {
 }
 
 void model_rn_cor_k0::accumFit(simpleDblVector & fit) {
+   /*
    for (size_t obs=0; obs < F->nelem; obs++)
      fit[obs] += fitval[obs];
+   */
 }
 
 // prepForOutput puts the transform to random effects in the par-vector

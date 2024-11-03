@@ -31,6 +31,7 @@ public:
    }
 
    ~modelPolyg() {
+      delete par;
    }
 
    void sample() {

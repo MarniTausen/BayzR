@@ -31,6 +31,7 @@ public:
    }
 
    ~modelMean() {
+      delete par;
    }
 
    void sample() {

@@ -100,6 +100,6 @@ bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", verbose=1, 
     class(result) <- "bayz"
     #result[['modelname']] <- fct()
     #result[['modelfunction']] <- deparse(substitute(fct))
-    result[['terms']] <- terms(model)
+    #result[['terms']] <- terms(model)
     return(result)
 }

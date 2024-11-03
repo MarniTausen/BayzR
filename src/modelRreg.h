@@ -29,6 +29,7 @@ public:
    }
 
    ~modelRreg() {
+      delete varmodel;
    }
    
    void sample() {

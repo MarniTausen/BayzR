@@ -48,6 +48,7 @@ public:
    ~modelMatrix() {
       delete M;
       delete F;
+      delete par;
    }
    
    // methods for single-site updates: data (de)corrections for a single covariate

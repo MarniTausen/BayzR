@@ -20,7 +20,7 @@ class modelResp : public modelBase {
 public:
    
    modelResp(parsedModelTerm & modeldescr)
-            : modelBase(), resid(), Y()
+            : modelBase(), Y()
    {
       if(modeldescr.variableNames.size()>1) {
          throw generalRbayzError("Multiple response variables (" + modeldescr.variableString +
@@ -51,11 +51,14 @@ public:
          else
             resid->val[row] = Y.data[row];
       }
-      // here not good. 1) idenVarstr needs a pointer to parVector. 2) it needs to use the residuals, not fitted values.
+      // [ToDo] Move out when implementing more variance structures in residuals
       varModel = new idenVarStr(modeldescr,resid);
    }
    
    ~modelResp() {
+      delete par;
+      delete resid;
+      delete varModel;
    }
 
    // readjust residuals to current fitted values.
@@ -80,24 +83,6 @@ public:
             par->val[row] = Y.data[row] - resid->val[row];
          }
       }
-/*    variance update is now moved to indepVar objects
-      // Continuous data: sample() is only updating residual variance
-      size_t obs;
-      double sum=0.0;
-      for (obs=0; obs<Nresid; obs++)
-         sum += resid[obs]*resid[obs]*residPrec[obs];
-      sum *= hpar[0];  // the sum was computed divided by the old variance!
-      hpar[0] = gprior.samplevar(sum, Nresid);
-      // the residPrec vector should be re-filled
-      double temp = 1.0/hpar[0];
-      for (obs=0; obs<Nresid; obs++)
-         residPrec[obs] = temp;
-         Rcpp::Rcout << "resid";
-         for(size_t i=0; i<10; i++) Rcpp::Rcout << " " << resid.data[i];
-         Rcpp::Rcout << "\n";
-         Rcpp::Rcout << "fitval";
-         for(size_t i=0; i<10; i++) Rcpp::Rcout << " " << par->val[i];
-         Rcpp::Rcout << "\n";*/
    }
 
    void sampleHpars() {

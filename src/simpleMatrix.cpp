@@ -28,10 +28,10 @@ simpleMatrix::simpleMatrix(Rcpp::RObject X) {
 // There is also an initWith without useCol to copy the whole Rcpp matrix.
 void simpleMatrix::initWith(Rcpp::NumericMatrix M, size_t useCol) {
    if (nrow> 0 || ncol>0 ) {    // oops this matrix is already allocated
-      throw(generalRbayzError("Cannot resize matrix in simpleMatrix"));
+      throw(generalRbayzError("Attempted re-init or re-alloc in simpleMatrix"));
    }
-   if (useCol > unsigned(M.ncol())) {
-      throw(generalRbayzError("useCol is larger than actual ncol in simpleMatrix"));
+   if (useCol > unsigned(M.ncol()) || useCol <=0) {
+      throw(generalRbayzError("useCol out of bounds (>ncol or <=0) in simpleMatrix"));
    }
    doalloc(M.nrow(), useCol);
    double *col;  // temporary column pointer
@@ -65,8 +65,10 @@ void simpleMatrix::swap(simpleMatrix* other) {
 }
 
 simpleMatrix::~simpleMatrix() {
-   delete[] data;
-   delete[] data0;
+   if(nrow>0 && ncol>0) {
+      delete[] data;
+      delete[] data0;
+   }
 }
 
 // memory alloc. This may fail, but it will be caught in try-catch in main function

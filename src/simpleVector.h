@@ -20,23 +20,23 @@
 
 class simpleIntVector {
 public:
-   simpleIntVector() : nelem(0) { }
+   simpleIntVector() { }
    simpleIntVector(size_t n);
-   ~simpleIntVector();
+   virtual ~simpleIntVector();
    int& operator[](size_t i);    // retrieving and setting value using []
    void initWith(Rcpp::IntegerVector v);
    void initWith(size_t n, int initvalue);
    int *data;
-   size_t nelem;
+   size_t nelem=0;
 private:
    void doalloc(size_t n);
 };
 
 class simpleDblVector {
 public:
-   simpleDblVector() : nelem(0) { }
+   simpleDblVector() { }
    simpleDblVector(size_t n);
-   ~simpleDblVector();
+   virtual ~simpleDblVector();
    double& operator[](size_t i);
    void initWith(Rcpp::NumericVector v, size_t useElem);
    void initWith(Rcpp::NumericVector v);

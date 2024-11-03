@@ -20,6 +20,26 @@ void labeledMatrix::addRowColNames(Rcpp::NumericMatrix M, std::string & name) {
    }
 }
 
+// Version restricting the column labels copied to 'useCol' columns, part of constructor
+// with 'useCol' limit.
+// Proper setting of useCol (>=1 and <= M.ncol) is not tested here, it is assumed that this
+// labeling function is only used in labeledMatrix contructor, and then simpleMatrix() constructor
+// will throw errors for improper setting of useCol.
+void labeledMatrix::addRowColNames(Rcpp::NumericMatrix M, std::string & name, size_t useCol) {
+   rownames = getMatrixNames(M, 1);
+   if(rownames.size()==0) {  // rownames empty not allowed
+      throw generalRbayzError("No rownames on matrix " + name + "\n");
+   }
+   std::vector<std::string> tempnames = getMatrixNames(M, 2);
+   if(tempnames.size()==0) {   // no colnames supplied, auto-generate useCol colnames
+      colnames = generateLabels("col",useCol);
+   }
+   else {                     // copy useCol columns from tempnames in colnames labels
+      colnames.resize(useCol);
+      for(size_t i=0; i<useCol; i++) colnames[i] = tempnames[i];
+   }
+}
+
 labeledMatrix::labeledMatrix(Rcpp::RObject col, std::string & name) : simpleMatrix(col) {
    // Need to temporarily redo the conversion of the input Robject to
    // Rcpp::NumericMatrix to retrieve row and col names.
@@ -29,6 +49,6 @@ labeledMatrix::labeledMatrix(Rcpp::RObject col, std::string & name) : simpleMatr
 
 void labeledMatrix::initWith(Rcpp::NumericMatrix & M, std::string & name, size_t useCol) {
    simpleMatrix::initWith(M, useCol);
-   this->addRowColNames(M, name);
+   this->addRowColNames(M, name, useCol);
 }
 

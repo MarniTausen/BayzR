@@ -26,8 +26,7 @@ public:
       parList.push_back(&par);
    };
 
-   virtual ~modelBase() {
-   }
+   virtual ~modelBase() {  }
    
    // sample and update methods, now updating of hyper pars (varcomps) is separated to
    // allow running with fixed (estimated) hyper parameters.

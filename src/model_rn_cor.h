@@ -25,7 +25,7 @@ class model_rn_cor_k0 : public modelFactor {
 public:
 
    model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod);
-   ~model_rn_cor_k0() {}
+   ~model_rn_cor_k0();
    void sample();
    void sampleHpars();
    void accumFit(simpleDblVector & fit);

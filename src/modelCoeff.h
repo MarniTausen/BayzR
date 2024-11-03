@@ -28,7 +28,7 @@ public:
       Nresid = respModel->resid->nelem;
    }
 
-   virtual ~modelCoeff() {
+   ~modelCoeff() {
    }
 
    virtual void accumFit(simpleDblVector & fit) = 0;

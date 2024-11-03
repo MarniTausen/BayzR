@@ -36,6 +36,7 @@ public:
    
    ~modelFactor() {
       delete F;
+      delete par;
    }
 
    void accumFit(simpleDblVector & fit) {
