@@ -164,7 +164,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       // with the same model - so that parameter-names and sizes all align.
       if(initVals_.isNotNull()) {
          Rcpp::List initVals(initVals_);
-         Rcpp::DataFrame old_parameters = initVals["Parameters"];
+         Rcpp::DataFrame old_parameters = Rcpp::as<Rcpp::DataFrame>(initVals["Parameters"]);
          Rcpp::CharacterVector old_par_names = old_parameters["Param"];
          Rcpp::IntegerVector old_par_sizes = old_parameters["Size"];
          // check alignment of names and sizes between old and current build model
@@ -179,8 +179,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
             match=false;
          if(match) {
             Rcpp::List old_estimates = initVals["Estimates"];
-            for(size_t par=0; par<parList.size(); par++) {       // for now loading fitted values from Estimates list,
-               Rcpp::DataFrame par_data = old_estimates[par];    // but they are also stored in Residuals. 
+            for(size_t par=0; par<parList.size(); par++) {                     // for now loading fitted values from Estimates list,
+               Rcpp::DataFrame par_data = Rcpp::as<Rcpp::DataFrame>(old_estimates[par]);    // but they are also stored in Residuals. 
                Rcpp::NumericVector par_pm = par_data["PostMean"];
                for(size_t row=0; row < (*(parList[par]))->nelem; row++)
                   (*(parList[par]))->val[row] = par_pm[row];
