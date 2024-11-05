@@ -49,7 +49,7 @@ model_rn_cor_k0::model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod)
    builObsIndex(obsIndex,F,kernelList[0]);
    fitval.initWith(F->nelem, 0.0l);
    // [ToDo] create the variance object - may need to move out as in ranfi
-   varmodel = new idenVarStr(modeldescr, this->regcoeff);
+   varmodel = new diagVarStr(modeldescr, this->regcoeff, kernelList[0]->weights);
 }
 
 
@@ -63,7 +63,7 @@ model_rn_cor_k0::~model_rn_cor_k0() {
 
 void model_rn_cor_k0::sample() {
    // Update regressions on the eigenvectors
-   double lhs, rhs;
+   double lhsl, rhsl;
    size_t matrixrow;
    double* colptr;
    kernelMatrix* K = kernelList[0];
@@ -75,14 +75,15 @@ void model_rn_cor_k0::sample() {
       for (size_t obs=0; obs < F->nelem; obs++)
          resid[obs] += regcoeff->val[col] * colptr[obsIndex[obs]];
       // Make the lhs and rhs and update this column regression
-      lhs = 0.0l; rhs=0.0l;
+      lhsl = 0.0l; rhsl=0.0l;
       for (size_t obs=0; obs < F->nelem; obs++) {
          matrixrow = obsIndex[obs];
-         rhs += colptr[matrixrow] * residPrec[obs] * (resid[obs]-fitval[obs]);
-         lhs += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
+         rhsl += colptr[matrixrow] * residPrec[obs] * (resid[obs]-fitval[obs]);
+         lhsl += colptr[matrixrow] * colptr[matrixrow] * residPrec[obs];
       }
-      lhs += (1.0l / ( K->weights[col] * varmodel->par->val[0]) ) ;
-      regcoeff->val[col] = R::rnorm( (rhs/lhs), sqrt(1.0/lhs));
+
+      lhsl += varmodel->weights[col];
+      regcoeff->val[col] = R::rnorm( (rhsl/lhsl), sqrt(1.0/lhsl));
       // residual correction for this column with updated regression
       for (size_t obs=0; obs < F->nelem; obs++)
          fitval[obs] += regcoeff->val[col] * colptr[obsIndex[obs]];
@@ -96,7 +97,8 @@ void model_rn_cor_k0::sampleHpars() {
 }
 
 void model_rn_cor_k0::accumFit(simpleDblVector & fit) {
-   /*
+   /* these accumFit functions are not yet active, and I don't even know
+      anymore why I started making them ...
    for (size_t obs=0; obs < F->nelem; obs++)
      fit[obs] += fitval[obs];
    */

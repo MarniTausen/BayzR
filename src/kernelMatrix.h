@@ -17,6 +17,7 @@
 #include <vector>
 #include "labeledMatrix.h"
 #include "simpleVector.h"
+#include "nameTools.h"
 
 extern std::vector<std::string> Messages;
 extern bool needStop;
@@ -54,21 +55,21 @@ public:
       if( ( dimopt = mtoptions["dim"]) != "") {
          dim_size = str2int(dimopt, ("dim="+dimopt));
          if(dim_size <= 0 || dim_size > eigvalues.size()) {
-            Messages.push_back("Warning: invalid dim setting <"+dimopt+"> processing kernel "+name+", setting default dimp=80");
+            Messages.push_back("Warning: invalid dim setting <"+dimopt+"> processing kernel "+name+", setting default dimp=90");
             dim_size=0;  // if dim not well set this does not trigger error,
-            dim_pct=80;  // but goes back to cutting off on 80% of variance.
+            dim_pct=90;  // but goes back to cutting off on 90% of variance.
          }
       }
       else {  // without 'dim' option, check for 'dimp' (note: dim will be used when both are set!)
          if( (dimpopt = mtoptions["dimp"]) != "") {
             dim_pct = str2dbl(dimpopt,("dimp="+dimpopt));
             if(dim_pct <= 0 || dim_pct > 100) {
-               Messages.push_back("Warning: invalid dimp setting <"+dimpopt+"> processing kernel "+name+", setting default dimp=80");
-               dim_pct=80;  // also here not error, but fo back to default dimp=80
+               Messages.push_back("Warning: invalid dimp setting <"+dimpopt+"> processing kernel "+name+", setting default dimp=90");
+               dim_pct=90;  // also here not error, but fall back to default dimp=90
             }
          }
          else  // no options set: take default
-            dim_pct=80;
+            dim_pct=90;
       }
       if(dim_size==0) {      // cut-off on %variance, need to find the matching number of evecs
          double sumeval = 0.0l;                             //  \/ only summing the positive ones!
@@ -128,22 +129,26 @@ public:
             }
          }
       }
-      // Make labels for the new combined matrix
-      std::vector<std::string> tempLabels;
-      tempLabels.reserve(nLevel1*nLevel2);
+      // Make row-colnames for the new combined matrix
+      std::vector<std::string> tempRownames;
+      tempRownames.reserve(nLevel1*nLevel2);
       for(size_t rowi=0; rowi<nLevel1; rowi++) {
          for(size_t rowj=0; rowj<nLevel2; rowj++) {
-            tempLabels.push_back(this->rownames[rowi]+"."+K2->rownames[rowj]);
+            tempRownames.push_back(this->rownames[rowi]+"."+K2->rownames[rowj]);
          }
       }
-      Rcpp::Rcout << "Interaction kernel retains " << nEvalUsed << " eigenvalues\n";
+      std::vector<std::string> tempColnames =  generateLabels("col",nEvalUsed);
+      Rcpp::Rcout << "Interaction kernel retains " << nEvalUsed << " eigenvectors\n";
       // Swap the old data with the new data.
       // Note the old data is removed when tempEvecs, tempEvals and tempLabels here go out of scope.
       this->swap(&tempEvecs);
       weights.swap(&tempEvals);
-      std::swap(rownames,tempLabels);
+      std::swap(rownames,tempRownames);
+      std::swap(colnames,tempColnames);
    }
 
+   // [ToDo] name weights is not so good, this is a class holding an eigendecomp, it is
+   // quite ok to call it eigen values. Weights becomes confusing in other parts of the code.
    simpleDblVector weights;
    
 };

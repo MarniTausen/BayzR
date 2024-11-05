@@ -41,6 +41,7 @@ public:
    void initWith(Rcpp::NumericVector v, size_t useElem);
    void initWith(Rcpp::NumericVector v);
    void initWith(size_t n, double initvalue);
+   void initWith(simpleDblVector & X);
    void swap(simpleDblVector* other);
    double *data;
    size_t nelem=0;

@@ -55,6 +55,7 @@ simpleDblVector::~simpleDblVector() {
 double& simpleDblVector::operator[](size_t i) {
    return(data[i]);
 }
+
 void simpleDblVector::initWith(Rcpp::NumericVector v, size_t useElem) {
    if (useElem > unsigned(v.size())) {
       throw(generalRbayzError("useElem is larger than actual nelem in simpleDblVector"));
@@ -63,14 +64,27 @@ void simpleDblVector::initWith(Rcpp::NumericVector v, size_t useElem) {
    for(size_t i=0; i<useElem; i++)
       data[i] = v[i];
 }
+
 void simpleDblVector::initWith(Rcpp::NumericVector v) {
    initWith(v, v.size());
 }
+
 void simpleDblVector::initWith(size_t n, double initvalue) {
    doalloc(n);
-   for(size_t i=0; i<nelem; i++)
-      data[i] = initvalue;
+   for(size_t i=0; i<nelem; i++) data[i] = initvalue;
 }
+
+void simpleDblVector::initWith(simpleDblVector & X) {
+   doalloc(X.nelem);
+   for(size_t i=0; i<nelem; i++) data[i] = X.data[i];
+}
+
+// [ToDo] make a wrap feature for simpleVector? - it can avoid copying.
+// A safe way to guarantee that the vector being wrapped does not disappear (making
+// the wrapper fail), is to put a "lock" in the one being wrapped that avoids clean-up?
+// But can it work when cleanup is needed to get the order right that first the wrapper
+// is removed and the one being wrapped is released? 
+
 void simpleDblVector::swap(simpleDblVector* other) {
    double* olddata = this->data;
    size_t oldnelem   = this->nelem;
@@ -79,6 +93,7 @@ void simpleDblVector::swap(simpleDblVector* other) {
    other->data = olddata;
    other->nelem  = oldnelem;
 }
+
 void simpleDblVector::doalloc(size_t n) {
    if (n <= 0) {
       throw(generalRbayzError("Zero or negative size in initialisation in simpleVector"));
