@@ -64,5 +64,13 @@ public:
    }
 };
 
+class modelRregDiag : public modelRreg {
+public:
+   modelRregDiag(parsedModelTerm & pmdescr, modelResp * rmod)
+      : modelRreg(pmdescr, rmod) {
+      varmodel = new diagVarStr(pmdescr, this->par, pmdescr.varObject[0]);
+   }
+};
+
 
 #endif /* modelRreg */

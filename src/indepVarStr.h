@@ -17,6 +17,7 @@
 #include "rbayzExceptions.h"
 #include "simpleVector.h"
 #include "parVector.h"
+#include "dataCovar.h"
 #include <unistd.h>
 
 class indepVarStr : public modelVar {
@@ -61,6 +62,7 @@ class diagVarStr : public indepVarStr {
 
 public:
 
+    // constructor with simpleDblVector (used internally in e.g. kernel model based on evecs)
     diagVarStr(parsedModelTerm & modeldescr, parVector* coefpar, simpleDblVector & Ddiag)
             : indepVarStr(modeldescr, coefpar) {
         if(coefpar->nelem != Ddiag.nelem) {
@@ -77,6 +79,30 @@ public:
         diag.initWith(Ddiag);
     }
 
+    // "regular" constructor that gets variance info from the parsed model description
+    diagVarStr(parsedModelTerm & modeldescr, parVector* coefpar) : indepVarStr(modeldescr, coefpar)
+    {
+        // for the moment only handling "simple" DIAG structure where varVariable[0] should have
+        // name, and varObject[0] should have Robject with the diagonal info. 
+        if(modeldescr.varianceStruct!="DIAG")
+            throw(generalRbayzError("Wrong call to diagVarStr with variance structure "+modeldescr.varianceStruct));
+        
+        try {
+            dataCovar tempDiag(modeldescr.varObject[0], false, false);
+            if(coefpar->nelem != tempDiag.nelem) {
+                throw(generalRbayzError("ERROR dimension of DIAG does not fit random effect size"));
+            }
+            par = new parVector(modeldescr, 1.0l, "var");
+            par->traced=1;
+            par->varianceStruct="DIAG";
+            diag.initWith(tempDiag);
+        }
+        catch(std::exception &err) {
+            Messages.push_back(std::string(err.what()));
+            throw(generalRbayzError("Error occured in processing DIAG["+modeldescr.varVariable[0]+"]");
+   	    }
+    }
+
     void sample() {
       double ssq=0.0;
       for(size_t k=0; k < coefpar->nelem; k++)
@@ -87,6 +113,7 @@ public:
     }
 
     simpleDblVector diag;
+
 };
 
 // mixtVarStr is now standard 2-class mixture with pi0, pi1, v0, v1

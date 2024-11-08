@@ -166,7 +166,8 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
    }
 
    // Split and analyse the variance description. This writes in varianceStruct a string
-   // that allows to select the right object class in main.
+   // that allows to select the right object class in main. Variances descriptions that are sequene of
+   // variance-structures and kernels get split and annotated further in varType etc. 
    std::string variance_text = options["V"];  // also need to handle VE?
    if (variance_text=="") {
       varianceStruct="notgiven";
@@ -183,55 +184,86 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
          for(size_t i=0; i<varianceElements.size(); i++) {
             size_t bracket = varianceElements[i].find_first_of("([");
             size_t len_tot = varianceElements[i].length();
-            std::string name;
-            std::string params;
-            if (bracket == std::string::npos) {
+            std::string name, variable, options;
+            if (bracket == std::string::npos) {   // simple variance-term like "Gmat"
                name = varianceElements[i];
-               params = "";
+               options = "";
+               variable = "";
             }
-            else {
+            else {                                // variance-term with [...] like K1[dim=5] or DIAG[W]
                size_t closeBrack = findClosingBrack(varianceElements[i], bracket);
                if(closeBrack != (len_tot-1) ) {
                   throw generalRbayzError("Unbalanced parentheses in: "+varianceElements[i]);
                }
                name = varianceElements[i].substr(0,bracket);
-               params = varianceElements[i].substr(bracket+1,(len_tot-bracket-2));
+               options = varianceElements[i].substr(bracket+1,(len_tot-bracket-2));
+               if(name=="DIAG") {                 // separating first element in [...] as the variable
+                  size_t comma = options.find(',');     // for DIAG structures ([ToDo]to be extended ...)
+                  if(comma==std::string::npos) {
+                     variable = options;
+                     options = "";
+                  }
+                  else {
+                     variable = options.substr(0,comma);
+                     options = options.substr(comma+1,std::string::npos);
+                  }
+               }
+               else {
+                  variable="";
+               }
             }
-            varianceNames.push_back(name);
-            varianceParams.push_back(params);
+            varName.push_back(name);
+            varVariable.push_back(variable);
+            varOption.push_back(options);
+         }
+         if(varName.back()=="DIAG" && varVariable.back()=="") {
+            throw generalRbayzError("DIAG specification is missing a variable in " + shortModelTerm);
          }
          // Fill the varianceObjects and varianceType vectors.
          // The Type is one of keywords IDEN, VCOV etc. OR "kernel";
-         // The Objects will be R_NilValue for the keywords, or point to the kernel (matrix) object.
-         // If a variance is not one of the keywords and also not an R object that can be a kernel, that's an error.
-         size_t nKernels=0, nVCOV=0;  // extend to also count the others ...
+         // The Objects are the kernel (matrix) object for type "kernel", the variable object for type "DIAG",
+         // or R_NilValue in other cases. If an Robject is needed but cannot be found, that's an error.
+         size_t nKernels=0, nVCOV=0;  // [ToDo] extend to also count the others ...
          for(size_t i=0; i<varianceElements.size(); i++) {
-            std::string name=varianceNames[i];
-            if(name=="IDEN" || name=="MIXT" || name=="VCOV" || name=="WGHT" || name=="DIAG"
-                    || name=="LLIN") {
-               varianceObjects.push_back(R_NilValue);
-               varianceType.push_back(name);
+            std::string name=varName[i];
+            if(name=="IDEN" || name=="MIXT" || name=="VCOV" || name=="WGHT" || name=="LLIN") {  
+               varObject.push_back(R_NilValue);                            // I think LLIN cannot come in here ...
+               varType.push_back(name);
                if(name=="VCOV") nVCOV++;
             }
-            else {
-               varianceObjects.push_back(getVariableObject(d,name));
-               if(varianceObjects.back() == R_NilValue) {
-                  throw generalRbayzError("Variance/kernel object not found in the R Environment: "
-                       +varianceNames[i]);
+            else if (name=="DIAG") {
+               varObject.push_back(getVariableObject(d,varVariable[i]));
+               if(varObject.back() == R_NilValue) {
+                  throw generalRbayzError("Variable <" + varVariable[i]+">in DIAG[] not found in the R Environment in "
+                                   + shortModelTerm);
                }
-               varianceType.push_back("kernel");
+               varType.push_back(name);
+            }
+            else {   // expect a "kernel"
+               varObject.push_back(getVariableObject(d,name));
+               if(varObject.back() == R_NilValue) {
+                  throw generalRbayzError("Variance/kernel <"+name+"> not found in the R Environment in "
+                                   + shortModelTerm);
+               }
+               varType.push_back("kernel");
                nKernels++;
             }
          }
          // Determine the combination of variance-structures and set varianceStruct to indicate what
-         // variance class to use for the modelling ... more work to be done here ...
+         // variance class to use for the modelling [ToDo] ... more work to be done here ...
          size_t nVarparts=varianceElements.size();
-         if(nKernels==nVarparts)
-            varianceStruct="kernels";
-         else if (nKernels==(nVarparts-1) && nVCOV==1)
-            varianceStruct="kernels-1vcov";
-         else {
-            throw generalRbayzError("Cannot handle this variance pattern: "+variance_text);
+         if(nVarparts==1) {
+            if (nKernels==1) varianceStruct="1kernel";
+            if (nVCOV==1) varianceStruct="1VCOV";
+            if (nKernels==0 && nVCOV==0) varianceStruct=varType[0];
+         }
+         else {  // multiple VTERMs
+            if(nKernels==nVarparts)
+               varianceStruct="kernels";
+            else if (nKernels==(nVarparts-1) && nVCOV==1)
+               varianceStruct="kernels-1vcov";
+            else
+               throw generalRbayzError("Cannot handle this variance pattern: "+variance_text);
          }
          // possible other cases to consider:
          // nkernels>0 && nVCOV>0 && (nKernels+nVCOV)==nVarparts:  kernels and multiple VCOV structures
@@ -283,9 +315,9 @@ std::ostream& operator<<(std::ostream& os, parsedModelTerm& p)
    std::vector<int> variableTypes;
    std::string varianceStruct="";
    std::string varianceLinMod="";
-   std::vector<std::string> varianceParams;
-   std::vector<std::string> varianceNames;
-   std::vector<Rcpp::RObject> varianceObjects;
+   std::vector<std::string> varOption;
+   std::vector<std::string> varName;
+   std::vector<Rcpp::RObject> varObject;
    std::vector<int> varianceKernelType;
    int hierarchType; // 0=no, 1=simplified form index/matrix, 2=genuine
    std::string hierarchModel="";

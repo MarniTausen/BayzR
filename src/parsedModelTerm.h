@@ -29,13 +29,14 @@ public:
    std::map<std::string, std::string> options; 
    std::string varianceStruct="";
    std::string varianceLinMod="";
-   std::vector<std::string> varianceParams;
-   std::vector<std::string> varianceNames;
-   std::vector<Rcpp::RObject> varianceObjects;
-   std::vector<std::string> varianceType;
+   // vectors from variance-term parsing
+   std::vector<std::string> varName;
+   std::vector<std::string> varOption;
+   std::vector<std::string> varVariable;
+   std::vector<Rcpp::RObject> varObject;
+   std::vector<std::string> varType;
    int hierarchType; // 0=no, 1=simplified form index/matrix, 2=genuine
    std::string hierarchModel="";
-   std::string logging="";
 };
 
 std::ostream& operator<<(std::ostream& os, parsedModelTerm& p);

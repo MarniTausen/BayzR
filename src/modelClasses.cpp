@@ -26,19 +26,19 @@ model_rn_cor_k0::model_rn_cor_k0(parsedModelTerm & modeldescr, modelResp * rmod)
       : modelFactor(modeldescr, rmod)
 {
    // for rn_cor_k0 all variance objects must be kernels
-   for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
-      if (modeldescr.varianceObjects[i]==R_NilValue) {
+   for(size_t i=0; i<modeldescr.varObject.size(); i++) {
+      if (modeldescr.varObject[i]==R_NilValue) {
          throw(generalRbayzError("Attempting to run rn_cor_k0 with parameterised kernels"));
       }
    }
    // Get the first kernel and then add (making kronecker products) with second etc., if available
-   kernelList.push_back(new kernelMatrix(modeldescr.varianceObjects[0], modeldescr.varianceNames[0],modeldescr.options));
-   if (modeldescr.varianceNames.size()==2) {  // combine with a second kernel if present
-      kernelMatrix* K2 = new kernelMatrix(modeldescr.varianceObjects[1], modeldescr.varianceNames[1],modeldescr.options);
+   kernelList.push_back(new kernelMatrix(modeldescr.varObject[0], modeldescr.varName[0],modeldescr.options));
+   if (modeldescr.varName.size()==2) {  // combine with a second kernel if present
+      kernelMatrix* K2 = new kernelMatrix(modeldescr.varObject[1], modeldescr.varName[1],modeldescr.options);
       kernelList[0]->addKernel(K2);
       delete K2;
    }
-   if (modeldescr.varianceNames.size()>2) {  // need to think if I can keep combining kernels with addKernel()
+   if (modeldescr.varName.size()>2) {  // need to think if I can keep combining kernels with addKernel()
       throw(generalRbayzError("Not yet ready to combine more than 2 kernels for interaction"));
    }
    // Here add a vector regcoeff (size K->ncol) to hold the regresssion on eigenvectors.
@@ -123,13 +123,13 @@ void model_rn_cor_k0::prepForOutput() {
 model_rn_cor_k1::model_rn_cor_k1(parsedModelTerm & modeldescr, modelResp * rmod)
            : modelFactor(modeldescr, rmod), regcoeff(), fitval(), gprior(modeldescr.options["prior"]) {
    // For the moment all variance objects must be kernels
-   for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
-      if (modeldescr.varianceObjects[i]==R_NilValue) {
+   for(size_t i=0; i<modeldescr.varObject.size(); i++) {
+      if (modeldescr.varObject[i]==R_NilValue) {
          throw(generalRbayzError("Mixing kernels with IDEN or other indep structures not yet possible"));
       }
    }
-   for(size_t i=0; i<modeldescr.varianceObjects.size(); i++) {
-      kernelList.push_back(new kernelMatrix(modeldescr.varianceObjects[i], modeldescr.varianceNames[i]));
+   for(size_t i=0; i<modeldescr.varObject.size(); i++) {
+      kernelList.push_back(new kernelMatrix(modeldescr.varObject[i], modeldescr.varName[i]));
    }
 }
 */
