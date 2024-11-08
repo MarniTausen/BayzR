@@ -13,17 +13,16 @@
 #include <Rcpp.h>
 #include <vector>
 #include <stdio.h>
+#include "Rbayz.h"
 #include "parVector.h"
 //#include <unistd.h>
-
-extern std::vector<parVector**> parList;
 
 class modelBase {
    
 public:
 
    modelBase() {
-      parList.push_back(&par);
+      Rbayz::parList.push_back(&par);
    };
 
    virtual ~modelBase() {  }

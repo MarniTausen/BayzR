@@ -10,6 +10,7 @@
 #define indepVarStr_h
 
 #include <Rcpp.h>
+#include "Rbayz.h"
 #include "modelVar.h"
 #include "modelBase.h"
 #include "parsedModelTerm.h"
@@ -98,7 +99,7 @@ public:
             diag.initWith(tempDiag);
         }
         catch(std::exception &err) {
-            Messages.push_back(std::string(err.what()));
+            Rbayz::Messages.push_back(std::string(err.what()));
             throw(generalRbayzError("Error occured in processing DIAG["+modeldescr.varVariable[0]+"]");
    	    }
     }
