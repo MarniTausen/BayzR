@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <Rcpp.h>
+#include "Rbayz.h"
 #include "rbayzExceptions.h"
 #include "parseFunctions.h"
 #include <string>
@@ -18,9 +19,6 @@
 #include "labeledMatrix.h"
 #include "simpleVector.h"
 #include "nameTools.h"
-
-extern std::vector<std::string> Messages;
-extern bool needStop;
 
 class kernelMatrix : public labeledMatrix {
 
@@ -55,7 +53,7 @@ public:
       if( ( dimopt = mtoptions["dim"]) != "") {
          dim_size = str2int(dimopt, ("dim="+dimopt));
          if(dim_size <= 0 || dim_size > eigvalues.size()) {
-            Messages.push_back("Warning: invalid dim setting <"+dimopt+"> processing kernel "+name+", setting default dimp=90");
+            Rbayz::Messages.push_back("Warning: invalid dim setting <"+dimopt+"> processing kernel "+name+", setting default dimp=90");
             dim_size=0;  // if dim not well set this does not trigger error,
             dim_pct=90;  // but goes back to cutting off on 90% of variance.
          }
@@ -64,7 +62,7 @@ public:
          if( (dimpopt = mtoptions["dimp"]) != "") {
             dim_pct = str2dbl(dimpopt,("dimp="+dimpopt));
             if(dim_pct <= 0 || dim_pct > 100) {
-               Messages.push_back("Warning: invalid dimp setting <"+dimpopt+"> processing kernel "+name+", setting default dimp=90");
+               Rbayz::Messages.push_back("Warning: invalid dimp setting <"+dimpopt+"> processing kernel "+name+", setting default dimp=90");
                dim_pct=90;  // also here not error, but fall back to default dimp=90
             }
          }
@@ -80,7 +78,7 @@ public:
          while (sumeval < eval_cutoff) sumeval += eigvalues[dim_size++];
          std::string s = "Note: for kernel " + name + " using dimp=" + std::to_string(dim_pct) + " takes "
                       + std::to_string(dim_size) + " eigenvectors";
-         Messages.push_back(s);
+         Rbayz::Messages.push_back(s);
       }
       this->initWith(eigvectors, name, dim_size);
       weights.initWith(eigvalues, dim_size);

@@ -100,7 +100,7 @@ public:
         }
         catch(std::exception &err) {
             Rbayz::Messages.push_back(std::string(err.what()));
-            throw(generalRbayzError("Error occured in processing DIAG["+modeldescr.varVariable[0]+"]");
+            throw(generalRbayzError("Error occured in processing DIAG["+modeldescr.varVariable[0]+"]"));
    	    }
     }
 

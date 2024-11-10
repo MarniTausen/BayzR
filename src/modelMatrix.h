@@ -32,10 +32,10 @@ public:
       // For now only allowing a matrix input where there is an index variable (model
       // made with id/matrix). It could be extended to allow for no id, so that matrix needs to
       // be aliged 1:1 with data records, then the 'id' is bascially a 1:1 link.
-      // 2: probably more variable-types could be accepted here, if dataFactor and dataMatrix
-      // would know how to convert them (e.g. integer vector to factor, dataframe to matrix).
-      if( ! (modeldescr.variableTypes[0]==1 && modeldescr.variableTypes[1]==6) )
-         throw generalRbayzError("variable types in rr() model are not <factor>/<matrix>");
+      bool acceptable0VarType = modeldescr.variableTypes[0]==1 || modeldescr.variableTypes[0]==2 ||
+                              modeldescr.variableTypes[0]==4 || modeldescr.variableTypes[0]==5;
+      if( ! (acceptable0VarType && modeldescr.variableTypes[1]==6) )
+         throw generalRbayzError("variable types in rr() model are not (convertable to) <factor>/<matrix>");
       F = new dataFactor(modeldescr.variableObjects[0], modeldescr.variableNames[0]);
       M = new dataMatrix(modeldescr.variableObjects[1], modeldescr.variableNames[1]);
       par = new parVector(modeldescr, 0.0l, M->colnames);

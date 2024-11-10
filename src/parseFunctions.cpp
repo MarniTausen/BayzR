@@ -9,13 +9,12 @@
 #include <string>
 #include <map>
 #include <sstream>
+#include "Rbayz.h"
 #include "parseFunctions.h"
 #include "rbayzExceptions.h"
 #include "nameTools.h"
 
 using Rsize_t = long int;
-extern std::vector<std::string> Messages;
-extern bool needStop;
 
 void removeSpaces(std::string &s) {
    size_t pos;
@@ -29,17 +28,24 @@ void removeSpaces(std::string &s) {
 // same kind.
 // Returns the position of the matching closing bracket, or string::npos if failed to find it.
 size_t findClosingBrack(std::string &s, size_t fromPos) {
+   Rcpp::Rcout << "In findClosingBrack with " << s << "  and " << fromPos << std::endl;
+   size_t s_last_pos = s.size()-1;
+   if(fromPos >= s_last_pos)      // if fromPos is on or after last character in s, there is
+      return std::string::npos;   // no hope to find a closing bracket.
    char closingBrack;
    if (s[fromPos] == '[') closingBrack = ']';
    else if (s[fromPos] == '(' ) closingBrack = ')';
    else
       throw(generalRbayzError("Wrong use of findClosingBrack"));
-   while(s[fromPos] != closingBrack && fromPos != std::string::npos) {
+   fromPos++;
+   while(s[fromPos] != closingBrack && fromPos < s_last_pos) {
       if(s[fromPos] == '[' || s[fromPos] == '(')
          fromPos = findClosingBrack(s,fromPos);
-      if (fromPos != std::string::npos ) fromPos++;
+      fromPos++;
    }
-   return fromPos;
+   Rcpp::Rcout << " ... returning " << fromPos << std::endl;
+   if(s[fromPos]==closingBrack) return fromPos;
+   else return std::string::npos;
 }
 
 std::vector<std::string> splitString(std::string text, std::string splitchar) {
@@ -73,8 +79,8 @@ int str2int(std::string s, std::string context) {
       retval = std::stoi(s);
    }
    catch (std::exception& e) {
-      Messages.push_back("Error reading value (not an integer number?) from <" + context + "> at <" + s + ">");
-      needStop=true;
+      Rbayz::Messages.push_back("Error reading value (not an integer number?) from <" + context + "> at <" + s + ">");
+      Rbayz::needStop=true;
       return 0;
    }
    return retval;
@@ -86,8 +92,8 @@ double str2dbl(std::string s, std::string context) {
       retval = std::stod(s);
    }
    catch (std::exception& e) {
-      Messages.push_back("Error reading value (not a number?) from <" + context + "> at <" + s + ">");
-      needStop=true;
+      Rbayz::Messages.push_back("Error reading value (not a number?) from <" + context + "> at <" + s + ">");
+      Rbayz::needStop=true;
       return 0;
    }
    return retval;
@@ -341,9 +347,9 @@ int checkOptions(std::map<std::string,std::string> userOpts, std::string allowed
    std::map<std::string, int>::iterator f;      // regular find in unsorted vector<string> is also OK here
    for(std::map<std::string,std::string>::iterator p = userOpts.begin(); p!= userOpts.end(); ++p) {
       if( (f=allowedOptsMap.find(p->first)) == allowedOptsMap.end()) {
-         Messages.push_back(" - Option not recognized (misspelled or not used here): " + p->first);
-         needStop=true;
+         Rbayz::Messages.push_back(" - Option not recognized (misspelled or not used here): " + p->first);
+         Rbayz::needStop=true;
       }
    }
-   if(needStop) return 1; else return 0;
+   if(Rbayz::needStop) return 1; else return 0;
 }

@@ -78,7 +78,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          else if(pmt.funcName=="rn") {
             if(pmt.varianceStruct=="IDEN" || pmt.varianceStruct=="notgiven")
                model.push_back(new model_rn_ind_iden(pmt, modelR));
-            else if (pmt.varianceStruct=="kernels")
+            else if (pmt.varianceStruct=="1kernel" || pmt.varianceStruct=="kernels")
                model.push_back(new model_rn_cor_k0(pmt, modelR));
             else
                throw generalRbayzError("There is no class to model rn(...) with Variance structure " + pmt.options["V"]);
@@ -105,7 +105,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       } // end for(term ...) to build model
       lastDone="Model building";
       if (verbose>1) Rcpp::Rcout << "Model building done\n";
-      if(needStop)
+      if(Rbayz::needStop)
          throw(generalRbayzError("Quitting after model building because of errors"));
 
       // compute number of residuals (data points) and number of parameters in the model.
@@ -118,8 +118,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          std::string s1="Note: data included total="+std::to_string(nResiduals)+" observed="+
                        std::to_string(nResiduals-nNAs)+" missing="+std::to_string(nNAs);
          std::string s2="Note: model build with "+std::to_string(nParameters)+" parameters";
-         Messages.push_back(s1);
-         Messages.push_back(s2);
+         Rbayz::Messages.push_back(s1);
+         Rbayz::Messages.push_back(s2);
       }
       if(verbose > 2) {
          Rcpp::Rcout << "Model-object overview (#, Name, Size, Traced, first Labels) after model building:\n";
@@ -257,7 +257,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
             if ( (cycle > chain[1]) && (cycle % chain[2] == 0) ) {  // save cycle
                for(size_t mt=0; mt<model.size(); mt++) model[mt]->prepForOutput();
                for(size_t i=0; i<Rbayz::parList.size(); i++) (*(Rbayz::parList[i]))->collectStats();
-               for(size_t i=0, col=0; i<parList.size(); i++) {
+               for(size_t i=0, col=0; i<Rbayz::parList.size(); i++) {
                   if( (*(Rbayz::parList[i]))->traced ) {
                      for(size_t j=0; j< (*(Rbayz::parList[i]))->nelem; j++) {
                         tracedSamples(save,col) = (*(Rbayz::parList[i]))->val[j]; col++;
@@ -372,8 +372,8 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       // Build the final return list
       Rcpp::List result = Rcpp::List::create();
       result.push_back(0,"nError");
-      if(Messages.size()>0) 
-         result.push_back(Messages,"Messages");
+      if(Rbayz::Messages.size()>0) 
+         result.push_back(Rbayz::Messages,"Messages");
       result.push_back(parInfo,"Parameters");
       result.push_back(tracedSamples,"Samples");
       result.push_back(estimates,"Estimates");
@@ -394,20 +394,20 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
    // ------------------------------
 
    catch (generalRbayzError &err) {
-      Messages.push_back(err.what());
+      Rbayz::Messages.push_back(err.what());
    }
    catch (std::exception &err) {
       std::string s = std::string(err.what()) + " after " + lastDone;
-      Messages.push_back(s);
+      Rbayz::Messages.push_back(s);
    }
    catch (...) {
-      Messages.push_back("An unknown error occured in bayz after: "+lastDone);
+      Rbayz::Messages.push_back("An unknown error occured in bayz after: "+lastDone);
    }
    // Build a return list that only has the error messages list.
    Rcpp::List result = Rcpp::List::create();
-   result.push_back(Messages.size(),"nError");
-   result.push_back(Messages,"Messages");
-   Rcpp::Rcout << "Bayz finished with (last) error: " << Messages[Messages.size()-1] << std::endl;
+   result.push_back(Rbayz::Messages.size(),"nError");
+   result.push_back(Rbayz::Messages,"Messages");
+   Rcpp::Rcout << "Bayz finished with (last) error: " << Rbayz::Messages[Rbayz::Messages.size()-1] << std::endl;
    Rcpp::Rcout << "There may be more messages or errors - use summary() or check <output>$Errors to see all" << std::endl;
 //   if(modelR != 0) delete modelR;
 //   for(size_t i=0; i<model.size(); i++) delete model[i];
