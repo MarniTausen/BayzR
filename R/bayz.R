@@ -61,14 +61,15 @@
 #'
 #' @param model   A formula describing the model to be fitted
 #' @param data    Data frame to collect data from
-#' @param VE      Model for the residual variance
-#' @param chain   Vector with length, burn-in and skip for the chain to run.
+#' @param VE      Model for the residual variance as formula or string
+#' @param chain   Vector c(length, burn, skip) with total chain length to run, burn-in, and skip-interval
+#'                for saving samples and collecting posterior statistics.
 #' @param method  String to indicate analysis method: "Bayes" (full Bayesian, default), "BLUPMC"
-#'                (BLUE/BLUP solutions with Monte Carlo to get SD/SE), "BLUP" (BLUE/BLUP solutions)
+#'                (BLUE/BLUP solutions with Monte Carlo to get SD/SE), or "BLUP" (BLUE/BLUP solutions
+#'                without SD/SE).
 #' @param init    Initialisation/starting values: supply output from a previous bayz run and bayz
 #'                will pick up estimates from a previous run to start a new chain.
-#' @param verbose Integer to regulate printing to R console: 0(quiet), 1(some), >2(more)
-#' @param ...     Additional parameters passed onto the Model function.
+#' @param verbose Integer to regulate printing to R console: 0(quiet), 1(some), >=2(more)
 #'
 #' @return A fitted bayz model
 #' @import stats
@@ -76,7 +77,7 @@
 #'
 #' @useDynLib BayzR, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
-bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", verbose=1, init=NULL, ...){
+bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", verbose=1, init=NULL){
 	if(!inherits(model,"formula")) {
 		stop("The first argument is not a valid formula")
 	}

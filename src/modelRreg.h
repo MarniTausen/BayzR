@@ -69,7 +69,6 @@ public:
    modelRregDiag(parsedModelTerm & pmdescr, modelResp * rmod)
       : modelRreg(pmdescr, rmod) {
       varmodel = new diagVarStr(pmdescr, this->par);
-//      varmodel = new idenVarStr(pmdescr, this->par);
    }
 };
 

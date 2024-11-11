@@ -181,12 +181,10 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
          // Here there could be a way to allow fixing variances by detecting if the last
          // element is a numerical value, then store and remove that last element.
          // Split every variance element in a name and a parameter-part
-         Rcpp::Rcout << varianceElements.size() << " " << varianceElements[0] << std::endl;
          for(size_t i=0; i<varianceElements.size(); i++) {
             size_t bracket = varianceElements[i].find_first_of("([");
             size_t len_tot = varianceElements[i].length();
             std::string name, variable, options;
-            Rcpp::Rcout << bracket << " " << len_tot << std::endl;
             if (bracket == std::string::npos) {   // simple variance-term like "Gmat"
                name = varianceElements[i];
                options = "";
@@ -194,13 +192,11 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
             }
             else {                                // variance-term with [...] like K1[dim=5] or DIAG[W]
                size_t closeBrack = findClosingBrack(varianceElements[i], bracket);
-               Rcpp::Rcout << closeBrack << std::endl;
                if(closeBrack != (len_tot-1) ) {
                   throw generalRbayzError("Unbalanced parentheses in: "+varianceElements[i]);
                }
                name = varianceElements[i].substr(0,bracket);
                options = varianceElements[i].substr(bracket+1,(len_tot-bracket-2));
-               Rcpp::Rcout << name << " " << options << std::endl;
                if(name=="DIAG") {                 // separating first element in [...] as the variable
                   size_t comma = options.find(',');     // for DIAG structures ([ToDo]to be extended ...)
                   if(comma==std::string::npos) {
@@ -216,7 +212,6 @@ void parsedModelTerm::parseModelTerm_step2(std::string fnName, std::string vrStr
                   variable="";
                }
             }
-            Rcpp::Rcout << name << "-" << variable << "-" << options << std::endl;
             varName.push_back(name);
             varVariable.push_back(variable);
             varOption.push_back(options);

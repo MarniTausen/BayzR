@@ -28,7 +28,6 @@ void removeSpaces(std::string &s) {
 // same kind.
 // Returns the position of the matching closing bracket, or string::npos if failed to find it.
 size_t findClosingBrack(std::string &s, size_t fromPos) {
-   Rcpp::Rcout << "In findClosingBrack with " << s << "  and " << fromPos << std::endl;
    size_t s_last_pos = s.size()-1;
    if(fromPos >= s_last_pos)      // if fromPos is on or after last character in s, there is
       return std::string::npos;   // no hope to find a closing bracket.
@@ -43,7 +42,6 @@ size_t findClosingBrack(std::string &s, size_t fromPos) {
          fromPos = findClosingBrack(s,fromPos);
       fromPos++;
    }
-   Rcpp::Rcout << " ... returning " << fromPos << std::endl;
    if(s[fromPos]==closingBrack) return fromPos;
    else return std::string::npos;
 }
