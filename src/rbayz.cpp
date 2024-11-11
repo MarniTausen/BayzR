@@ -158,6 +158,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
                (*(Rbayz::parList[i+1]))->Name = parNames[i];
          }
       }
+      if (verbose>4) Rcpp::Rcout << "Parameter names disambiguation checked\n";
 
       // Load initial values if given. An easy start is to only allow init-values from a run
       // with the same model - so that parameter-names and sizes all align.
@@ -191,6 +192,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          }      // this could also be a warning, but there is no nice way to count and handle warnings
          Rcpp::Rcout << "Chain has been initialized with previous estimates\n";
       }
+      if (verbose>4) Rcpp::Rcout << "Passed check init values\n";
 
       // Check the chain settings and find number of output samples by making list of output cycle-numbers.
       if (chain[0]==0 && chain[1]==0 && chain[2]==0) {  // chain was not set
@@ -198,9 +200,9 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
          Rcpp::Rcout << "Warning: chain was not set, running 1100 cycles but it may be too short for many analyses\n";
       }
       if (chain.size() != 3) throw (generalRbayzError("The chain settings do not have 3 elements"));
-      if (chain[1] <= 0) throw (generalRbayzError("The chain length is zero or negative"));
-      if (chain[2] < 0 || chain[3]<0 ) throw (generalRbayzError("The chain burnin or skip is negative"));
-      if (chain[3] == 0) chain[3]=1;  // interpret skip zero as outputting all cycles
+      if (chain[0] <= 0) throw (generalRbayzError("The chain length is zero or negative"));
+      if (chain[1] < 0 || chain[2]<0 ) throw (generalRbayzError("The chain burnin or skip is negative"));
+      if (chain[2] == 0) chain[2]=1;  // interpret skip zero as outputting all cycles
       Rcpp::IntegerVector outputCycleNumbers;
       for (int cycle=1; cycle <= chain[0]; cycle++) {         // exactly the same loop and condition to make
          if ( (cycle > chain[1]) && (cycle % chain[2] == 0))  // output samples below
@@ -208,6 +210,7 @@ Rcpp::List rbayz_cpp(Rcpp::Formula modelFormula, SEXP VE, Rcpp::DataFrame inputD
       }
       size_t nSamples = outputCycleNumbers.size();
       if (nSamples==0) throw (generalRbayzError("The chain settings do not make any output"));
+      if (verbose>4) Rcpp::Rcout << "Chain checks done\n";
 
       // Find the number of traced parameters and set-up matrix to store samples of traced parameters
       size_t nTracedParam=0;
