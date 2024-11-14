@@ -1,4 +1,4 @@
-# Bayesian mixed models, shrinkage and interaction kernel regression
+# Bayesian mixed models, shrinkage, sparse and interaction kernel regression
 
 [![Build
 Status](https://travis-ci.org/MarniTausen/BayzR.svg?branch=master)](https://travis-ci.org/MarniTausen/BayzR)[![Coverage
@@ -8,9 +8,13 @@ coveralls](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=
 -   [How to install](#how-to-install)
 -   [Short manual for using the bayz() main function](#Short-Manual)
 -   [Example](#examples)
+-   [Summarizing and using output](#README5.html)
 
-Here write down the applicability of the software. For more information
-access the website: <http://www.bayz.biz/>.
+The Rbayz packages has a single main function ‘bayz’ that fits
+mixed-linear, Bayesian shrinkage, (sparse) kernel-regression, (kernel)
+interaction and multi-trait models with complex covariance structures
+using an extended R-formula syntax. The R help ?bayz contains basic help
+information; full details are available on \<ljanss.github.io/Rbayz\>.
 
 # How to install
 
@@ -69,9 +73,9 @@ syntax.
 The model formula in bayz has the basic syntax of an R formula but with
 all explanatory (right-hand-side) terms wrapped by a function to specify
 how to fit the explanatory variables in the model. This may look like
-Yield \~ fx(Year) + rn(Variety) to fit Yield with Year as a fixed factor
+Yield ~ fx(Year) + rn(Variety) to fit Yield with Year as a fixed factor
 and Variety as a random factor. The equivalent lme4 model would be Yield
-\~ factor(Year) + (1\|Variety). The list of model functions currently
+~ factor(Year) + (1\|Variety). The list of model functions currently
 available is: fx() : fixed factors (with interactions) rn() : random
 factors (with interactions) rg() : fixed regressions (with interactions
 or nested in a factor) rr() : random regressions The model functions
@@ -127,7 +131,7 @@ products). The variance structure is then built up from a combination of
 given (proportional) variance-covariance / correlation / kernel matrices
 and predefined acronyms IDEN, DIAG and VCOV that indicate parameterized
 matrices (with parameters to be estimated from the data). Alternatively,
-the variance structure can be specified as a linear model using V=\~,
+the variance structure can be specified as a linear model using V=~,
 which is interpreted as a use of a log-linear model for the variances.
 
 # Examples

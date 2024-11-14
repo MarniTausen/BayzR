@@ -9,6 +9,6 @@ URL: http://www.bayz.biz
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat
-RoxygenNote: 7.1.1
+RoxygenNote: 7.3.2
 Imports: Rcpp, nlme, coda
 LinkingTo: Rcpp

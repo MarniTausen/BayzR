@@ -2,18 +2,14 @@
 % Please edit documentation in R/summary.R
 \name{summary.bayz}
 \alias{summary.bayz}
-\title{Summary of bayz model fit}
+\title{Summary of traced parameters from bayz model fit}
 \usage{
 \method{summary}{bayz}(object, maxLevel = 10, HPDprob = 0.95, ...)
 }
 \arguments{
 \item{object}{bayz output object}
 
-\item{maxLevel}{controls the inclusion of estimates in the "Main estimates" table by selecting
-only the model-terms with less <= maxlevel coefficients}
-
-\item{HPDprob}{the probability for the Highest Posterior Density intervals reported in the
-table "Convergence diagnostics"}
+\item{HPDprob}{probability for the Highest Posterior Density intervals (default 0.95)}
 
 \item{...}{additional parameters}
 }
@@ -21,5 +17,6 @@ table "Convergence diagnostics"}
 summarybayz object
 }
 \description{
-Produced summary statistics of the bayz object and returns a summarybayz object.
+Posterior summary statistics including HPD interval and convergence diagnostics of traced parameters
+    from a bayz model fit, returns a summarybayz object.
 }

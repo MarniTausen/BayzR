@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.summary.R
 \name{print.summarybayz}
 \alias{print.summarybayz}
-\title{Print function for bayz class}
+\title{Print function for 'summarybayz' class}
 \usage{
 \method{print}{summarybayz}(x, ...)
 }

@@ -1,4 +1,4 @@
-#' Print function for bayz class
+#' Print function for 'summarybayz' class
 #'
 #' Prints the bayz class
 #'

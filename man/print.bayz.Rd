@@ -2,7 +2,7 @@
 % Please edit documentation in R/print.R
 \name{print.bayz}
 \alias{print.bayz}
-\title{Print function for bayz class}
+\title{Print function for bayz output class}
 \usage{
 \method{print}{bayz}(x, ...)
 }
@@ -15,5 +15,7 @@
 Nothing, only prints
 }
 \description{
-Prints the bayz class
+This method is usually not seen or used directly by the user, but allows to see a compact version of the output
+in the console without overflowing the screen, for instance when running bayz() without catching the output, or
+to quickly see error messages without the need to use summary().
 }

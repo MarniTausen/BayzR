@@ -2,82 +2,106 @@
 % Please edit documentation in R/bayz.R
 \name{bayz}
 \alias{bayz}
-\title{Bayesian mixed linear and shrinkage models}
+\title{Bayesian mixed models, shrinkage and interaction kernel regression}
 \usage{
-bayz(model, data = NULL, chain = c(0, 0, 0), silent = FALSE, ...)
+bayz(
+  model,
+  VE = "",
+  data = NULL,
+  chain = c(0, 0, 0),
+  method = "",
+  verbose = 1,
+  init = NULL
+)
 }
 \arguments{
-\item{model}{A formula describing the model to be fit.}
+\item{model}{An R formula describing the model to be fitted using an extended R formula syntax (see details).}
 
-\item{data}{Data frame to collect data from}
+\item{VE}{Model for the residual variance as formula or string (see details).}
 
-\item{chain}{Vector describing the number of iterations to be run.}
+\item{data}{Data frame with variables (responses, explanatory variables) to build the model.}
 
-\item{silent}{Boolean to switch on/off printing to R console}
+\item{chain}{Vector c(length, burn-in, skip) with total chain length to run, burn-in, and skip-interval
+for saving samples and collecting posterior statistics.}
 
-\item{...}{Additional parameters passed onto the Model function.}
+\item{method}{String to indicate analysis method: "Bayes" (full Bayesian, default), "BLUPMC"
+(BLUE/BLUP solutions with Monte Carlo to get SD/SE).}
+
+\item{verbose}{Integer to regulate printing to R console: 0 (quiet), 1 (some), >=2 (more), with
+verbose=1 as default.}
+
+\item{init}{An object of class "bayz", output from a previous bayz run, to supply initialisation
+values to start a new chain.}
 }
 \value{
-A fitted bayz model
+A list of class "bayz" containing results from the fitted model. Several methods
+        are available to summarize, extract, plot or compute contrasts, predictions, etc. on the output.
 }
 \description{
-The bayz function fits various mixed-linear and Bayesian shrinkage models with complex
-covariance structures using an extended R-formula syntax.
+The bayz function fits various mixed-linear, Bayesian shrinkage, (sparse) kernel-regression, (kernel)
+interaction and multi-trait models with complex covariance structures using an extended R-formula syntax.
 }
 \details{
-The model formula in bayz has the basic syntax of an R formula but with all
+The model formula in bayz has an extended syntax with all
 explanatory (right-hand-side) terms wrapped by a function to specify how to fit
-the explanatory variables in the model. This may look like Yield ~ fx(Year) + rn(Variety)
-to fit Yield with Year as a fixed factor and Variety as a random factor. 
-The equivalent lme4 model would be Yield ~ factor(Year) + (1|Variety). 
-The list of model functions currently available is:
-fx() (fixed factors), rn() (random factors), rg()
-(fixed regressions), and rr() (random regressions). 
-The model functions allow to specify interactions of variables, hierarchies, use of
-matrices as input data, complex covariance structures, and prior distributions can 
-be changed to modify standard mixed model in Bayesian shrinkage models.
+the variables in the model, for example Yield ~ fx(Year) + rn(Variety)
+to fit Yield with Year as a fixed class effect and Variety as a random class effect. 
+The syntax allows
+to add options on each model term, such as variance-structures, 
+fitting, prior, and output options. A common application is to specify a
+relationship / similarity "kernel" as correlation-structure for random effects using
+rn(Variety, V=myGmat). 
+The model-terms currently available are fx() (fixed effects of one or multiple interacting
+class variables), rn() (random effects of one or multiple interacting class variables with
+various options to model the covariance structure), rr() (random/ridge regression on a table
+of covariates with options for homogeneous or heterogeneous shrinkage), rg() (fixed regressions
+and nested fixed regressions). 
 
-Interactions between fators are specified using the colon, for instance by writing for a 
-fixed Year-Location interaction fx(Year:Location). Bayz does
-NOT support automatic expansion with main effects by using the 'star' (Year*Location) or
-'forward slash' (Year/Location) syntaxes, hence bayz requires to manually add the desired
-main effects in the model (but 
-note that bayz uses the 'forward slash' to specify hierarchical models).
-Interactions between factors can be specified to any degree.
-The 'star' syntax can be used to indicate interaction
-between covariates, like rg(TempSum*Precip), where it is simply interpreted as
-multiplication. 
-Interaction between a covariate and a factor is specified using the 'pipe'
-character as in lme4 models. It can be used to specify fixed nested regressions as 
-rg(TempSum|Year:Location) to specify regressions on TempSum within each Year-Location, or
-to speficy random slope models in rr(), for instance rr(TempSum|Variety). 
+Model-terms for class variables fx() and rn() allow to specify interactions of variables
+with a colon, such as fx(Year:Location). This has the same interpretation as in other R models;
+main effects, if desired, need to be explicitly added in the model.
+Nested regressions are specified in the common R syntax
+rg(TempSum|Year:Location) to specify regressions on TempSum within each Year-Location.
+For random effects, interacting variables can have
+interaction-variance structures written as a multiplication of similarity matrices / kernels
+(interpreted as kronecker product)
+like rn(Variety:Location, V=KG*KE), or can involve an estimated covariance structure specified as VCOV,
+for instance to specify a multitrait model with rn(Variety:Trait, V=KG*VCOV) supplying data on
+multiple traits in a 'melted' format. Kernels and covariance structures can be made sparser and
+of reduced rank by setting cut-offs on the eigenvectors to use, by setting an in-model
+Bayesian variable-selection on eigenvectors, or by estimating a large covariance structure
+as the kronecker product of two or more smaller matrices. Estimated VCOV covariances structures
+by default run a Bayesian factor-analytic model by modelling a limited number of eigenvectors.
 
-The bayz call has a data argument to specify an input data-frame (the "main data")
-to contain model variables,
-but bayz will also search the R environment if variables are not found in the main data.
-Typically, input in the form of matrices such as large sets of covariates, proportional
-variance-covariance / correlation / kernel / similarity matrices used in variance models,
-as well as data for hierarchical models, are not in the main data.
-Matrices / kernels should be prepared with row-names to match a variable
-in the data. For matrices / kernels used in variance models, the link is straightforward, 
-for instance in rn(Variety:Location, V=KG*KE), KG and KE can be a genetic and environmental
-kinship / kernel matrix, respectively, and KG should have row-names matching Variety levels,
-while KE should have row-names matching Location levels. 
-To fit a large set of covariates, the match is specified using a hierachical specification
-rr(Variety/Metabolites), where Metabolites is then a matrix of covariates which must have
-row-names matching Variety levels. In both cases, such kernel or covariate matrices
-must have unique levels, but the main data may have repeated levels and in different order.
-If one has repeated metabolite data on each Variety, for instance at multiple time-points,
-then consider that Variety is not the appropriate link to the data, but Variety:Time is.
+The data argument supplies a data frame with response(s) and explanatory variables to build the model
+in the usual R-way, and bayz will also search the R environment if variables are not found in the supplied data.
+The data-frame typically does not include tables with large sets of predictors, and covariance structures / kernels to be
+used in variance models, and bayz will also search these objects in the R environment. 
+These additional tables of data and matrices should have
+row-names to match a variable (sample id) in the data, and bayz will link on sample ids, allowing
+for sample ids in the data to be in different order, repeated, or missing.
 
-For random effects a variance-covariance structure can be specified using a
-V= option within the model-term function, for example rn(Variety, V=KG).
-When the fit is for an interaction of factors, the variance specification should
-expand to include one term for each variable, separated by stars (which should
-be read as Kronecker products). The variance structure
-is then built up from a combination of given (proportional) variance-covariance / correlation /
-kernel matrices and predefined acronyms IDEN, DIAG and VCOV that indicate parameterized
-matrices (with parameters to be estimated from the data). 
-Alternatively, the variance structure can be specified as a linear model using V=~, 
-which is interpreted as a use of a log-linear model for the variances.
+The VE argument sets the model for the error (residual) variance structure, which can either be a string
+with one or a combination of pre-defined structures such as WGHT (weighted), GRP (to fit heterogenous
+variances by some grouping factor), VCOV (general var-covariance structures), or by a linear model.
+The latter is interpreted as fitting a log-linear model for the variances and allows to parsimoniously
+include multiple explanatory variables in the residual variance modelling.
+VE can be omitted, which will fit a default iid homogeneous variance.
+
+For method="Bayes" (default), bayz runs the common Bayesian estimation of all model parameters by using a
+Monte Carlo Markov chain. For method="BLUPMC", updating of variance parameters is omitted, and variance
+estimates should be supplied by using the init argument with the output of a previous run with estimated
+variances. 
+
+The output of the bayz function is a list of class "bayz" that includes several data-frames and lists.
+For instance, model estimtes are in <output>$Estimates with members named after model parameters. Overviews
+of the output can be obtained using summary(), which also includes convergence diagnostics and Highest Posterior
+Density (HPD) intervals on selected parameters. Parameter estimates can also be extracted from the output
+with methods coef() (all fixed and random effect estimates), fixef()
+and ranef() (fixed, and random effects, respectively), vcomp() (all variance estimates). Additionally,
+vcomp() can compute "PVEs" (proportions of variance explained), including HPD intervals, when supplied with information 
+on how to weigh each variance parameter in the total explained variance. Rbayz also includes predict(),
+contrast() and plot() methods.
+
+Full details are available in the github site ljanss.github.io/Rbayz.
 }
