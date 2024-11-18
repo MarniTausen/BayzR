@@ -11,11 +11,12 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-# R/bayz methods for summarizing and extracting output
+# R/bayz methods for summarizing, extracting and using output
 
 -   [summary](#Summary of output)
 -   [coef, fixef and ranef](#Coefficients estimates)
 -   [vcomp](#Variance components and PVEs)
+-   [Computing contrasts](#Computing constrasts)
 
 # Summary of output
 

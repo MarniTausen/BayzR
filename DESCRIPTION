@@ -1,11 +1,14 @@
-Package: BayzR
+Package: Rbayz
 Title: R package for bayz
-Version: 0.8.0
-Authors@R: c(person("Marni", "Tausen", email = "marni@birc.au.dk", role = c("aut")),person("Luc", "Janss", email = "luc.janss@qgg.au.dk", role = c("cre")),person("Maria Izabel", "Cavassim Alves", email = "mica@birc.au.dk", role = c("edt")))
-Description: What the package does (one paragraph).
+Version: 0.9.0
+Authors@R: c(person("Luc", "Janss", email = "luc.janss@qgg.au.dk", role = c("cre")),
+             person("Marni", "Tausen", email = "marni@birc.au.dk", role = c("aut")),
+             person("Maria Izabel", "Cavassim Alves", email = "mica@birc.au.dk", role = c("edt")))
+Description: The bayz function fits various mixed-linear, Bayesian shrinkage, (sparse) kernel-regression, (kernel)
+             interaction and multi-trait models with complex covariance structures using an extended R-formula syntax.
 Depends: R (>= 3.5)
 License: GPL
-URL: http://www.bayz.biz
+URL: http://ljanss.github.io/Rbayz
 Encoding: UTF-8
 LazyData: true
 Suggests: testthat

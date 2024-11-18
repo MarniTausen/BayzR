@@ -9,14 +9,16 @@
 #' to fit Yield with Year as a fixed class effect and Variety as a random class effect. 
 #' The syntax allows
 #' to add options on each model term, such as variance-structures, 
-#' fitting, prior, and output options. A common application is to specify a
+#' fitting, prior, and output options. Common applications are to specify a
 #' relationship / similarity "kernel" as correlation-structure for random effects using
-#' rn(Variety, V=myGmat). 
+#' rn(Variety, V=myGmat), extensions of this with interactions and a variance-structure
+#' specified as a kronecker product, and the fitting of regularized regression models on (multiple)
+#' large sets of covariates with different shrinkage options.
 #' The model-terms currently available are fx() (fixed effects of one or multiple interacting
 #' class variables), rn() (random effects of one or multiple interacting class variables with
 #' various options to model the covariance structure), rr() (random/ridge regression on a table
 #' of covariates with options for homogeneous or heterogeneous shrinkage), rg() (fixed regressions
-#' and nested fixed regressions). 
+#' and nested fixed regressions) and a model can specify any number of such model terms.
 #' 
 #' Model-terms for class variables fx() and rn() allow to specify interactions of variables
 #' with a colon, such as fx(Year:Location). This has the same interpretation as in other R models;
@@ -27,12 +29,12 @@
 #' interaction-variance structures written as a multiplication of similarity matrices / kernels
 #' (interpreted as kronecker product)
 #' like rn(Variety:Location, V=KG*KE), or can involve an estimated covariance structure specified as VCOV,
-#' for instance to specify a multitrait model with rn(Variety:Trait, V=KG*VCOV) supplying data on
-#' multiple traits in a 'melted' format. Kernels and covariance structures can be made sparser and
+#' for instance to specify a multitrait model with rn(Variety:Trait, V=KG*VCOV).
+#' Kernels and covariance structures can be made sparser and
 #' of reduced rank by setting cut-offs on the eigenvectors to use, by setting an in-model
 #' Bayesian variable-selection on eigenvectors, or by estimating a large covariance structure
 #' as the kronecker product of two or more smaller matrices. Estimated VCOV covariances structures
-#' by default run a Bayesian factor-analytic model by modelling a limited number of eigenvectors.
+#' by default run a Bayesian factor-analytic model estimating a limited number of eigenvectors.
 #'
 #' The data argument supplies a data frame with response(s) and explanatory variables to build the model
 #' in the usual R-way, and bayz will also search the R environment if variables are not found in the supplied data.
