@@ -8,7 +8,7 @@ coveralls](https://coveralls.io/repos/github/MarniTausen/BayzR/badge.svg?branch=
 -   [How to install](#how-to-install)
 -   [Short manual for using the bayz() main function](#Short-Manual)
 -   [Example](#examples)
--   [Summarizing and using output](#README5.html)
+-   [Summarizing and using output](usingOutput.html)
 
 The Rbayz packages has a single main function ‘bayz’ that fits
 mixed-linear, Bayesian shrinkage, (sparse) kernel-regression, (kernel)
