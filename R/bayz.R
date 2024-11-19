@@ -86,7 +86,7 @@
 #' @import stats
 #' @export
 #'
-#' @useDynLib BayzR, .registration = TRUE
+#' @useDynLib Rbayz, .registration = TRUE
 #' @importFrom Rcpp sourceCpp
 bayz <- function(model, VE="", data=NULL, chain=c(0,0,0), method="", verbose=1, init=NULL){
 	if(!inherits(model,"formula")) {
